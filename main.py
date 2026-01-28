@@ -10,7 +10,7 @@ import threading
 from unzip import read_osz_file
 from osu_to_level import create_level_json
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 def resource_path(relative_path):
     """Get absolute path to resource, works for dev and for PyInstaller"""
