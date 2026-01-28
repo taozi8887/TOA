@@ -39,12 +39,15 @@ The game will:
 3. Start gameplay after a 3-second countdown
 
 ### Controls
-- **W** or **Up Arrow** - Hit top tiles
-- **A** or **Left Arrow** - Hit left tiles
-- **S** or **Down Arrow** - Hit bottom tiles
-- **D** or **Right Arrow** - Hit right tiles
-- **Left/Right Mouse Click** - Alternative control method
-- **ESC (hold)** - Exit game
+- **W** - Select top square
+- **A** - Select left square
+- **S** - Select bottom square
+- **D** - Select right square
+- **Space** - Alternative select (can be used with WAD keys)
+- **Left Click** - Hit red tiles
+- **Right Click** - Hit blue tiles
+- **P** - Pause/Resume
+- **ESC (double press)** - Return to level selector
 
 ## Creating Custom Levels
 
@@ -65,19 +68,6 @@ process_osz_to_level(
     seed=42
 )
 ```
-
-### Method 2: From Audio Files
-
-Generate levels from any audio file using rhythm detection:
-```bash
-python song_to_level.py path/to/audio.mp3 --out levels/mylevel.json
-```
-
-Options:
-- `--bpm` - Manually set BPM (auto-detected by default)
-- `--quantize` - Note quantization (1/4, 1/8, 1/16)
-- `--difficulty` - Difficulty level (0.5 to 2.0)
-- `--pattern` - Tile pattern (random, alternating, wave)
 
 ### Method 3: Direct Integration
 
@@ -180,29 +170,11 @@ REGENERATE_LEVEL = True
   - 50 points (ok timing)
   - Miss (outside window)
 
-## Advanced Features
-
-### Random Tile Generation Rules
-- Same tile cannot repeat consecutively
-- Minimum of 2 different tiles between repeats (prevents patterns like 0-1-0-1)
-
-### Slider Handling
-osu! sliders are converted to single hits (slider repeats are currently disabled but can be re-enabled in `osu_to_level.py`)
-
-### Autoplay Mode
-Autoplay uses precise timing simulation with slight randomization for human-like gameplay.
-
 ## Troubleshooting
 
 ### "No module named 'pygame'"
 ```bash
 pip install -r requirements.txt
-```
-
-### "FileNotFoundError: level.json"
-Make sure level JSON files are in the `levels/` folder. Run:
-```bash
-python organize_levels.py
 ```
 
 ### Audio not playing
