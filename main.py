@@ -10,7 +10,7 @@ import threading
 from unzip import read_osz_file
 from osu_to_level import create_level_json
 
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 
 def resource_path(relative_path):
     """Get absolute path to resource, works for dev and for PyInstaller"""
@@ -79,9 +79,90 @@ def process_osz_to_level(osz_path, extract_name, output_json, seed=42):
     
     return output_json, extract_dir
 
-def show_level_select_popup():
-    """Show popup window to select a level"""
+def fade_out(screen, duration=0.3):
+    """Fade out the current screen to black"""
+    clock = pygame.time.Clock()
+    fade_surface = pygame.Surface(screen.get_size())
+    fade_surface.fill((0, 0, 0))
+    
+    start_time = time.time()
+    while time.time() - start_time < duration:
+        elapsed = time.time() - start_time
+        alpha = int(255 * (elapsed / duration))
+        fade_surface.set_alpha(alpha)
+        screen.blit(fade_surface, (0, 0))
+        pygame.display.flip()
+        clock.tick(60)
+    
+    # Ensure fully black at the end
+    fade_surface.set_alpha(255)
+    screen.blit(fade_surface, (0, 0))
+    pygame.display.flip()
+
+def fade_in(screen, content_func, duration=0.3):
+    """Fade in from black to the current screen
+    
+    Args:
+        screen: pygame display surface
+        content_func: Function that draws the content (takes screen as argument)
+        duration: Duration of fade in seconds
+    """
+    clock = pygame.time.Clock()
+    fade_surface = pygame.Surface(screen.get_size())
+    fade_surface.fill((0, 0, 0))
+    
+    start_time = time.time()
+    while time.time() - start_time < duration:
+        elapsed = time.time() - start_time
+        alpha = int(255 * (1 - elapsed / duration))
+        
+        # Draw the content
+        content_func(screen)
+        
+        # Draw fading black overlay
+        fade_surface.set_alpha(alpha)
+        screen.blit(fade_surface, (0, 0))
+        pygame.display.flip()
+        clock.tick(60)
+
+def show_loading_screen():
+    """Show loading screen and preload all assets"""
     pygame.init()
+    
+    screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
+    pygame.display.set_caption(f"TOA v{__version__} - Loading")
+    pygame.mouse.set_visible(False)
+    window_width, window_height = screen.get_size()
+    clock = pygame.time.Clock()
+    
+    font_title = pygame.font.Font(None, 72)
+    font_status = pygame.font.Font(None, 36)
+    
+    WHITE = (255, 255, 255)
+    BLACK = (0, 0, 0)
+    BLUE = (100, 150, 255)
+    
+    # Start with black screen
+    screen.fill(BLACK)
+    pygame.display.flip()
+    
+    # Fade in the loading screen
+    fade_surface = pygame.Surface((window_width, window_height))
+    fade_surface.fill((0, 0, 0))
+    for alpha in range(255, 0, -25):
+        screen.fill(BLACK)
+        title_text = font_title.render("TOA", True, WHITE)
+        title_rect = title_text.get_rect(center=(window_width // 2, window_height // 2 - 100))
+        screen.blit(title_text, title_rect)
+        
+        status_text = font_status.render("Loading...", True, WHITE)
+        status_rect = status_text.get_rect(center=(window_width // 2, window_height // 2 + 50))
+        screen.blit(status_text, status_rect)
+        
+        fade_surface.set_alpha(alpha)
+        screen.blit(fade_surface, (0, 0))
+        pygame.display.flip()
+        clock.tick(60)
     
     # Get available level files
     levels_dir = "levels"
@@ -99,9 +180,42 @@ def show_level_select_popup():
         print("Error: No level files found!")
         return None
     
-    # Load metadata and background images for each level
+    # Load metadata and background images for each level with progress bar
     level_metadata = []
-    for level_file in level_files:
+    total_files = len(level_files)
+    
+    for idx, level_file in enumerate(level_files):
+        # Update progress
+        progress = (idx + 1) / total_files
+        
+        # Draw loading screen with progress
+        screen.fill(BLACK)
+        
+        title_text = font_title.render("TOA", True, WHITE)
+        title_rect = title_text.get_rect(center=(window_width // 2, window_height // 2 - 100))
+        screen.blit(title_text, title_rect)
+        
+        status_text = font_status.render(f"Loading levels... {idx + 1}/{total_files}", True, WHITE)
+        status_rect = status_text.get_rect(center=(window_width // 2, window_height // 2 + 50))
+        screen.blit(status_text, status_rect)
+        
+        # Draw progress bar
+        bar_width = 400
+        bar_height = 20
+        bar_x = window_width // 2 - bar_width // 2
+        bar_y = window_height // 2 + 100
+        
+        # Background bar
+        pygame.draw.rect(screen, (50, 50, 50), (bar_x, bar_y, bar_width, bar_height), border_radius=10)
+        # Progress bar
+        filled_width = int(bar_width * progress)
+        if filled_width > 0:
+            pygame.draw.rect(screen, BLUE, (bar_x, bar_y, filled_width, bar_height), border_radius=10)
+        
+        pygame.display.flip()
+        clock.tick(60)
+        
+        # Load level metadata
         try:
             with open(resource_path(os.path.join(levels_dir, level_file)), 'r') as f:
                 data = json.load(f)
@@ -131,6 +245,90 @@ def show_level_select_popup():
         except:
             # If can't read metadata, use filename
             level_metadata.append((level_file, level_file.replace('.json', ''), '', 'Unknown', 'Unknown', None))
+    
+    # Show complete message briefly
+    screen.fill(BLACK)
+    title_text = font_title.render("TOA", True, WHITE)
+    title_rect = title_text.get_rect(center=(window_width // 2, window_height // 2 - 100))
+    screen.blit(title_text, title_rect)
+    
+    status_text = font_status.render("Ready!", True, WHITE)
+    status_rect = status_text.get_rect(center=(window_width // 2, window_height // 2 + 50))
+    screen.blit(status_text, status_rect)
+    
+    # Draw full progress bar
+    bar_width = 400
+    bar_height = 20
+    bar_x = window_width // 2 - bar_width // 2
+    bar_y = window_height // 2 + 100
+    pygame.draw.rect(screen, BLUE, (bar_x, bar_y, bar_width, bar_height), border_radius=10)
+    
+    pygame.display.flip()
+    time.sleep(0.3)  # Brief pause to show completion
+    
+    # Fade out loading screen
+    fade_out(screen, duration=0.5)
+    
+    # Keep screen black for transition to level selector
+    screen.fill((0, 0, 0))
+    pygame.display.flip()
+    
+    return level_metadata
+
+def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
+    """Show popup window to select a level
+    
+    Args:
+        fade_in_start: If True, fade in from black at the start
+        preloaded_metadata: Pre-loaded level metadata from loading screen
+    """
+    levels_dir = "levels"  # Define this first as it's used later
+    
+    # Use preloaded metadata if available, otherwise load now
+    if preloaded_metadata is not None:
+        level_metadata = preloaded_metadata
+    else:
+        # Fallback: Load metadata now (shouldn't happen with loading screen)
+        pygame.init()
+        level_files = []
+        try:
+            levels_path = resource_path(levels_dir)
+            level_files = [f for f in os.listdir(levels_path) if f.endswith('.json')]
+            level_files.sort()
+        except Exception as e:
+            print(f"Error: Could not read levels directory: {levels_dir}")
+            print(f"Full error: {e}")
+            return None
+        
+        if not level_files:
+            print("Error: No level files found!")
+            return None
+        
+        level_metadata = []
+        for level_file in level_files:
+            try:
+                with open(resource_path(os.path.join(levels_dir, level_file)), 'r') as f:
+                    data = json.load(f)
+                    title = data.get('meta', {}).get('title', 'Unknown')
+                    version = data.get('meta', {}).get('version', 'Unknown')
+                    artist = data.get('meta', {}).get('artist', 'Unknown')
+                    creator = data.get('meta', {}).get('creator', 'Unknown')
+                    beatmap_name = level_file.replace('.json', '').split('_')[0]
+                    beatmap_dir = f"beatmaps/{beatmap_name}"
+                    bg_image = None
+                    try:
+                        if os.path.exists(resource_path(beatmap_dir)):
+                            image_extensions = ['.jpg', '.jpeg', '.png', '.bmp']
+                            for file in os.listdir(resource_path(beatmap_dir)):
+                                if any(file.lower().endswith(ext) for ext in image_extensions):
+                                    bg_path = os.path.join(beatmap_dir, file)
+                                    bg_image = pygame.image.load(resource_path(bg_path))
+                                    break
+                    except:
+                        bg_image = None
+                    level_metadata.append((level_file, title, version, artist, creator, bg_image))
+            except:
+                level_metadata.append((level_file, level_file.replace('.json', ''), '', 'Unknown', 'Unknown', None))
     
     # Window setup - fullscreen borderless
     screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
@@ -171,6 +369,9 @@ def show_level_select_popup():
     
     selected_level = None
     hovered_index = None
+    
+    # We'll render once first, then fade in at the end of the first frame
+    first_frame = True
     
     while selected_level is None:
         mouse_pos = pygame.mouse.get_pos()
@@ -224,9 +425,6 @@ def show_level_select_popup():
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 scrollbar_dragging = False
         
-        if selected_level is not None:
-            break
-        
         # Handle continuous arrow key scrolling (when held down)
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP]:
@@ -247,7 +445,7 @@ def show_level_select_popup():
         
         # Draw title
         title_text = font_title.render("Select a Level", True, BLACK)
-        title_rect = title_text.get_rect(center=(window_width // 2, 40))
+        title_rect = title_text.get_rect(center=(window_width // 2, 55))
         screen.blit(title_text, title_rect)
         
         # Draw level list
@@ -439,24 +637,50 @@ def show_level_select_popup():
         esc_rect = esc_text.get_rect(center=(window_width // 2, window_height - 60))
         screen.blit(esc_text, esc_rect)
         
+        # Fade in from black on first frame (after everything is rendered)
+        if first_frame:
+            first_frame = False
+            # Update display with the fully rendered frame
+            pygame.display.flip()
+            
+            # Now create fade-in effect by drawing black overlay with decreasing alpha
+            fade_surface = pygame.Surface((window_width, window_height))
+            fade_surface.fill((0, 0, 0))
+            fade_start_time = time.time()
+            fade_duration = 0.5 if not fade_in_start else 0.7  # Faster on first load, slower when returning
+            
+            # Save the current fully rendered screen
+            saved_screen = screen.copy()
+            
+            while time.time() - fade_start_time < fade_duration:
+                elapsed = time.time() - fade_start_time
+                alpha = int(255 * (1 - elapsed / fade_duration))
+                
+                # Blit the saved fully rendered frame
+                screen.blit(saved_screen, (0, 0))
+                
+                # Apply fade overlay
+                fade_surface.set_alpha(alpha)
+                screen.blit(fade_surface, (0, 0))
+                pygame.display.flip()
+                clock.tick(60)
+        
         pygame.display.flip()
         clock.tick(60)
     
-    # Properly close the popup window
-    pygame.display.quit()
-    pygame.quit()
-    time.sleep(0.1)  # Small delay to ensure window closes
-    
     if selected_level == "QUIT":
         return None
+    
+    # Fade out before transitioning
+    fade_out(screen, duration=0.5)
     
     return selected_level
 
 def show_autoplay_popup():
     """Show popup window to ask about autoplay"""
-    pygame.init()
-    screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
+    screen = pygame.display.get_surface()
     pygame.display.set_caption(f"TOA v{__version__} - Setup")
+    pygame.mouse.set_visible(False)  # Hide mouse cursor
     window_width, window_height = screen.get_size()
     clock = pygame.time.Clock()
     
@@ -465,7 +689,24 @@ def show_autoplay_popup():
     
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
-    GRAY = (200, 200, 200)
+    
+    # Create a function to draw the autoplay popup content
+    def draw_autoplay_content(surf):
+        surf.fill(WHITE)
+        title_text = font_large.render("Enable Autoplay?", True, BLACK)
+        title_rect = title_text.get_rect(center=(window_width // 2, window_height // 2 - 100))
+        surf.blit(title_text, title_rect)
+        
+        yes_text = font_small.render("Press Y for Yes", True, BLACK)
+        yes_rect = yes_text.get_rect(center=(window_width // 2, window_height // 2 + 20))
+        surf.blit(yes_text, yes_rect)
+        
+        no_text = font_small.render("Press N for No", True, BLACK)
+        no_rect = no_text.get_rect(center=(window_width // 2, window_height // 2 + 80))
+        surf.blit(no_text, no_rect)
+    
+    # Fade in from black
+    fade_in(screen, draw_autoplay_content, duration=0.5)
     
     result = None
     
@@ -478,53 +719,41 @@ def show_autoplay_popup():
                 if event.key == pygame.K_y:
                     result = True
                     break
-                elif event.key == pygame.K_n:
-                    result = False
-                    break
                 elif event.key == pygame.K_ESCAPE:
+                    # Go back to level selector
+                    result = 'BACK'
+                    break
+                else:
+                    # Any other key is No
                     result = False
                     break
         
         if result is not None:
             break
-            
-        screen.fill(WHITE)
         
-        # Draw question
-        title_text = font_large.render("Enable Autoplay?", True, BLACK)
-        title_rect = title_text.get_rect(center=(window_width // 2, window_height // 2 - 100))
-        screen.blit(title_text, title_rect)
-        
-        # Draw instructions
-        yes_text = font_small.render("Press Y for Yes", True, BLACK)
-        yes_rect = yes_text.get_rect(center=(window_width // 2, window_height // 2 + 20))
-        screen.blit(yes_text, yes_rect)
-        
-        no_text = font_small.render("Press N for No", True, BLACK)
-        no_rect = no_text.get_rect(center=(window_width // 2, window_height // 2 + 80))
-        screen.blit(no_text, no_rect)
-        
+        # Draw the content
+        draw_autoplay_content(screen)
         pygame.display.flip()
         clock.tick(60)
     
-    # Properly close the popup window
-    pygame.display.quit()
-    pygame.quit()
-    time.sleep(0.1)  # Small delay to ensure window closes
+    # Fade out before transitioning to game
+    fade_out(screen, duration=0.3)
     
     return result
 
-def main(level_json=None, audio_dir=None):
+def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_metadata=None):
     """
     Main game function.
     
     Args:
         level_json: Path to the level JSON file (if None, will show level selection popup)
         audio_dir: Directory containing audio.mp3 (if None, will infer from level_json path)
+        returning_from_game: If True, we're returning from game and should fade in level selector
+        preloaded_metadata: Pre-loaded level metadata from loading screen
     """
     # Show level selection popup if no level provided
     if level_json is None:
-        level_json = show_level_select_popup()
+        level_json = show_level_select_popup(fade_in_start=returning_from_game, preloaded_metadata=preloaded_metadata)
         if level_json is None:
             print("No level selected. Exiting...")
             return
@@ -540,10 +769,13 @@ def main(level_json=None, audio_dir=None):
     # Show popup to ask about autoplay
     autoplay_enabled = show_autoplay_popup()
     
-    # Reinitialize pygame for game window
-    pygame.init()
-
-    # Borderless, windowed "fullscreen" (uses desktop resolution)
+    # If user pressed ESC on autoplay popup, go back to level selector
+    if autoplay_enabled == 'BACK':
+        screen = pygame.display.get_surface()
+        fade_out(screen, duration=0.7)
+        return 'RESTART'
+    
+    # Reuse existing pygame window
     screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
     pygame.display.set_caption(f"TOA v{__version__}")
     pygame.mouse.set_visible(False)  # Hide mouse cursor
@@ -555,6 +787,10 @@ def main(level_json=None, audio_dir=None):
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
     GREY = (150, 150, 150)
+    
+    # Start with black screen
+    screen.fill(BLACK)
+    pygame.display.flip()
     
     # Get screen dimensions
     screen_width, screen_height = screen.get_size()
@@ -745,9 +981,23 @@ def main(level_json=None, audio_dir=None):
     total_pause_duration = 0
     paused_elapsed_time = 0  # Frozen elapsed_time when paused
 
+    # Fade-in effect for game start
+    fade_in_alpha = 255  # Start fully black
+    fade_in_duration = 1.0  # Fade in over 1 second to allow bars to render
+    fade_in_delay = 0.3  # Delay before starting fade to let elements render
+
     running = True
     while running:
         elapsed_time = time.time() - game_start_time - total_pause_duration
+        
+        # Update fade-in alpha (fade from black to fully visible after delay)
+        if elapsed_time < fade_in_delay:
+            fade_in_alpha = 255  # Stay fully black during delay
+        elif elapsed_time < fade_in_delay + fade_in_duration:
+            fade_progress = (elapsed_time - fade_in_delay) / fade_in_duration
+            fade_in_alpha = int(255 * (1 - fade_progress))
+        else:
+            fade_in_alpha = 0
         
         # Use frozen time when paused, current time when not paused
         display_time = paused_elapsed_time if paused else elapsed_time
@@ -807,8 +1057,7 @@ def main(level_json=None, audio_dir=None):
                     if esc_pressed_once and (current_time - esc_press_time) < 2:
                         # Return to level selector
                         pygame.mixer.music.stop()
-                        pygame.display.quit()
-                        pygame.quit()
+                        fade_out(screen, duration=0.7)
                         return 'RESTART'
                     else:
                         esc_pressed_once = True
@@ -1052,8 +1301,8 @@ def main(level_json=None, audio_dir=None):
         # After processing input, skip any events that have fully expired
         if not paused:
             elapsed_time = time.time() - game_start_time - total_pause_duration
-            while current_event_index < len(level) and elapsed_time > level[current_event_index][0] + accuracy_window:
-                # Get the missed event info
+            while current_event_index < len(level) and elapsed_time > level[current_event_index][0]:
+                # Get the missed event info (missed because we passed the exact target time)
                 missed_time, missed_box, missed_color = level[current_event_index]
                 count_miss += 1
                 total_notes += 1
@@ -1508,14 +1757,19 @@ def main(level_json=None, audio_dir=None):
             instruction_rect = instruction_text.get_rect(center=(center_x, center_y + 80))
             screen.blit(instruction_text, instruction_rect)
         
+        # Apply fade-in overlay at the start of the game
+        if fade_in_alpha > 0:
+            fade_overlay = pygame.Surface((screen_width, screen_height))
+            fade_overlay.fill((0, 0, 0))
+            fade_overlay.set_alpha(fade_in_alpha)
+            screen.blit(fade_overlay, (0, 0))
+        
         pygame.display.flip()
         clock.tick(60)
 
-    # Cleanup when exiting normally
+    # Cleanup when user closes window (not returning to level selector)
     pygame.mixer.music.stop()
-    pygame.display.quit()
-    pygame.quit()
-    sys.exit()
+    return None  # Signal complete exit
 
 if __name__ == "__main__":
     # Prevent multiple instances when frozen with PyInstaller
@@ -1531,11 +1785,25 @@ if __name__ == "__main__":
         print("Running batch processor to generate levels from .osz files...")
         process_osz_files()
     else:
+        # Show loading screen and preload all assets
+        preloaded_metadata = show_loading_screen()
+        
+        if preloaded_metadata is None:
+            print("Failed to load assets. Exiting...")
+            sys.exit()
+        
         # Loop to allow returning to level selector
+        returning = False
         while True:
-            result = main()
+            result = main(returning_from_game=returning, preloaded_metadata=preloaded_metadata)
             if result != 'RESTART':
                 break
+            returning = True  # Set flag for subsequent iterations
+        
+        # Cleanup and exit
+        pygame.display.quit()
+        pygame.quit()
+        sys.exit()
         
         # Or specify a level directly:
         # main(level_json="levels/kemomimi_KEMOMIMI EDM SQUAD.json", audio_dir="beatmaps/kemomimi")
