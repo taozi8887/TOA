@@ -1,0 +1,12 @@
+## 🎮 TOA v0.2.1 - Beatmap Additions
+
+**New Content:**
+• Added The Big Black beatmap
+• Added Blue Zenith beatmap  
+• Added fine night by goreshit beatmap
+• Added envidia beatmap
+
+**Bug Fixes:**
+• Removed pazolite beatmap (due to bugs)
+
+───────────────────────────────────────────────────────────────────
