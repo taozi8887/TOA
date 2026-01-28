@@ -1,0 +1,20 @@
+# Core game requirements
+pygame>=2.6.1
+
+# Audio processing and level generation
+numpy>=2.0.0
+librosa>=0.10.2
+soundfile>=0.12.1
+audioread>=3.0.1
+
+# Audio source separation (for song_to_level.py)
+demucs>=4.0.1
+
+# Autoplay functionality
+pynput>=1.7.6
+
+# Executable building (optional)
+pyinstaller>=6.0.0
+
+# Python version requirement
+# python_version>="3.13"
