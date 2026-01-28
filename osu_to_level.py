@@ -3,7 +3,7 @@ import random
 import os
 
 def parse_osu_file(osu_filepath):
-    """Parse .osu file and extract hit object timings and metadata."""
+    """Parse .osu file and extract hit object timings, hitsounds, and metadata."""
     timings = []
     metadata = {}
     
@@ -33,14 +33,28 @@ def parse_osu_file(osu_filepath):
             # Parse hit objects section
             if in_hitobjects and line and not line.startswith('//'):
                 parts = line.split(',')
-                if len(parts) >= 3:
+                if len(parts) >= 5:
                     try:
                         timing_ms = int(parts[2])
-                        timings.append(timing_ms)
+                        hitsound = int(parts[4])  # Hitsound flags
+                        
+                        # Parse hitsound flags (bits 0-3)
+                        has_normal = hitsound & 1 == 0  # Normal is default if no bits set
+                        has_whistle = hitsound & 2
+                        has_finish = hitsound & 4
+                        has_clap = hitsound & 8
+                        
+                        timings.append({
+                            'time': timing_ms,
+                            'hitsound': hitsound,
+                            'whistle': bool(has_whistle),
+                            'finish': bool(has_finish),
+                            'clap': bool(has_clap)
+                        })
                     except (ValueError, IndexError):
                         continue
     
-    return sorted(timings), metadata
+    return timings, metadata
 
 def generate_level(timings):
     """Generate level data with random colors and boxes (min 2 tiles between repeats)."""
@@ -51,9 +65,9 @@ def generate_level(timings):
     # Track last 3 boxes to ensure at least 2 different tiles before repeat
     last_boxes = []
     
-    for timing_ms in timings:
+    for timing_obj in timings:
         # Convert milliseconds to seconds
-        time_seconds = timing_ms / 1000.0
+        time_seconds = timing_obj['time'] / 1000.0
         
         # Random color
         color = random.choice(colors)
@@ -82,7 +96,11 @@ def generate_level(timings):
         level.append({
             "t": time_seconds,
             "box": box,
-            "color": color
+            "color": color,
+            "hitsound": timing_obj.get('hitsound', 0),
+            "whistle": timing_obj.get('whistle', False),
+            "finish": timing_obj.get('finish', False),
+            "clap": timing_obj.get('clap', False)
         })
     
     return level

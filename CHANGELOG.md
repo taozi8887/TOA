@@ -1,3 +1,16 @@
+#
+## [0.3.1] - 2026-01-28
+
+### Changed
+- Hitsound playback latency reduced (lower audio buffer, more mixer channels)
+- Hitsound volume set to 60% for all hitsounds
+- Hitsounds now play more reliably on very fast note streams
+- Autoplay popup now only accepts ESC, Y, or N keys (others ignored)
+- Improved hitsound timing accuracy (closer to level timing)
+
+### Fixed
+- Fixed rare bug where hitsounds could be skipped on dense patterns
+- Fixed minor visual/logic bugs in popup and shake feedback
 # Changelog
 
 All notable changes to this project will be documented in this file.

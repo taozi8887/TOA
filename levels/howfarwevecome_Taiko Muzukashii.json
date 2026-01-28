@@ -14,3612 +14,6500 @@
     {
       "t": 1.84,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 2.201,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 2.562,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 2.743,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 2.924,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 3.285,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 3.647,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 4.008,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 4.37,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 4.731,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 5.092,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 5.453,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 5.634,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 5.815,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 6.176,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 6.538,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 6.899,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 7.261,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 7.623,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 7.984,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 8.346,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 8.526,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 8.707,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 9.068,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 9.249,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 9.43,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 9.611,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 9.791,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 9.972,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 10.153,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 10.514,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 10.876,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 11.237,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 11.418,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 11.599,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 11.96,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 12.321,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 12.502,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 12.683,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 12.864,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 13.044,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 13.406,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 13.767,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 14.129,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 14.309,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 14.49,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 14.852,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 15.213,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 15.574,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 15.755,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 15.936,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 16.117,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 16.297,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 16.659,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 17.02,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 17.201,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 17.382,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 17.743,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 17.924,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 18.105,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 18.285,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 18.466,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 18.827,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 19.189,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 19.55,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 19.912,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 20.093,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 20.273,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 20.635,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 20.815,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 20.996,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 21.177,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 21.358,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 21.538,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 21.719,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 21.9,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 22.08,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 22.442,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 22.803,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 22.984,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 23.165,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 23.526,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 23.707,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 23.888,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 24.068,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 24.249,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 24.43,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 24.611,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 24.791,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 24.972,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 25.333,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 25.695,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 25.876,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 26.056,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 26.418,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 26.599,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 26.779,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 26.96,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 27.141,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 27.321,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 27.502,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 27.683,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 27.864,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 28.225,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 28.586,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 28.767,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 28.948,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 29.309,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 29.49,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 29.671,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 29.852,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 30.032,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 30.213,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 30.394,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 30.574,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 30.755,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 31.117,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 31.297,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 31.659,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 31.839,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 32.201,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 32.382,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 32.562,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 32.743,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 32.924,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 33.105,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 33.195,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 33.285,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 33.647,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 34.009,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 34.37,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 34.551,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 34.732,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 35.093,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 35.274,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 35.455,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 35.635,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 35.816,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 35.997,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 36.178,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 36.358,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 36.539,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 36.9,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 37.262,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 37.443,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 37.623,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 37.985,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 38.166,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 38.346,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 38.527,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 38.708,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 38.888,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 39.069,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 39.25,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 39.431,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 39.792,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 40.153,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 40.334,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 40.515,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 40.876,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 41.057,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 41.238,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 41.419,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 41.599,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 41.78,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 41.961,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 42.141,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 42.502,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 42.684,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 42.864,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 43.226,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 43.586,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 43.949,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 44.129,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 44.31,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 44.491,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 44.672,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 44.762,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 44.852,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 45.213,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 45.394,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 45.574,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 45.755,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 45.936,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 46.117,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 46.297,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 46.659,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 46.839,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 47.02,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 47.201,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 47.382,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 47.562,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 47.743,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 48.105,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 48.285,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 48.466,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 48.647,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 48.827,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 49.008,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 49.189,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 49.55,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 49.731,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 49.912,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 50.093,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 50.273,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 50.454,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 50.635,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 50.815,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 50.996,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 51.358,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 51.719,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 52.08,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 52.442,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 52.803,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 53.165,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 54.249,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 54.61,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 54.972,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 55.333,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 55.694,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 56.056,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 56.779,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 56.96,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 57.14,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 57.321,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 57.502,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 57.683,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 57.863,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 58.225,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 58.405,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 58.586,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 58.767,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 58.948,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 59.128,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 59.309,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 59.671,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 59.851,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 60.032,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 60.213,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 60.393,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 60.574,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 60.755,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 61.116,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 61.297,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 61.478,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 61.659,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 61.839,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 62.02,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 62.201,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 62.381,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 62.562,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 62.924,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 63.285,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 63.646,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 64.008,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 64.369,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 64.731,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 65.815,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 66.176,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 66.538,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 66.899,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 67.26,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 67.622,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 68.346,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 68.707,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 69.068,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 69.249,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 69.43,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 69.791,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 69.972,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 70.153,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 70.333,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 70.695,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 70.876,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 71.056,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 71.237,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 71.599,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 71.779,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 71.96,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 72.321,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 72.683,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 72.864,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 73.044,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 73.225,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 73.586,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 73.767,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 73.948,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 74.129,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 74.49,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 74.671,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 74.851,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 75.032,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 75.213,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 75.394,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 75.574,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 75.755,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 76.117,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 76.478,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 76.839,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 77.201,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 77.382,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 77.562,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 77.743,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 78.105,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 78.466,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 78.647,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 78.827,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 79.008,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 79.37,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 79.55,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 79.731,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 79.912,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 80.273,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 80.635,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 80.815,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 80.996,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 81.358,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 81.538,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 81.719,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 81.9,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 82.261,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 82.442,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 82.623,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 82.803,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 82.984,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 83.165,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 83.346,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 83.526,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 83.707,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 83.888,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 84.068,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 84.249,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 84.43,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 84.611,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 84.791,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 84.972,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 85.153,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 85.333,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 85.514,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 85.695,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 86.056,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 86.237,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 86.599,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 86.779,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 86.96,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 87.321,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 87.502,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 87.683,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 87.864,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 88.044,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 88.225,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 88.406,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 88.767,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 88.948,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 89.129,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 89.309,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 89.671,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 90.032,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 90.213,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 90.394,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 90.574,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 90.755,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 90.936,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 91.026,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 91.117,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 91.478,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 91.659,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 91.839,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 92.02,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 92.201,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 92.382,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 92.562,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 92.924,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 93.104,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 93.285,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 93.466,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 93.647,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 93.827,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 94.008,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 94.37,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 94.55,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 94.731,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 94.912,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 95.092,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 95.273,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 95.454,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 95.815,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 95.996,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 96.177,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 96.358,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 96.538,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 96.719,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 96.9,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 97.08,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 97.261,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 97.623,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 97.984,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 98.345,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 98.707,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 99.068,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 99.43,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 100.514,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 100.875,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 101.237,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 101.598,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 101.959,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 102.321,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 103.044,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 103.225,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 103.405,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 103.586,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 103.767,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 103.948,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 104.128,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 104.49,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 104.67,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 104.851,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 105.032,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 105.213,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 105.393,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 105.574,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 105.936,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 106.116,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 106.297,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 106.478,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 106.658,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 106.839,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 107.02,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 107.381,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 107.562,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 107.743,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 107.924,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 108.104,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 108.285,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 108.466,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 108.646,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 108.827,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 109.189,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 109.55,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 109.911,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 110.273,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 110.634,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 110.996,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 112.08,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 112.441,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 112.803,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 113.164,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 113.525,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 113.887,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 114.611,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 114.791,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 114.972,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 115.153,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 115.514,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 115.695,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 116.056,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 117.502,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 117.682,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 117.863,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 118.044,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 118.405,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 118.586,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 118.948,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 119.309,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 119.49,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 119.671,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 119.852,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 120.032,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 120.213,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 120.394,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 120.574,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 120.755,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 120.936,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 121.297,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 121.478,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 121.839,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 123.285,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 123.465,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 123.646,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 123.827,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 124.188,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 124.369,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 124.731,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 124.912,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 125.092,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 125.273,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 125.454,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 125.635,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 125.815,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 125.996,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 126.177,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 126.538,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 126.719,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 127.08,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 127.261,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 127.623,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 127.803,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 128.165,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 128.526,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 128.707,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 129.068,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 129.43,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 129.791,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 130.153,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 130.514,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 130.695,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 130.876,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 131.056,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 131.418,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 131.599,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 131.96,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 132.321,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 132.502,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 132.863,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 133.044,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 133.406,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 133.586,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 133.948,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 134.309,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 134.49,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 134.851,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 135.032,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 135.213,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 135.394,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 135.936,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 136.117,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 136.297,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 136.478,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 136.659,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 136.839,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 137.201,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 137.382,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 137.743,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 138.105,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 138.285,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 138.466,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 138.827,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 139.189,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 139.37,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 139.55,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 139.912,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 140.273,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 140.635,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 140.996,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 141.177,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 141.358,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 141.719,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 142.08,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 142.261,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 142.442,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 142.803,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 143.165,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 143.526,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 143.888,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 144.068,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 144.249,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 144.611,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 144.972,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 145.153,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 145.514,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 145.876,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 146.056,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 146.418,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 146.599,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 146.779,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 146.96,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 147.321,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 147.502,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 147.864,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 148.225,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 148.586,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 148.948,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 149.309,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 149.671,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 150.032,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 150.394,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 150.755,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 152.201,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 152.382,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 152.562,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 152.743,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 152.924,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 153.105,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 153.285,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 153.647,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 153.827,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 154.008,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 154.189,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 154.37,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 154.55,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 154.731,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 155.093,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 155.273,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 155.454,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 155.635,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 155.815,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 155.996,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 156.177,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 156.538,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 156.719,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 156.9,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 157.081,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 157.261,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 157.442,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 157.623,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 157.803,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 157.984,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 158.346,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 158.707,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 159.068,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 159.43,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 159.791,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 160.153,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 161.237,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 161.598,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 161.96,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 162.321,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 162.682,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 163.044,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 163.767,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 163.948,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 164.128,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 164.309,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 164.49,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 164.671,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 164.851,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 165.213,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 165.393,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 165.574,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 165.755,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 165.936,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 166.116,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 166.297,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 166.659,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 166.839,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 167.02,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 167.201,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 167.381,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 167.562,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 167.743,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 168.104,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 168.285,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 168.466,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 168.647,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 168.827,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 169.008,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 169.189,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 169.369,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 169.55,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 169.912,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 170.273,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 170.634,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 170.996,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 171.357,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 171.719,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 172.803,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 173.164,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 173.526,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 173.887,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 174.248,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 174.61,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 175.333,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 175.695,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 175.876,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 176.056,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 176.418,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 176.779,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 177.141,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 177.502,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 177.864,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 178.225,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 178.586,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 178.767,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 178.948,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 179.309,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 179.671,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 180.032,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 180.394,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 180.574,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 180.755,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 180.936,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 181.117,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 181.478,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 181.659,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 181.839,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 182.201,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 182.562,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 12,
+      "whistle": false,
+      "finish": true,
+      "clap": true
     },
     {
       "t": 182.924,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 183.285,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 184.008,
       "box": 3,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 185.093,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 185.454,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 186.358,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 186.538,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 186.9,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 187.261,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 187.442,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 187.623,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 187.984,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 188.165,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 188.346,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 188.707,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 189.068,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 189.791,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 190.152,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 190.333,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 190.514,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 190.875,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 191.056,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 191.237,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 191.598,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 191.959,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 192.683,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 193.044,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 193.225,
       "box": 1,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 193.406,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 193.767,
       "box": 0,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 8,
+      "whistle": false,
+      "finish": false,
+      "clap": true
     },
     {
       "t": 193.948,
       "box": 2,
-      "color": "blue"
+      "color": "blue",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 194.129,
       "box": 1,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     },
     {
       "t": 194.49,
       "box": 3,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 194.851,
       "box": 2,
-      "color": "red"
+      "color": "red",
+      "hitsound": 4,
+      "whistle": false,
+      "finish": true,
+      "clap": false
     },
     {
       "t": 195.574,
       "box": 0,
-      "color": "red"
+      "color": "red",
+      "hitsound": 0,
+      "whistle": false,
+      "finish": false,
+      "clap": false
     }
   ]
 }

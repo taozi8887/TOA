@@ -10,7 +10,7 @@ import threading
 from unzip import read_osz_file
 from osu_to_level import create_level_json
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 def resource_path(relative_path):
     """Get absolute path to resource, works for dev and for PyInstaller"""
@@ -128,6 +128,11 @@ def fade_in(screen, content_func, duration=0.3):
 def show_loading_screen():
     """Show loading screen and preload all assets"""
     pygame.init()
+    try:
+        pygame.mixer.init(buffer=256)  # Lower buffer for reduced audio latency
+    except Exception as e:
+        print(f"Warning: Could not set low-latency audio buffer: {e}")
+    pygame.mixer.set_num_channels(64)  # Increase channels for rapid hitsounds
     
     screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
     pygame.display.set_caption(f"TOA v{__version__} - Loading")
@@ -290,6 +295,7 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
     else:
         # Fallback: Load metadata now (shouldn't happen with loading screen)
         pygame.init()
+        pygame.mixer.set_num_channels(64)  # Increase channels for rapid hitsounds
         level_files = []
         try:
             levels_path = resource_path(levels_dir)
@@ -719,14 +725,14 @@ def show_autoplay_popup():
                 if event.key == pygame.K_y:
                     result = True
                     break
+                elif event.key == pygame.K_n:
+                    result = False
+                    break
                 elif event.key == pygame.K_ESCAPE:
                     # Go back to level selector
                     result = 'BACK'
                     break
-                else:
-                    # Any other key is No
-                    result = False
-                    break
+                # Ignore all other keys
         
         if result is not None:
             break
@@ -822,22 +828,30 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     score = 0
     total_hits = 0  # Track successful hits
     total_notes = 0  # Track total notes attempted
-    accuracy_window = 0.2  # seconds - time window to hit the target
+    accuracy_window = 0.15  # seconds - time window to hit the target
     
     # Load level from JSON file
     with open(resource_path(level_json), "r") as f:
         level_data = json.load(f)
     
-    # Convert JSON level format to tuple format (time, box, color)
-    level = [(event["t"], event["box"], event["color"]) for event in level_data["level"]]
+    # Convert JSON level format to tuple format (time, box, color, hitsound_data)
+    level = []
+    for event in level_data["level"]:
+        hitsound_data = {
+            'whistle': event.get('whistle', False),
+            'finish': event.get('finish', False),
+            'clap': event.get('clap', False)
+        }
+        level.append((event["t"], event["box"], event["color"], hitsound_data))
     
     # Offset all level timings by 3 seconds for music delay
-    level = [(t + 3.0, box, color) for t, box, color in level]
+    level = [(t + 3.0, box, color, hs) for t, box, color, hs in level]
     
     # Current target box and color
     target_box = None
     target_color = None
     target_time = None
+    target_hitsound = None
     
     # Track active boxes for fading (box_index: (color, flash_start_time, fade_end_time))
     active_boxes = {}
@@ -876,6 +890,33 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     
     pygame.mixer.music.load(resource_path(audio_path))
     music_start_time = None  # Will be set 3 seconds after game starts
+    
+    # Load hitsounds (normal, whistle, finish, clap)
+    hitsounds = {}
+    try:
+        # Try to load from beatmap folder first, then default
+        for sound_name in ['normal', 'whistle', 'finish', 'clap']:
+            sound = None
+            # Try beatmap-specific hitsounds
+            for prefix in ['normal', 'soft', 'drum']:
+                sound_file = f"{prefix}-hit{sound_name}.wav"
+                sound_path = os.path.join(audio_dir, sound_file)
+                if os.path.exists(resource_path(sound_path)):
+                    sound = pygame.mixer.Sound(resource_path(sound_path))
+                    break
+            # If not found, use default pygame sound (generate simple beep)
+            if sound is None:
+                # Create simple beep sounds as fallback
+                sound = pygame.mixer.Sound(buffer=b'\x00' * 1000)  # Placeholder
+            sound.set_volume(0.6)  # Set volume to 60%
+            hitsounds[sound_name] = sound
+    except Exception as e:
+        print(f"Could not load hitsounds: {e}")
+        # Create empty sound objects
+        for sound_name in ['normal', 'whistle', 'finish', 'clap']:
+            sound = pygame.mixer.Sound(buffer=b'\x00' * 1000)
+            sound.set_volume(0.6)  # Set volume to 60%
+            hitsounds[sound_name] = sound
     
     # Load beatmap background image if available
     beatmap_bg_image = None
@@ -974,6 +1015,9 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     combo = 0
     combo_pop_time = 0  # Time when combo was last increased
     combo_animation_duration = 0.08  # Animation duration in seconds (faster)
+    
+    # Track events that have already shown visual feedback (shake + text)
+    events_with_visual_feedback = set()
 
     # Pause functionality
     paused = False
@@ -1009,7 +1053,32 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
 
         # Set current target for this frame (do not auto-skip yet so late inputs in this frame still register)
         if current_event_index < len(level):
-            target_time, target_box, target_color = level[current_event_index]
+            target_time, target_box, target_color, target_hitsound = level[current_event_index]
+        
+        # Show visual feedback (shake + text) when tile hits the box, independent of player input
+        if not paused and current_event_index < len(level):
+            if elapsed_time >= target_time and current_event_index not in events_with_visual_feedback:
+                # Visual feedback for tile hitting box
+                import random
+                box_centers_display = [
+                    (center_x, center_y - square_size // 2 - spacing),
+                    (center_x + square_size // 2 + spacing, center_y),
+                    (center_x, center_y + square_size // 2 + spacing),
+                    (center_x - square_size // 2 - spacing, center_y),
+                ]
+                jx, jy = box_centers_display[target_box]
+                side = random.choice([-1, 1])
+                
+                # Trigger shake
+                shake_time = time.time()
+                shake_intensity = 9
+                shake_box = target_box
+                
+                # Play hitsound on miss (tile reached box without being hit)
+                hitsounds['normal'].play()
+                
+                # Mark this event as having shown visual feedback
+                events_with_visual_feedback.add(current_event_index)
         
         # Built-in autoplay - directly trigger actions at correct timing (only when not paused)
         if autoplay_enabled and not paused and current_event_index < len(level):
@@ -1043,9 +1112,6 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                 judgment_displays.append((judgment_text, jx, jy, time.time(), target_box, side))
                 
                 current_event_index += 1
-                shake_time = time.time()
-                shake_intensity = 6
-                shake_box = target_box
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -1115,7 +1181,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                                 judgment_text = "100"
                                 combo += 1
                                 combo_pop_time = time.time()
-                            else:  # timing_error <= 0.2 (or dynamic window)
+                            elif timing_error <= 0.15:  # OK hit
                                 judgment = 50
                                 count_50 += 1
                                 judgment_text = "50"
@@ -1138,10 +1204,23 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                             side = random.choice([-1, 1])
                             judgment_displays.append((judgment_text, jx, jy, time.time(), target_box, side))
                             
+                            # Trigger shake on successful hit
+                            if current_event_index not in events_with_visual_feedback:
+                                shake_time = time.time()
+                                shake_intensity = 9
+                                shake_box = target_box
+                                events_with_visual_feedback.add(current_event_index)
+                            
+                            # Play hitsounds
+                            hitsounds['normal'].play()
+                            if target_hitsound.get('whistle'):
+                                hitsounds['whistle'].play()
+                            if target_hitsound.get('finish'):
+                                hitsounds['finish'].play()
+                            if target_hitsound.get('clap'):
+                                hitsounds['clap'].play()
+                            
                             current_event_index += 1
-                            shake_time = time.time()
-                            shake_intensity = 6
-                            shake_box = target_box
                         else:
                             # Wrong input - display miss and skip this event
                             import random
@@ -1153,10 +1232,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                             ]
                             jx, jy = box_centers_display[target_box]
                             side = random.choice([-1, 1])
-                            judgment_displays.append(("0", jx, jy, time.time(), target_box, side))
-                            shake_time = time.time()
-                            shake_intensity = 6
-                            shake_box = target_box
+                            judgment_displays.append(("miss", jx, jy, time.time(), target_box, side))
                             current_event_index += 1
                             count_miss += 1
                             total_notes += 1
@@ -1172,10 +1248,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                         ]
                         jx, jy = box_centers_display[target_box]
                         side = random.choice([-1, 1])
-                        judgment_displays.append(("0", jx, jy, time.time(), target_box, side))
-                        shake_time = time.time()
-                        shake_intensity = 6
-                        shake_box = target_box
+                        judgment_displays.append(("miss", jx, jy, time.time(), target_box, side))
                         count_miss += 1
                         total_notes += 1
                         current_event_index += 1
@@ -1193,10 +1266,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                             ]
                             jx, jy = box_centers_display[active_box_idx]
                             side = random.choice([-1, 1])
-                            judgment_displays.append(("0", jx, jy, time.time(), active_box_idx, side))
-                            shake_time = time.time()
-                            shake_intensity = 6
-                            shake_box = active_box_idx
+                            judgment_displays.append(("miss", jx, jy, time.time(), active_box_idx, side))
                 elif event.button == 3:  # Right click
                     # Check if this is the correct action
                     if current_event_index < len(level) and abs(elapsed_time - target_time) < dynamic_accuracy_window:
@@ -1215,7 +1285,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                                 judgment_text = "100"
                                 combo += 1
                                 combo_pop_time = time.time()
-                            else:  # timing_error <= 0.2 (or dynamic window)
+                            elif timing_error <= 0.15:  # OK hit
                                 judgment = 50
                                 count_50 += 1
                                 judgment_text = "50"
@@ -1238,10 +1308,23 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                             side = random.choice([-1, 1])
                             judgment_displays.append((judgment_text, jx, jy, time.time(), target_box, side))
                             
+                            # Trigger shake on successful hit
+                            if current_event_index not in events_with_visual_feedback:
+                                shake_time = time.time()
+                                shake_intensity = 9
+                                shake_box = target_box
+                                events_with_visual_feedback.add(current_event_index)
+                            
+                            # Play hitsounds
+                            hitsounds['normal'].play()
+                            if target_hitsound.get('whistle'):
+                                hitsounds['whistle'].play()
+                            if target_hitsound.get('finish'):
+                                hitsounds['finish'].play()
+                            if target_hitsound.get('clap'):
+                                hitsounds['clap'].play()
+                            
                             current_event_index += 1
-                            shake_time = time.time()
-                            shake_intensity = 6
-                            shake_box = target_box
                         else:
                             # Wrong input - display miss and skip this event
                             import random
@@ -1253,10 +1336,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                             ]
                             jx, jy = box_centers_display[target_box]
                             side = random.choice([-1, 1])
-                            judgment_displays.append(("0", jx, jy, time.time(), target_box, side))
-                            shake_time = time.time()
-                            shake_intensity = 6
-                            shake_box = target_box
+                            judgment_displays.append(("miss", jx, jy, time.time(), target_box, side))
                             current_event_index += 1
                             count_miss += 1
                             total_notes += 1
@@ -1272,10 +1352,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                         ]
                         jx, jy = box_centers_display[target_box]
                         side = random.choice([-1, 1])
-                        judgment_displays.append(("0", jx, jy, time.time(), target_box, side))
-                        shake_time = time.time()
-                        shake_intensity = 6
-                        shake_box = target_box
+                        judgment_displays.append(("miss", jx, jy, time.time(), target_box, side))
                         count_miss += 1
                         total_notes += 1
                         current_event_index += 1
@@ -1293,17 +1370,14 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                             ]
                             jx, jy = box_centers_display[active_box_idx]
                             side = random.choice([-1, 1])
-                            judgment_displays.append(("0", jx, jy, time.time(), active_box_idx, side))
-                            shake_time = time.time()
-                            shake_intensity = 6
-                            shake_box = active_box_idx
-
+                            judgment_displays.append(("miss", jx, jy, time.time(), active_box_idx, side))
+                            
         # After processing input, skip any events that have fully expired
         if not paused:
             elapsed_time = time.time() - game_start_time - total_pause_duration
-            while current_event_index < len(level) and elapsed_time > level[current_event_index][0]:
-                # Get the missed event info (missed because we passed the exact target time)
-                missed_time, missed_box, missed_color = level[current_event_index]
+            while current_event_index < len(level) and elapsed_time > level[current_event_index][0] + accuracy_window:
+                # Get the missed event info (missed because we passed the timing window)
+                missed_time, missed_box, missed_color, missed_hitsound = level[current_event_index]
                 count_miss += 1
                 total_notes += 1
                 combo = 0  # Reset combo on miss
@@ -1317,19 +1391,16 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                 ]
                 jx, jy = box_centers_display[missed_box]
                 side = random.choice([-1, 1])
-                judgment_displays.append(("0", jx, jy, time.time(), missed_box, side))
+                judgment_displays.append(("miss", jx, jy, time.time(), missed_box, side))
                 # Add screen shake when indicator reaches box without being hit
-                shake_time = time.time()
-                shake_intensity = 6
-                shake_box = missed_box
                 current_event_index += 1
 
             # Refresh target after any auto-advances
             if current_event_index < len(level):
-                target_time, target_box, target_color = level[current_event_index]
+                target_time, target_box, target_color, target_hitsound = level[current_event_index]
                 # Add this box to active boxes if not already there
                 if target_box not in active_boxes:
-                    flash_lead = 0.15
+                    flash_lead = 0  # Flash when indicator reaches the box
                     fade_duration = 0.2
                     approach_duration = 0.8  # Time for indicator to travel to box
                     next_time = level[current_event_index + 1][0] if current_event_index + 1 < len(level) else target_time + 1.0
@@ -1351,7 +1422,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
             start_scan = max(0, current_event_index - lookback)
             for i in range(start_scan, min(current_event_index + lookahead, len(level))):
                 if i not in existing_events:
-                    evt_time, evt_box, evt_color = level[i]
+                    evt_time, evt_box, evt_color, evt_hitsound = level[i]
                     # Add indicators for events that haven't reached their target time yet
                     if elapsed_time <= evt_time:
                         # For top box (0), tiles come from left only
@@ -1807,3 +1878,12 @@ if __name__ == "__main__":
         
         # Or specify a level directly:
         # main(level_json="levels/kemomimi_KEMOMIMI EDM SQUAD.json", audio_dir="beatmaps/kemomimi")
+
+
+
+
+
+
+
+
+
