@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [0.3.4] - 2026-01-29
+
+### Notes
+- If you do not hear hitsounds on some maps, it is likely because the required hitsound files (e.g., soft-hitnormal0.ogg) are missing from the beatmap folder. This is not a code error; the game will play any hitsound file present that matches the note's hitsound index and type.
+
+### Changed
+- Audio file loading now supports multiple extensions: mp3, ogg, wav, flac, aac, m4a for both music and hitsounds. The game will use the first matching file found for each type.
+- All old levels have been replaced with a new set of levels and songs.
+
+#### New Songs (one or more levels each):
+  - All The Things She Said — Seraphine
+  - DRUM GO DUM feat. Aluna, Wolftyla, Bekuh BOOM — K/DA
+  - GIANTS (feat. Becky G, Keke Palmer, SOYEON, DUCKWRTH, Thutmose) — True Damage
+  - GODS feat. NewJeans — League of Legends
+  - Misfit Toys — Pusha T & Mako
+  - MORE feat. Madison Beer, (G)I-DLE, Lexie Liu, Jaira Burns, Seraphine — K/DA
+  - POP/STARS (ft. Madison Beer, (G)I-DLE, Jaira Burns) — K/DA
+  - RISE (ft. The Glitch Mob, Mako, and The Word Alive) — League of Legends
+  - STAR WALKIN' — Lil Nas X
+  - Take Over (feat. Jeremy McKinnon (A Day To Remember), MAX, Henry) (Cut Ver.) — League of Legends
+  - THE BADDEST feat. (G)I-DLE, Bea Miller, Wolftyla — K/DA
+  - VILLAIN feat. Madison Beer and Kim Petras — K/DA
+  - Warriors — Imagine Dragons
+
 ## [0.3.3] - 2026-01-29
 
 ### Added
