@@ -1,4 +1,23 @@
-#
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.3.3] - 2026-01-29
+
+### Added
+- Timing-driven box shake when a tile reaches its target box (independent of user input; still triggers on full misses/early misses).
+- A short "spawn lockout" before a note can be judged, so clicks immediately on spawn don't get scored.
+
+### Changed
+- Tighter timing for a 300 judgment (more strict perfect window).
+
+### Fixed
+- Resolved remaining **hitsound**, **hitcheck**, and **ghost-click** edge cases (timing + audio feedback now consistent).
+- Visual feedback (shake) no longer gets skipped when you miss early; it's driven by the level timing instead of the current-note pointer.
+
 ## [0.3.2] - 2026-01-28
 
 ### Changed
@@ -22,13 +41,6 @@
 ### Fixed
 - Fixed rare bug where hitsounds could be skipped on dense patterns
 - Fixed minor visual/logic bugs in popup and shake feedback
-
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.3.0] - 2026-01-28
 
