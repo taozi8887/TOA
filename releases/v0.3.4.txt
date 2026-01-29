@@ -1,0 +1,10 @@
+## ✨ TOA v0.3.4 - New Levels & Audio Support
+
+**Major Changes:**
+• All old levels replaced with a new set of songs and levels (see CHANGELOG for full song list)
+• Audio file loading now supports mp3, ogg, wav, flac, aac, m4a for both music and hitsounds
+
+**Other:**
+• See CHANGELOG.md for details
+
+───────────────────────────────────────────────────────────────────

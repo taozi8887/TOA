@@ -10,7 +10,7 @@ import sys
 import os
 
 # Version should match __version__ in main.py
-VERSION = "0.3.3"
+VERSION = "0.3.4"
 
 def build_exe():
     """Build the executable using PyInstaller with version info"""

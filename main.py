@@ -10,7 +10,7 @@ import threading
 from unzip import read_osz_file
 from osu_to_level import create_level_json
 
-__version__ = "0.3.3"
+__version__ = "0.3.4"
 
 def resource_path(relative_path):
     """Get absolute path to resource, works for dev and for PyInstaller"""
@@ -361,7 +361,7 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
     available_height = list_end_y - list_start_y
     total_content_height = len(level_metadata) * item_height
     max_scroll = max(0.0, total_content_height - available_height)
-    scroll_speed = 50  # Pixels per scroll tick
+    scroll_speed = 75  # Pixels per scroll tick
 
     # Scrollbar drag tracking
     scrollbar_dragging = False
@@ -831,15 +831,48 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     dot2_image = pygame.image.load(resource_path("assets/dot2.jpg"))
     dot2_image = pygame.transform.scale(dot2_image, (50, 50))
 
-    # Load background music
+    # Load background music using AudioFilename from .osu if available
     audio_path = None
+    audio_extensions = ['.mp3', '.ogg', '.wav', '.flac', '.aac', '.m4a']
+    osu_audio_filename = None
     try:
+        # Try to find the .osu file matching the level
+        level_base = os.path.splitext(os.path.basename(level_json))[0]
+        # Remove difficulty suffix (after last underscore)
+        if '_' in level_base:
+            base_name = level_base.rsplit('_', 1)[0]
+        else:
+            base_name = level_base
+        # Find .osu file in audio_dir that matches base_name
+        osu_file = None
         for file in os.listdir(resource_path(audio_dir)):
-            if file.lower().endswith('.mp3'):
-                audio_path = os.path.join(audio_dir, file)
+            if file.lower().endswith('.osu') and base_name.lower() in file.lower():
+                osu_file = os.path.join(audio_dir, file)
                 break
+        # Parse AudioFilename from .osu file
+        if osu_file and os.path.exists(resource_path(osu_file)):
+            with open(resource_path(osu_file), 'r', encoding='utf-8', errors='ignore') as f:
+                for line in f:
+                    if line.strip().lower().startswith('audiofilename:'):
+                        osu_audio_filename = line.strip().split(':', 1)[1].strip()
+                        break
+        # If found, use it
+        if osu_audio_filename:
+            candidate = os.path.join(audio_dir, osu_audio_filename)
+            if os.path.exists(resource_path(candidate)):
+                audio_path = candidate
+        # Fallback: search for any audio file
         if audio_path is None:
-            raise FileNotFoundError("No .mp3 file found in audio directory")
+            files = os.listdir(resource_path(audio_dir))
+            for ext in audio_extensions:
+                for file in files:
+                    if file.lower().endswith(ext):
+                        audio_path = os.path.join(audio_dir, file)
+                        break
+                if audio_path:
+                    break
+        if audio_path is None:
+            raise FileNotFoundError(f"No audio file ({', '.join(audio_extensions)}) found in audio directory")
     except Exception as e:
         print(f"Error finding audio file: {e}")
         audio_path = os.path.join(audio_dir, "audio.mp3")
@@ -849,14 +882,18 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
 
     # Load hitsounds
     hitsounds = {}
+    hitsound_extensions = ['.wav', '.ogg', '.mp3', '.flac', '.aac', '.m4a']
     try:
         for sound_name in ['normal', 'whistle', 'finish', 'clap']:
             sound = None
             for prefix in ['normal', 'soft', 'drum']:
-                sound_file = f"{prefix}-hit{sound_name}.wav"
-                sound_path = os.path.join(audio_dir, sound_file)
-                if os.path.exists(resource_path(sound_path)):
-                    sound = pygame.mixer.Sound(resource_path(sound_path))
+                for ext in hitsound_extensions:
+                    sound_file = f"{prefix}-hit{sound_name}{ext}"
+                    sound_path = os.path.join(audio_dir, sound_file)
+                    if os.path.exists(resource_path(sound_path)):
+                        sound = pygame.mixer.Sound(resource_path(sound_path))
+                        break
+                if sound:
                     break
             if sound is None:
                 sound = pygame.mixer.Sound(buffer=b'\x00' * 1000)
