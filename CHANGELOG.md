@@ -1,4 +1,15 @@
 #
+## [0.3.2] - 2026-01-28
+
+### Changed
+- Hitsounds now play correctly in autoplay mode
+- Hitsounds only play on successful hits (not on misses)
+- Hitsound volume set to 50%
+
+### Fixed
+- Ghost clicks and misses no longer trigger hitsounds
+- Code cleanup for hitsound playback logic
+
 ## [0.3.1] - 2026-01-28
 
 ### Changed
@@ -11,6 +22,7 @@
 ### Fixed
 - Fixed rare bug where hitsounds could be skipped on dense patterns
 - Fixed minor visual/logic bugs in popup and shake feedback
+
 # Changelog
 
 All notable changes to this project will be documented in this file.

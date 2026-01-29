@@ -10,7 +10,7 @@ import threading
 from unzip import read_osz_file
 from osu_to_level import create_level_json
 
-__version__ = "0.3.1"
+__version__ = "0.3.2"
 
 def resource_path(relative_path):
     """Get absolute path to resource, works for dev and for PyInstaller"""
@@ -908,14 +908,14 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
             if sound is None:
                 # Create simple beep sounds as fallback
                 sound = pygame.mixer.Sound(buffer=b'\x00' * 1000)  # Placeholder
-            sound.set_volume(0.6)  # Set volume to 60%
+            sound.set_volume(0.5)  # Set volume to 50%
             hitsounds[sound_name] = sound
     except Exception as e:
         print(f"Could not load hitsounds: {e}")
         # Create empty sound objects
         for sound_name in ['normal', 'whistle', 'finish', 'clap']:
             sound = pygame.mixer.Sound(buffer=b'\x00' * 1000)
-            sound.set_volume(0.6)  # Set volume to 60%
+            sound.set_volume(0.5)  # Set volume to 50%
             hitsounds[sound_name] = sound
     
     # Load beatmap background image if available
@@ -1075,7 +1075,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                 shake_box = target_box
                 
                 # Play hitsound on miss (tile reached box without being hit)
-                hitsounds['normal'].play()
+                # hitsounds['normal'].play()
                 
                 # Mark this event as having shown visual feedback
                 events_with_visual_feedback.add(current_event_index)
@@ -1110,7 +1110,16 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                 jx, jy = box_centers_display[target_box]
                 side = random.choice([-1, 1])
                 judgment_displays.append((judgment_text, jx, jy, time.time(), target_box, side))
-                
+
+                # Play hitsounds (autoplay)
+                # hitsounds['normal'].play()
+                # if target_hitsound.get('whistle'):
+                #     hitsounds['whistle'].play()
+                # if target_hitsound.get('finish'):
+                #     hitsounds['finish'].play()
+                # if target_hitsound.get('clap'):
+                #     hitsounds['clap'].play()
+
                 current_event_index += 1
         
         for event in pygame.event.get():
@@ -1213,12 +1222,12 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                             
                             # Play hitsounds
                             hitsounds['normal'].play()
-                            if target_hitsound.get('whistle'):
-                                hitsounds['whistle'].play()
-                            if target_hitsound.get('finish'):
-                                hitsounds['finish'].play()
-                            if target_hitsound.get('clap'):
-                                hitsounds['clap'].play()
+                            # if target_hitsound.get('whistle'):
+                            #     hitsounds['whistle'].play()
+                            # if target_hitsound.get('finish'):
+                            #     hitsounds['finish'].play()
+                            # if target_hitsound.get('clap'):
+                            #     hitsounds['clap'].play()
                             
                             current_event_index += 1
                         else:
@@ -1317,12 +1326,12 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                             
                             # Play hitsounds
                             hitsounds['normal'].play()
-                            if target_hitsound.get('whistle'):
-                                hitsounds['whistle'].play()
-                            if target_hitsound.get('finish'):
-                                hitsounds['finish'].play()
-                            if target_hitsound.get('clap'):
-                                hitsounds['clap'].play()
+                            # if target_hitsound.get('whistle'):
+                            #     hitsounds['whistle'].play()
+                            # if target_hitsound.get('finish'):
+                            #     hitsounds['finish'].play()
+                            # if target_hitsound.get('clap'):
+                            #     hitsounds['clap'].play()
                             
                             current_event_index += 1
                         else:
