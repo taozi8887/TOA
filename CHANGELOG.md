@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+#
+# ## [0.3.5] - 2026-01-30
+#
+# ### Added
+# - Auto fade out song and return to level selector when level ends.
+# - Updated accuracy windows:
+#   - 300: <= 0.02s
+#   - 100: <= 0.0475s
+#   - 50:  <= 0.075s
+
 ## [0.3.4] - 2026-01-29
 
 ### Notes

@@ -12,18 +12,20 @@ def read_osz_file(osz_path, extract_dir="temp_beatmap"):
 
     # Open the .osz file as a zip file
     osu_files = []
+
     try:
         with zipfile.ZipFile(osz_path, 'r') as zf:
             print(f"Extracting contents of {osz_path} to {extract_dir}...")
-            # Extract all files safely
-            zf.extractall(extract_dir)
-            print("Extraction complete.")
-            
-            # Find all .osu files
-            for filename in zf.namelist():
-                if filename.endswith('.osu'):
-                    osu_files.append(os.path.join(extract_dir, filename))
-                print(f"- {filename}")
+            # Only extract files not in any 'sb' folder
+            for member in zf.namelist():
+                # Skip any file or folder inside a directory named 'sb'
+                parts = member.split('/')
+                if 'sb' in parts:
+                    continue
+                zf.extract(member, extract_dir)
+                if member.endswith('.osu'):
+                    osu_files.append(os.path.join(extract_dir, member))
+                print(f"- {member}")
 
     except zipfile.BadZipFile:
         print(f"Error: {osz_path} is not a valid zip file.")

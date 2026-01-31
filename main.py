@@ -10,7 +10,7 @@ import threading
 from unzip import read_osz_file
 from osu_to_level import create_level_json
 
-__version__ = "0.3.4"
+__version__ = "0.3.5"
 
 def resource_path(relative_path):
     """Get absolute path to resource, works for dev and for PyInstaller"""
@@ -1014,11 +1014,11 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         return (gap / 2) if gap > 1.0 else base_window
 
     def judgment_from_error(timing_error):
-        if timing_error <= 0.04:
+        if timing_error <= 0.02:
             return 300, "300"
-        if timing_error <= 0.1:
+        if timing_error <= 0.0475:
             return 100, "100"
-        if timing_error <= 0.15:
+        if timing_error <= 0.075:
             return 50, "50"
         return None, None
 
@@ -1108,6 +1108,14 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
 
 
     running = True
+
+    # ===== End-of-level handling (2s delay, 3s music fade, then return to level selector) =====
+    level_end_elapsed = None
+    music_fade_started = False
+    music_fade_start_elapsed = None
+    POST_LEVEL_DELAY = 3.0
+    POST_LEVEL_MUSIC_FADE = 3.0
+
     while running:
         elapsed_time = time.time() - game_start_time - total_pause_duration
 
@@ -1122,7 +1130,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         display_time = paused_elapsed_time if paused else elapsed_time
 
         if music_start_time is None and elapsed_time >= 3.0 and not paused:
-            pygame.mixer.music.play(-1)
+            pygame.mixer.music.play()
             music_start_time = time.time()
 
         if current_event_index < len(level):
@@ -1238,6 +1246,22 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                     reached_shake_events.add(arrival_shake_index)
                     trigger_box_shake(box_idx, intensity=9)
                 arrival_shake_index += 1
+
+            # ===== End-of-level flow (NO freezing; let visuals keep running) =====
+            # Mark end-of-level once ALL notes are resolved (hit or miss)
+            if current_event_index >= len(level) and level_end_elapsed is None:
+                level_end_elapsed = elapsed_time
+
+            # After 2s delay, fade music for 3s, then fade screen and return to selector
+            if level_end_elapsed is not None:
+                if (elapsed_time - level_end_elapsed) >= POST_LEVEL_DELAY and not music_fade_started:
+                    pygame.mixer.music.fadeout(int(POST_LEVEL_MUSIC_FADE * 1000))
+                    music_fade_started = True
+                    music_fade_start_elapsed = elapsed_time
+
+                if music_fade_started and (elapsed_time - music_fade_start_elapsed) >= POST_LEVEL_MUSIC_FADE:
+                    fade_out(screen, duration=0.7)  # same normal fade effect
+                    return 'RESTART'
 
         screen.fill(WHITE)
 
