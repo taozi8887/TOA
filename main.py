@@ -10,7 +10,72 @@ import threading
 from unzip import read_osz_file
 from osu_to_level import create_level_json
 
-__version__ = "0.3.5"
+__version__ = "0.4.0"
+
+# Settings management
+class Settings:
+    """Manages game settings with local storage"""
+    
+    DEFAULT_SETTINGS = {
+        'music_volume': 0.7,
+        'hitsound_volume': 0.3,
+        'hitsounds_enabled': True,
+        'scroll_speed': 75,
+        'fade_effects': True,
+        'keybinds': {
+            'top': pygame.K_w,
+            'right': pygame.K_d,
+            'bottom': pygame.K_s,
+            'left': pygame.K_a
+        },
+        'mouse_binds': {
+            'red': 1,  # Left click
+            'blue': 3  # Right click
+        }
+    }
+    
+    def __init__(self):
+        self.settings_file = 'toa_settings.json'
+        self.settings = self.load_settings()
+    
+    def load_settings(self):
+        """Load settings from file or create default"""
+        try:
+            if os.path.exists(self.settings_file):
+                with open(self.settings_file, 'r') as f:
+                    loaded = json.load(f)
+                    # Merge with defaults to ensure all keys exist
+                    settings = self.DEFAULT_SETTINGS.copy()
+                    settings.update(loaded)
+                    # Ensure nested dicts are merged
+                    if 'keybinds' in loaded:
+                        settings['keybinds'] = {**self.DEFAULT_SETTINGS['keybinds'], **loaded['keybinds']}
+                    if 'mouse_binds' in loaded:
+                        settings['mouse_binds'] = {**self.DEFAULT_SETTINGS['mouse_binds'], **loaded['mouse_binds']}
+                    return settings
+        except Exception as e:
+            print(f"Error loading settings: {e}")
+        return self.DEFAULT_SETTINGS.copy()
+    
+    def save_settings(self):
+        """Save settings to file"""
+        try:
+            with open(self.settings_file, 'w') as f:
+                json.dump(self.settings, f, indent=2)
+        except Exception as e:
+            print(f"Error saving settings: {e}")
+    
+    def get(self, key, default=None):
+        """Get a setting value"""
+        return self.settings.get(key, default)
+    
+    def set(self, key, value):
+        """Set a setting value and save"""
+        self.settings[key] = value
+        self.save_settings()
+
+# Global settings instance
+game_settings = Settings()
 
 def resource_path(relative_path):
     """Get absolute path to resource, works for dev and for PyInstaller"""
@@ -81,6 +146,11 @@ def process_osz_to_level(osz_path, extract_name, output_json, seed=42):
 
 def fade_out(screen, duration=0.3):
     """Fade out the current screen to black"""
+    if not game_settings.get('fade_effects', True):
+        screen.fill((0, 0, 0))
+        pygame.display.flip()
+        return
+        
     clock = pygame.time.Clock()
     fade_surface = pygame.Surface(screen.get_size())
     fade_surface.fill((0, 0, 0))
@@ -107,6 +177,11 @@ def fade_in(screen, content_func, duration=0.3):
         content_func: Function that draws the content (takes screen as argument)
         duration: Duration of fade in seconds
     """
+    if not game_settings.get('fade_effects', True):
+        content_func(screen)
+        pygame.display.flip()
+        return
+        
     clock = pygame.time.Clock()
     fade_surface = pygame.Surface(screen.get_size())
     fade_surface.fill((0, 0, 0))
@@ -135,8 +210,42 @@ def show_loading_screen():
     pygame.mixer.set_num_channels(64)  # Increase channels for rapid hitsounds
 
     screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
+    # Set window icon based on dark mode (Windows/macOS)
+    icon_file = "assets/icon_black.png"
+    try:
+        fallback = False
+        if sys.platform == "win32":
+            import winreg
+            try:
+                registry = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
+                key = winreg.OpenKey(registry, r"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize")
+                apps_use_light_theme, _ = winreg.QueryValueEx(key, "AppsUseLightTheme")
+                winreg.CloseKey(key)
+                if apps_use_light_theme == 0:
+                    icon_file = "assets/icon_white.png"
+            except Exception:
+                icon_file = "assets/icon.png"
+                fallback = True
+        elif sys.platform == "darwin":
+            import subprocess
+            try:
+                result = subprocess.run([
+                    "defaults", "read", "-g", "AppleInterfaceStyle"
+                ], capture_output=True, text=True)
+                if result.returncode == 0 and "Dark" in result.stdout:
+                    icon_file = "assets/icon_white.png"
+                elif result.returncode != 0:
+                    icon_file = "assets/icon.png"
+                    fallback = True
+            except Exception:
+                icon_file = "assets/icon.png"
+                fallback = True
+        icon_surface = pygame.image.load(resource_path(icon_file))
+        pygame.display.set_icon(icon_surface)
+    except Exception as e:
+        print(f"Warning: Could not set window icon: {e}")
     pygame.display.set_caption(f"TOA v{__version__} - Loading")
-    pygame.mouse.set_visible(False)
+    pygame.mouse.set_visible(True)
     window_width, window_height = screen.get_size()
     clock = pygame.time.Clock()
 
@@ -154,20 +263,21 @@ def show_loading_screen():
     # Fade in the loading screen
     fade_surface = pygame.Surface((window_width, window_height))
     fade_surface.fill((0, 0, 0))
-    for alpha in range(255, 0, -25):
-        screen.fill(BLACK)
-        title_text = font_title.render("TOA", True, WHITE)
-        title_rect = title_text.get_rect(center=(window_width // 2, window_height // 2 - 100))
-        screen.blit(title_text, title_rect)
+    if game_settings.get('fade_effects', True):
+        for alpha in range(255, 0, -25):
+            screen.fill(BLACK)
+            title_text = font_title.render("TOA", True, WHITE)
+            title_rect = title_text.get_rect(center=(window_width // 2, window_height // 2 - 100))
+            screen.blit(title_text, title_rect)
 
-        status_text = font_status.render("Loading...", True, WHITE)
-        status_rect = status_text.get_rect(center=(window_width // 2, window_height // 2 + 50))
-        screen.blit(status_text, status_rect)
+            status_text = font_status.render("Loading...", True, WHITE)
+            status_rect = status_text.get_rect(center=(window_width // 2, window_height // 2 + 50))
+            screen.blit(status_text, status_rect)
 
-        fade_surface.set_alpha(alpha)
-        screen.blit(fade_surface, (0, 0))
-        pygame.display.flip()
-        clock.tick(60)
+            fade_surface.set_alpha(alpha)
+            screen.blit(fade_surface, (0, 0))
+            pygame.display.flip()
+            clock.tick(60)
 
     # Get available level files
     levels_dir = "levels"
@@ -272,7 +382,8 @@ def show_loading_screen():
     time.sleep(0.3)  # Brief pause to show completion
 
     # Fade out loading screen
-    fade_out(screen, duration=0.5)
+    if game_settings.get('fade_effects', True):
+        fade_out(screen, duration=0.5)
 
     # Keep screen black for transition to level selector
     screen.fill((0, 0, 0))
@@ -361,7 +472,7 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
     available_height = list_end_y - list_start_y
     total_content_height = len(level_metadata) * item_height
     max_scroll = max(0.0, total_content_height - available_height)
-    scroll_speed = 75  # Pixels per scroll tick
+    scroll_speed = game_settings.get('scroll_speed', 75)  # Use setting
 
     # Scrollbar drag tracking
     scrollbar_dragging = False
@@ -389,8 +500,14 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    selected_level = "QUIT"
-                    break
+                    # Open settings menu
+                    settings_result = show_settings_menu(from_selector=True)
+                    if settings_result == 'QUIT':
+                        selected_level = "QUIT"
+                        break
+                    # If result is 'BACK' or None, just continue
+                    # Reload scroll speed in case it changed
+                    scroll_speed = game_settings.get('scroll_speed', 75)
                 elif event.key == pygame.K_UP:
                     scroll_offset = max(0, scroll_offset - scroll_speed)
                 elif event.key == pygame.K_DOWN:
@@ -634,7 +751,7 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
             hint_rect = hint_text.get_rect(center=(window_width // 2, window_height - 30))
             screen.blit(hint_text, hint_rect)
 
-        esc_text = font_hint.render("Press ESC to quit", True, (200, 200, 200))
+        esc_text = font_hint.render("Press ESC for Settings", True, (200, 200, 200))
         esc_rect = esc_text.get_rect(center=(window_width // 2, window_height - 60))
         screen.blit(esc_text, esc_rect)
 
@@ -643,22 +760,23 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
             first_frame = False
             pygame.display.flip()
 
-            fade_surface = pygame.Surface((window_width, window_height))
-            fade_surface.fill((0, 0, 0))
-            fade_start_time = time.time()
-            fade_duration = 0.5 if not fade_in_start else 0.7
+            if game_settings.get('fade_effects', True):
+                fade_surface = pygame.Surface((window_width, window_height))
+                fade_surface.fill((0, 0, 0))
+                fade_start_time = time.time()
+                fade_duration = 0.5 if not fade_in_start else 0.7
 
-            saved_screen = screen.copy()
+                saved_screen = screen.copy()
 
-            while time.time() - fade_start_time < fade_duration:
-                elapsed = time.time() - fade_start_time
-                alpha = int(255 * (1 - elapsed / fade_duration))
+                while time.time() - fade_start_time < fade_duration:
+                    elapsed = time.time() - fade_start_time
+                    alpha = int(255 * (1 - elapsed / fade_duration))
 
-                screen.blit(saved_screen, (0, 0))
-                fade_surface.set_alpha(alpha)
-                screen.blit(fade_surface, (0, 0))
-                pygame.display.flip()
-                clock.tick(60)
+                    screen.blit(saved_screen, (0, 0))
+                    fade_surface.set_alpha(alpha)
+                    screen.blit(fade_surface, (0, 0))
+                    pygame.display.flip()
+                    clock.tick(60)
 
         pygame.display.flip()
         clock.tick(60)
@@ -666,14 +784,555 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
     if selected_level == "QUIT":
         return None
 
-    fade_out(screen, duration=0.5)
+    if game_settings.get('fade_effects', True):
+        fade_out(screen, duration=0.5)
     return selected_level
+
+def show_quit_confirmation():
+    """Show yes/no confirmation for quitting game
+    
+    Returns:
+        True if user confirms quit, False otherwise
+    """
+    screen = pygame.display.get_surface()
+    window_width, window_height = screen.get_size()
+    clock = pygame.time.Clock()
+    
+    # Save current screen
+    saved_screen = screen.copy()
+    
+    font_large = pygame.font.Font(None, 64)
+    font_button = pygame.font.Font(None, 48)
+    
+    WHITE = (255, 255, 255)
+    BLACK = (0, 0, 0)
+    GREEN = (100, 200, 100)
+    RED = (255, 100, 100)
+    
+    # Create semi-transparent overlay
+    overlay = pygame.Surface((window_width, window_height), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 180))
+    
+    # Confirmation box dimensions
+    box_width = 500
+    box_height = 250
+    box_x = (window_width - box_width) // 2
+    box_y = (window_height - box_height) // 2
+    
+    result = None
+    
+    while result is None:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                result = False
+                
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    result = False
+                elif event.key == pygame.K_y:
+                    result = True
+                elif event.key == pygame.K_n:
+                    result = False
+                    
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                mouse_pos = pygame.mouse.get_pos()
+                if yes_button_rect.collidepoint(mouse_pos):
+                    result = True
+                elif no_button_rect.collidepoint(mouse_pos):
+                    result = False
+        
+        # Draw saved screen first
+        screen.blit(saved_screen, (0, 0))
+        
+        # Draw overlay
+        screen.blit(overlay, (0, 0))
+        
+        # Draw confirmation box
+        box_rect = pygame.Rect(box_x, box_y, box_width, box_height)
+        pygame.draw.rect(screen, WHITE, box_rect, border_radius=15)
+        pygame.draw.rect(screen, BLACK, box_rect, 3, border_radius=15)
+        
+        # Draw text
+        title_text = font_large.render("Quit Game?", True, BLACK)
+        title_rect = title_text.get_rect(center=(window_width // 2, box_y + 60))
+        screen.blit(title_text, title_rect)
+        
+        # Draw buttons
+        button_y = box_y + 140
+        yes_button_rect = pygame.Rect(box_x + 80, button_y, 150, 60)
+        no_button_rect = pygame.Rect(box_x + 270, button_y, 150, 60)
+        
+        # Yes button
+        pygame.draw.rect(screen, RED, yes_button_rect, border_radius=10)
+        pygame.draw.rect(screen, BLACK, yes_button_rect, 3, border_radius=10)
+        yes_text = font_button.render("Yes", True, BLACK)
+        yes_text_rect = yes_text.get_rect(center=yes_button_rect.center)
+        screen.blit(yes_text, yes_text_rect)
+        
+        # No button
+        pygame.draw.rect(screen, GREEN, no_button_rect, border_radius=10)
+        pygame.draw.rect(screen, BLACK, no_button_rect, 3, border_radius=10)
+        no_text = font_button.render("No", True, BLACK)
+        no_text_rect = no_text.get_rect(center=no_button_rect.center)
+        screen.blit(no_text, no_text_rect)
+        
+        pygame.display.flip()
+        clock.tick(60)
+    
+    return result
+
+def show_settings_menu(from_game=False, from_selector=False):
+    """Show settings menu with sliders and keybind remapping
+    
+    Args:
+        from_game: If True, we're pausing from game; if False, it's a standalone settings menu
+        from_selector: If True, we're opening from level selector
+        
+    Returns:
+        'RESUME' to resume game, 'QUIT' to quit, or None
+    """
+    screen = pygame.display.get_surface()
+    pygame.display.set_caption(f"TOA v{__version__} - Settings")
+    pygame.mouse.set_visible(True)
+    window_width, window_height = screen.get_size()
+    clock = pygame.time.Clock()
+    
+    font_title = pygame.font.Font(None, 64)
+    font_label = pygame.font.Font(None, 36)
+    font_small = pygame.font.Font(None, 28)
+    font_button = pygame.font.Font(None, 32)
+    
+    WHITE = (255, 255, 255)
+    BLACK = (0, 0, 0)
+    GRAY = (200, 200, 200)
+    DARK_GRAY = (100, 100, 100)
+    BLUE = (100, 150, 255)
+    GREEN = (100, 200, 100)
+    RED = (255, 100, 100)
+    
+    # UI layout
+    slider_width = 300
+    slider_height = 8
+    knob_radius = 12
+    
+    # Settings state
+    music_volume = game_settings.get('music_volume')
+    hitsound_volume = game_settings.get('hitsound_volume')
+    hitsounds_enabled = game_settings.get('hitsounds_enabled')
+    scroll_speed = game_settings.get('scroll_speed')
+    fade_effects = game_settings.get('fade_effects', True)
+    fade_effects = game_settings.get('fade_effects', True)
+    
+    # Keybind remapping state
+    waiting_for_key = None  # Which keybind we're waiting to remap
+    waiting_for_mouse = None  # Which mouse button we're waiting to remap
+    
+    # Slider dragging state
+    dragging_slider = None
+    
+    running = True
+    result = None
+    
+    def draw_slider(x, y, width, height, value, min_val, max_val, label):
+        """Draw a horizontal slider"""
+        # Label
+        label_surface = font_label.render(label, True, BLACK)
+        screen.blit(label_surface, (x, y - 35))
+        
+        # Track
+        track_rect = pygame.Rect(x, y, width, height)
+        pygame.draw.rect(screen, GRAY, track_rect, border_radius=4)
+        
+        # Filled portion
+        filled_width = int((value - min_val) / (max_val - min_val) * width)
+        filled_rect = pygame.Rect(x, y, filled_width, height)
+        pygame.draw.rect(screen, BLUE, filled_rect, border_radius=4)
+        
+        # Knob
+        knob_x = x + filled_width
+        knob_y = y + height // 2
+        pygame.draw.circle(screen, WHITE, (knob_x, knob_y), knob_radius)
+        pygame.draw.circle(screen, BLACK, (knob_x, knob_y), knob_radius, 2)
+        
+        # Value display
+        value_text = f"{int(value * 100) if min_val == 0 and max_val == 1 else int(value)}"
+        if min_val == 0 and max_val == 1:
+            value_text += "%"
+        value_surface = font_small.render(value_text, True, BLACK)
+        screen.blit(value_surface, (x + width + 15, y - 8))
+        
+        return track_rect
+    
+    def draw_toggle(x, y, enabled, label):
+        """Draw a toggle switch"""
+        toggle_width = 60
+        toggle_height = 30
+        
+        # Label
+        label_surface = font_label.render(label, True, BLACK)
+        screen.blit(label_surface, (x, y - 35))
+        
+        # Toggle background
+        bg_color = GREEN if enabled else GRAY
+        toggle_rect = pygame.Rect(x, y, toggle_width, toggle_height)
+        pygame.draw.rect(screen, bg_color, toggle_rect, border_radius=15)
+        
+        # Toggle knob
+        knob_x = x + toggle_width - 18 if enabled else x + 18
+        knob_y = y + toggle_height // 2
+        pygame.draw.circle(screen, WHITE, (knob_x, knob_y), 12)
+        pygame.draw.circle(screen, BLACK, (knob_x, knob_y), 12, 2)
+        
+        return toggle_rect
+    
+    def draw_button(x, y, width, height, text, color=GRAY):
+        """Draw a button and return its rect"""
+        button_rect = pygame.Rect(x, y, width, height)
+        pygame.draw.rect(screen, color, button_rect, border_radius=8)
+        pygame.draw.rect(screen, BLACK, button_rect, 2, border_radius=8)
+        
+        text_surface = font_button.render(text, True, BLACK)
+        text_rect = text_surface.get_rect(center=button_rect.center)
+        screen.blit(text_surface, text_rect)
+        
+        return button_rect
+    
+    def get_key_name(key_code):
+        """Get readable name for pygame key code"""
+        return pygame.key.name(key_code).upper()
+    
+    def get_mouse_name(button):
+        """Get readable name for mouse button or key"""
+        if isinstance(button, int) and button > 10:  # Keyboard keys have higher values than mouse buttons (1-5)
+            return get_key_name(button)
+        names = {1: "Left Click", 2: "Middle Click", 3: "Right Click", 4: "Scroll Up", 5: "Scroll Down"}
+        return names.get(button, f"Button {button}")
+    
+    while running:
+        mouse_pos = pygame.mouse.get_pos()
+        mouse_x, mouse_y = mouse_pos
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                result = 'QUIT'
+                running = False
+                
+            if event.type == pygame.KEYDOWN:
+                if waiting_for_key:
+                    # Check if key is already bound
+                    keybinds = game_settings.get('keybinds')
+                    mouse_binds = game_settings.get('mouse_binds')
+                    
+                    # Check against other keybinds (excluding the one being remapped)
+                    is_duplicate = False
+                    for bind_name, bind_key in keybinds.items():
+                        if bind_name != waiting_for_key and bind_key == event.key:
+                            is_duplicate = True
+                            break
+                    
+                    # Check against mouse binds
+                    if event.key in mouse_binds.values():
+                        is_duplicate = True
+                    
+                    if not is_duplicate:
+                        keybinds[waiting_for_key] = event.key
+                        game_settings.set('keybinds', keybinds)
+                        waiting_for_key = None
+                elif waiting_for_mouse:
+                    # Check if key/button is already bound
+                    keybinds = game_settings.get('keybinds')
+                    mouse_binds = game_settings.get('mouse_binds')
+                    
+                    is_duplicate = False
+                    # Check against keybinds
+                    if event.key in keybinds.values():
+                        is_duplicate = True
+                    
+                    # Check against other mouse binds (excluding the one being remapped)
+                    for bind_name, bind_val in mouse_binds.items():
+                        if bind_name != waiting_for_mouse and bind_val == event.key:
+                            is_duplicate = True
+                            break
+                    
+                    if not is_duplicate:
+                        mouse_binds[waiting_for_mouse] = event.key
+                        game_settings.set('mouse_binds', mouse_binds)
+                        waiting_for_mouse = None
+                elif event.key == pygame.K_ESCAPE:
+                    if from_game:
+                        result = 'BACK'
+                    elif from_selector:
+                        result = 'BACK'
+                    else:
+                        result = 'QUIT'
+                    running = False
+                    
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if waiting_for_mouse:
+                    # Check if button is already bound
+                    keybinds = game_settings.get('keybinds')
+                    mouse_binds = game_settings.get('mouse_binds')
+                    
+                    is_duplicate = False
+                    # Check against keybinds
+                    if event.button in keybinds.values():
+                        is_duplicate = True
+                    
+                    # Check against other mouse binds (excluding the one being remapped)
+                    for bind_name, bind_val in mouse_binds.items():
+                        if bind_name != waiting_for_mouse and bind_val == event.button:
+                            is_duplicate = True
+                            break
+                    
+                    if not is_duplicate:
+                        mouse_binds[waiting_for_mouse] = event.button
+                        game_settings.set('mouse_binds', mouse_binds)
+                        waiting_for_mouse = None
+                else:
+                    # Check slider clicks
+                    if music_slider_rect.collidepoint(mouse_pos):
+                        dragging_slider = 'music'
+                    elif hitsound_slider_rect.collidepoint(mouse_pos):
+                        dragging_slider = 'hitsound'
+                    elif scroll_slider_rect.collidepoint(mouse_pos):
+                        dragging_slider = 'scroll'
+                    elif hitsounds_toggle_rect.collidepoint(mouse_pos):
+                        hitsounds_enabled = not hitsounds_enabled
+                        game_settings.set('hitsounds_enabled', hitsounds_enabled)
+                    elif fade_toggle_rect.collidepoint(mouse_pos):
+                        fade_effects = not fade_effects
+                        game_settings.set('fade_effects', fade_effects)
+                    elif quit_menu_rect and quit_menu_rect.collidepoint(mouse_pos):
+                        # Show confirmation for quit to menu
+                        if show_quit_confirmation():
+                            result = 'QUIT_MENU'
+                            running = False
+                    elif quit_game_rect and quit_game_rect.collidepoint(mouse_pos):
+                        # Show confirmation for quit game
+                        if show_quit_confirmation():
+                            result = 'QUIT'
+                            running = False
+                    # Check keybind buttons
+                    elif keybind_top_rect.collidepoint(mouse_pos):
+                        waiting_for_key = 'top'
+                    elif keybind_right_rect.collidepoint(mouse_pos):
+                        waiting_for_key = 'right'
+                    elif keybind_bottom_rect.collidepoint(mouse_pos):
+                        waiting_for_key = 'bottom'
+                    elif keybind_left_rect.collidepoint(mouse_pos):
+                        waiting_for_key = 'left'
+                    elif mouse_red_rect.collidepoint(mouse_pos):
+                        waiting_for_mouse = 'red'
+                    elif mouse_blue_rect.collidepoint(mouse_pos):
+                        waiting_for_mouse = 'blue'
+                    elif reset_keybinds_rect.collidepoint(mouse_pos):
+                        # Reset all keybinds to default
+                        default_keybinds = {
+                            'top': pygame.K_w,
+                            'right': pygame.K_d,
+                            'bottom': pygame.K_s,
+                            'left': pygame.K_a
+                        }
+                        default_mouse_binds = {
+                            'red': 1,
+                            'blue': 3
+                        }
+                        game_settings.set('keybinds', default_keybinds)
+                        game_settings.set('mouse_binds', default_mouse_binds)
+                        keybinds = default_keybinds
+                        mouse_binds = default_mouse_binds
+                        
+            if event.type == pygame.MOUSEBUTTONUP:
+                dragging_slider = None
+        
+        # Handle slider dragging
+        if dragging_slider:
+            if dragging_slider == 'music':
+                rel_x = mouse_x - music_slider_rect.x
+                music_volume = max(0.0, min(1.0, rel_x / slider_width))
+                game_settings.set('music_volume', music_volume)
+                pygame.mixer.music.set_volume(music_volume)
+            elif dragging_slider == 'hitsound':
+                rel_x = mouse_x - hitsound_slider_rect.x
+                hitsound_volume = max(0.0, min(1.0, rel_x / slider_width))
+                game_settings.set('hitsound_volume', hitsound_volume)
+            elif dragging_slider == 'scroll':
+                rel_x = max(0, min(slider_width, mouse_x - scroll_slider_rect.x))
+                scroll_speed = 25 + int((rel_x / slider_width) * 675)  # 25-700
+                scroll_speed = max(25, min(700, scroll_speed))  # Clamp
+                game_settings.set('scroll_speed', scroll_speed)
+        
+        # Drawing
+        screen.fill(WHITE)
+        
+        # Title
+        title_text = font_title.render("Settings", True, BLACK)
+        title_rect = title_text.get_rect(center=(window_width // 2, 50))
+        screen.blit(title_text, title_rect)
+        
+        # Layout columns
+        left_col_x = window_width // 4 - slider_width // 2
+        right_col_x = 3 * window_width // 4 - 150
+        
+        # Volume sliders (left column)
+        y_offset = 140
+        music_slider_rect = draw_slider(left_col_x, y_offset, slider_width, slider_height, 
+                                        music_volume, 0, 1, "Music Volume")
+        
+        y_offset += 100
+        hitsound_slider_rect = draw_slider(left_col_x, y_offset, slider_width, slider_height,
+                                           hitsound_volume, 0, 1, "Hitsound Volume")
+        
+        y_offset += 80
+        hitsounds_toggle_rect = draw_toggle(left_col_x, y_offset, hitsounds_enabled, "Enable Hitsounds")
+        
+        y_offset += 80
+        fade_toggle_rect = draw_toggle(left_col_x, y_offset, fade_effects, "Enable Fade Effects")
+        
+        y_offset += 100
+        scroll_slider_rect = draw_slider(left_col_x, y_offset, slider_width, slider_height,
+                                         scroll_speed, 25, 700, "Scroll Speed")
+        
+        # Keybinds (right column)
+        keybinds = game_settings.get('keybinds')
+        mouse_binds = game_settings.get('mouse_binds')
+        
+        y_offset = 140
+        keybind_label = font_label.render("Keybinds", True, BLACK)
+        screen.blit(keybind_label, (right_col_x, y_offset - 35))
+        
+        button_width = 200
+        button_height = 40
+        button_spacing = 50
+        
+        # Top key
+        if waiting_for_key == 'top':
+            key_text = "Press a key..."
+        else:
+            key_text = f"Top: {get_key_name(keybinds['top'])}"
+        color = BLUE if waiting_for_key == 'top' else GRAY
+        keybind_top_rect = draw_button(right_col_x, y_offset, button_width, button_height, 
+                                       key_text, color)
+        
+        y_offset += button_spacing
+        if waiting_for_key == 'right':
+            key_text = "Press a key..."
+        else:
+            key_text = f"Right: {get_key_name(keybinds['right'])}"
+        color = BLUE if waiting_for_key == 'right' else GRAY
+        keybind_right_rect = draw_button(right_col_x, y_offset, button_width, button_height,
+                                         key_text, color)
+        
+        y_offset += button_spacing
+        if waiting_for_key == 'bottom':
+            key_text = "Press a key..."
+        else:
+            key_text = f"Bottom: {get_key_name(keybinds['bottom'])}"
+        color = BLUE if waiting_for_key == 'bottom' else GRAY
+        keybind_bottom_rect = draw_button(right_col_x, y_offset, button_width, button_height,
+                                          key_text, color)
+        
+        y_offset += button_spacing
+        if waiting_for_key == 'left':
+            key_text = "Press a key..."
+        else:
+            key_text = f"Left: {get_key_name(keybinds['left'])}"
+        color = BLUE if waiting_for_key == 'left' else GRAY
+        keybind_left_rect = draw_button(right_col_x, y_offset, button_width, button_height,
+                                        key_text, color)
+        
+        # Mouse binds
+        y_offset += button_spacing + 20
+        mouse_label = font_label.render("Mouse Buttons", True, BLACK)
+        screen.blit(mouse_label, (right_col_x, y_offset - 15))
+        
+        y_offset += 30
+        if waiting_for_mouse == 'red':
+            mouse_text = "Press key/click..."
+        else:
+            mouse_text = f"Red: {get_mouse_name(mouse_binds['red'])}"
+        color = RED if waiting_for_mouse == 'red' else GRAY
+        mouse_red_rect = draw_button(right_col_x, y_offset, button_width, button_height,
+                                     mouse_text, color)
+        
+        y_offset += button_spacing
+        if waiting_for_mouse == 'blue':
+            mouse_text = "Press key/click..."
+        else:
+            mouse_text = f"Blue: {get_mouse_name(mouse_binds['blue'])}"
+        color = BLUE if waiting_for_mouse == 'blue' else GRAY
+        mouse_blue_rect = draw_button(right_col_x, y_offset, button_width, button_height,
+                                      mouse_text, color)
+        
+        # Reset button
+        y_offset += button_spacing + 10
+        reset_keybinds_rect = draw_button(right_col_x, y_offset, button_width, button_height,
+                                         "Reset to Default", DARK_GRAY)
+        
+        # Bottom buttons
+        button_y = window_height - 110
+        if from_game:
+            quit_menu_rect = draw_button(window_width // 2 - 210, button_y, 200, 50, "Quit to Menu", RED)
+            quit_game_rect = draw_button(window_width // 2 + 10, button_y, 200, 50, "Quit Game", RED)
+        elif from_selector:
+            quit_menu_rect = None
+            quit_game_rect = draw_button(window_width // 2 - 100, button_y, 200, 50, "Quit Game", RED)
+        else:
+            quit_menu_rect = None
+            quit_game_rect = draw_button(window_width // 2 - 100, button_y, 200, 50, "Back", GRAY)
+        
+        # Hint text
+        if from_selector or from_game:
+            hint_text = "Press ESC to go back"
+        else:
+            hint_text = "Press ESC to go back"
+        hint_surface = font_small.render(hint_text, True, DARK_GRAY)
+        hint_rect = hint_surface.get_rect(center=(window_width // 2, window_height - 30))
+        screen.blit(hint_surface, hint_rect)
+        
+        # Update cursor based on hover states
+        mouse_pos = pygame.mouse.get_pos()
+        hovering_button = False
+        if quit_menu_rect and quit_menu_rect.collidepoint(mouse_pos):
+            hovering_button = True
+        elif quit_game_rect and quit_game_rect.collidepoint(mouse_pos):
+            hovering_button = True
+        elif reset_keybinds_rect and reset_keybinds_rect.collidepoint(mouse_pos):
+            hovering_button = True
+        elif keybind_top_rect and keybind_top_rect.collidepoint(mouse_pos):
+            hovering_button = True
+        elif keybind_right_rect and keybind_right_rect.collidepoint(mouse_pos):
+            hovering_button = True
+        elif keybind_bottom_rect and keybind_bottom_rect.collidepoint(mouse_pos):
+            hovering_button = True
+        elif keybind_left_rect and keybind_left_rect.collidepoint(mouse_pos):
+            hovering_button = True
+        elif mouse_red_rect and mouse_red_rect.collidepoint(mouse_pos):
+            hovering_button = True
+        elif mouse_blue_rect and mouse_blue_rect.collidepoint(mouse_pos):
+            hovering_button = True
+        elif hitsounds_toggle_rect and hitsounds_toggle_rect.collidepoint(mouse_pos):
+            hovering_button = True
+        elif fade_toggle_rect and fade_toggle_rect.collidepoint(mouse_pos):
+            hovering_button = True
+        
+        if hovering_button or dragging_slider:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+        else:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+        
+        pygame.display.flip()
+        clock.tick(60)
+    
+    pygame.mouse.set_visible(True)
+    return result
+
 
 def show_autoplay_popup():
     """Show popup window to ask about autoplay"""
     screen = pygame.display.get_surface()
     pygame.display.set_caption(f"TOA v{__version__} - Setup")
-    pygame.mouse.set_visible(False)
+    pygame.mouse.set_visible(True)
     window_width, window_height = screen.get_size()
     clock = pygame.time.Clock()
 
@@ -697,7 +1356,11 @@ def show_autoplay_popup():
         no_rect = no_text.get_rect(center=(window_width // 2, window_height // 2 + 80))
         surf.blit(no_text, no_rect)
 
-    fade_in(screen, draw_autoplay_content, duration=0.5)
+    if game_settings.get('fade_effects', True):
+        fade_in(screen, draw_autoplay_content, duration=0.5)
+    else:
+        draw_autoplay_content(screen)
+        pygame.display.flip()
 
     result = None
     while result is None:
@@ -723,7 +1386,8 @@ def show_autoplay_popup():
         pygame.display.flip()
         clock.tick(60)
 
-    fade_out(screen, duration=0.3)
+    if game_settings.get('fade_effects', True):
+        fade_out(screen, duration=0.3)
     return result
 
 def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_metadata=None):
@@ -751,12 +1415,13 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
 
     if autoplay_enabled == 'BACK':
         screen = pygame.display.get_surface()
-        fade_out(screen, duration=0.7)
+        if game_settings.get('fade_effects', True):
+            fade_out(screen, duration=0.7)
         return 'RESTART'
 
     screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
     pygame.display.set_caption(f"TOA v{__version__}")
-    pygame.mouse.set_visible(False)
+    pygame.mouse.set_visible(True)
 
     pygame.event.pump()
 
@@ -775,9 +1440,6 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     spacing = 105
     border_width = 3
     radius = 10
-
-    esc_press_time = 0
-    esc_pressed_once = False
 
     active_key = None
 
@@ -818,17 +1480,17 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     approach_indicators = []
 
     # Load and scale box image
-    box_image = pygame.image.load(resource_path("assets/box.jpg"))
+    box_image = pygame.image.load(resource_path("assets/box.jpg")).convert()
     box_image = pygame.transform.scale(box_image, (square_size, square_size))
 
-    box_red_image = pygame.image.load(resource_path("assets/boxred.jpg"))
+    box_red_image = pygame.image.load(resource_path("assets/boxred.jpg")).convert()
     box_red_image = pygame.transform.scale(box_red_image, (square_size, square_size))
-    box_blue_image = pygame.image.load(resource_path("assets/boxblue.jpg"))
+    box_blue_image = pygame.image.load(resource_path("assets/boxblue.jpg")).convert()
     box_blue_image = pygame.transform.scale(box_blue_image, (square_size, square_size))
 
-    dot_image = pygame.image.load(resource_path("assets/dot.jpg"))
+    dot_image = pygame.image.load(resource_path("assets/dot.jpg")).convert()
     dot_image = pygame.transform.scale(dot_image, (50, 50))
-    dot2_image = pygame.image.load(resource_path("assets/dot2.jpg"))
+    dot2_image = pygame.image.load(resource_path("assets/dot2.jpg")).convert()
     dot2_image = pygame.transform.scale(dot2_image, (50, 50))
 
     # Load background music using AudioFilename from .osu if available
@@ -878,6 +1540,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         audio_path = os.path.join(audio_dir, "audio.mp3")
 
     pygame.mixer.music.load(resource_path(audio_path))
+    pygame.mixer.music.set_volume(game_settings.get('music_volume', 0.7))
     music_start_time = None
 
     # Load hitsounds
@@ -897,13 +1560,13 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                     break
             if sound is None:
                 sound = pygame.mixer.Sound(buffer=b'\x00' * 1000)
-            sound.set_volume(0.3)
+            sound.set_volume(game_settings.get('hitsound_volume', 0.3))
             hitsounds[sound_name] = sound
     except Exception as e:
         print(f"Could not load hitsounds: {e}")
         for sound_name in ['normal', 'whistle', 'finish', 'clap']:
             sound = pygame.mixer.Sound(buffer=b'\x00' * 1000)
-            sound.set_volume(0.3)
+            sound.set_volume(game_settings.get('hitsound_volume', 0.3))
             hitsounds[sound_name] = sound
 
     # Load beatmap background image if available
@@ -931,11 +1594,37 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         mask = pygame.Surface(size, pygame.SRCALPHA)
         pygame.draw.rect(mask, (255, 255, 255, 255), (0, 0, size[0], size[1]), 0, radius)
         rounded_image.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MIN)
-        return rounded_image
+        return rounded_image.convert_alpha()
 
     box_image_rounded = create_rounded_image(box_image, 8)
     box_red_rounded = create_rounded_image(box_red_image, 8)
     box_blue_rounded = create_rounded_image(box_blue_image, 8)
+    
+    # Pre-cache gradient surfaces for edge flashes
+    gradient_cache = {}
+    def get_cached_gradient(direction, length, height, color, max_alpha):
+        """Get or create a cached gradient surface"""
+        key = (direction, length, height, color, max_alpha)
+        if key not in gradient_cache:
+            gradient_surface = pygame.Surface((length, height), pygame.SRCALPHA)
+            for i in range(length):
+                progress = i / length
+                if direction == 'left':
+                    alpha = int(max_alpha * progress)
+                else:  # right
+                    alpha = int(max_alpha * (1 - progress))
+                pygame.draw.line(gradient_surface, (*color, alpha), (i, 0), (i, height))
+            gradient_cache[key] = gradient_surface.convert_alpha()
+        return gradient_cache[key]
+    
+    # Pre-render common text surfaces
+    text_cache = {}
+    def get_cached_text(font, text, color):
+        """Get or create cached text surface"""
+        key = (id(font), text, color)
+        if key not in text_cache:
+            text_cache[key] = font.render(text, True, color)
+        return text_cache[key]
 
     dot_radius = 10
     move_time = 0
@@ -998,12 +1687,17 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     arrival_shake_index = 0  # NEW: drives arrival shake purely by level timing
 
     # ======= Hitcheck helpers =======
+    
+    # Get keybinds from settings
+    keybinds = game_settings.get('keybinds')
+    mouse_binds = game_settings.get('mouse_binds')
 
     def key_for_box(box_idx):
-        return ['w', 'd', 's', 'a'][box_idx]
+        key_map = ['top', 'right', 'bottom', 'left']
+        return keybinds[key_map[box_idx]]
 
     def button_for_color(color):
-        return 'left' if color == 'red' else 'right'
+        return mouse_binds[color]
 
     def compute_dynamic_window(evt_idx, base_window):
         if evt_idx >= len(level):
@@ -1074,7 +1768,8 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
 
         add_judgment_text(text, hit_box_idx)
         trigger_box_shake(hit_box_idx, intensity=9)
-        hitsounds['normal'].play()
+        if game_settings.get('hitsounds_enabled', True):
+            hitsounds['normal'].play()
 
         resolved_events.add(evt_idx)
         current_event_index += 1
@@ -1119,11 +1814,14 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     while running:
         elapsed_time = time.time() - game_start_time - total_pause_duration
 
-        if elapsed_time < fade_in_delay:
-            fade_in_alpha = 255
-        elif elapsed_time < fade_in_delay + fade_in_duration:
-            fade_progress = (elapsed_time - fade_in_delay) / fade_in_duration
-            fade_in_alpha = int(255 * (1 - fade_progress))
+        if game_settings.get('fade_effects', True):
+            if elapsed_time < fade_in_delay:
+                fade_in_alpha = 255
+            elif elapsed_time < fade_in_delay + fade_in_duration:
+                fade_progress = (elapsed_time - fade_in_delay) / fade_in_duration
+                fade_in_alpha = int(255 * (1 - fade_progress))
+            else:
+                fade_in_alpha = 0
         else:
             fade_in_alpha = 0
 
@@ -1153,7 +1851,8 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                 trigger_box_shake(target_box, intensity=9)
 
                 # Play hitsounds during autoplay
-                hitsounds['normal'].play()
+                if game_settings.get('hitsounds_enabled', True):
+                    hitsounds['normal'].play()
                 current_event_index += 1
 
         for event in pygame.event.get():
@@ -1162,43 +1861,67 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    current_time = time.time()
-                    if esc_pressed_once and (current_time - esc_press_time) < 2:
-                        pygame.mixer.music.stop()
-                        fade_out(screen, duration=0.7)
-                        return 'RESTART'
-                    else:
-                        esc_pressed_once = True
-                        esc_press_time = current_time
-
-                if event.key == pygame.K_p:
-                    paused = not paused
-                    if paused:
-                        pause_start_time = time.time()
-                        paused_elapsed_time = elapsed_time
-                        pygame.mixer.music.pause()
-                    else:
+                    # Pause and show settings menu
+                    paused = True
+                    pause_start_time = time.time()
+                    paused_elapsed_time = elapsed_time
+                    pygame.mixer.music.pause()
+                    
+                    # Show settings menu
+                    settings_result = show_settings_menu(from_game=True)
+                    
+                    if settings_result == 'BACK':
+                        # Resume game
+                        paused = False
                         total_pause_duration += time.time() - pause_start_time
                         pygame.mixer.music.unpause()
+                        # Update volumes in case they changed
+                        pygame.mixer.music.set_volume(game_settings.get('music_volume', 0.7))
+                        for sound in hitsounds.values():
+                            sound.set_volume(game_settings.get('hitsound_volume', 0.3))
+                        # Reload keybinds
+                        keybinds = game_settings.get('keybinds')
+                        mouse_binds = game_settings.get('mouse_binds')
+                    elif settings_result == 'QUIT_MENU':
+                        # Quit to menu
+                        pygame.mixer.music.stop()
+                        if game_settings.get('fade_effects', True):
+                            fade_out(screen, duration=0.7)
+                        return 'RESTART'
+                    elif settings_result == 'QUIT':
+                        # Quit game completely
+                        pygame.mixer.music.stop()
+                        if game_settings.get('fade_effects', True):
+                            fade_out(screen, duration=0.7)
+                        pygame.quit()
+                        sys.exit()
 
                 if not paused:
-                    if event.key == pygame.K_w:
-                        active_key = 'w'
-                    elif event.key == pygame.K_a:
-                        active_key = 'a'
-                    elif event.key == pygame.K_s or event.key == pygame.K_SPACE:
-                        active_key = 's'
-                    elif event.key == pygame.K_d:
-                        active_key = 'd'
+                    # Check if any keybind was pressed
+                    if event.key == keybinds['top']:
+                        active_key = keybinds['top']
+                    elif event.key == keybinds['right']:
+                        active_key = keybinds['right']
+                    elif event.key == keybinds['bottom']:
+                        active_key = keybinds['bottom']
+                    elif event.key == keybinds['left']:
+                        active_key = keybinds['left']
+                    
+                    # Check if red/blue are mapped to keyboard keys
+                    if display_time >= 3.0 and current_event_index < len(level):
+                        if event.key == mouse_binds['red']:
+                            handle_click(mouse_binds['red'], elapsed_time, current_event_index)
+                        elif event.key == mouse_binds['blue']:
+                            handle_click(mouse_binds['blue'], elapsed_time, current_event_index)
 
             if event.type == pygame.MOUSEBUTTONDOWN and not paused:
                 if display_time < 3.0:
                     continue
                 if current_event_index < len(level):
-                    if event.button == 1:
-                        handle_click('left', elapsed_time, current_event_index)
-                    elif event.button == 3:
-                        handle_click('right', elapsed_time, current_event_index)
+                    if event.button == mouse_binds['red']:
+                        handle_click(mouse_binds['red'], elapsed_time, current_event_index)
+                    elif event.button == mouse_binds['blue']:
+                        handle_click(mouse_binds['blue'], elapsed_time, current_event_index)
 
         # Auto-miss past window
         if not paused:
@@ -1260,7 +1983,8 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                     music_fade_start_elapsed = elapsed_time
 
                 if music_fade_started and (elapsed_time - music_fade_start_elapsed) >= POST_LEVEL_MUSIC_FADE:
-                    fade_out(screen, duration=0.7)  # same normal fade effect
+                    if game_settings.get('fade_effects', True):
+                        fade_out(screen, duration=0.7)
                     return 'RESTART'
 
         screen.fill(WHITE)
@@ -1562,13 +2286,13 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         dot_size = 50
         for i, (dot_x, dot_y) in enumerate(dot_positions):
             is_active = False
-            if i == 0 and active_key == 'w':
+            if i == 0 and active_key == keybinds['top']:
                 is_active = True
-            elif i == 1 and active_key == 'd':
+            elif i == 1 and active_key == keybinds['right']:
                 is_active = True
-            elif i == 2 and active_key == 's':
+            elif i == 2 and active_key == keybinds['bottom']:
                 is_active = True
-            elif i == 3 and active_key == 'a':
+            elif i == 3 and active_key == keybinds['left']:
                 is_active = True
 
             current_dot = dot2_image if is_active else dot_image
@@ -1593,20 +2317,6 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
             countdown_surface.set_alpha(alpha)
             countdown_rect = countdown_surface.get_rect(center=(center_x, center_y))
             screen.blit(countdown_surface, countdown_rect)
-
-        # Pause overlay
-        if paused:
-            pause_overlay = pygame.Surface((screen_width, screen_height), pygame.SRCALPHA)
-            pygame.draw.rect(pause_overlay, (0, 0, 0, 128), (0, 0, screen_width, screen_height))
-            screen.blit(pause_overlay, (0, 0))
-
-            pause_text = font_countdown.render("PAUSED", True, WHITE)
-            pause_rect = pause_text.get_rect(center=(center_x, center_y))
-            screen.blit(pause_text, pause_rect)
-
-            instruction_text = font_stats.render("Press P to resume", True, WHITE)
-            instruction_rect = instruction_text.get_rect(center=(center_x, center_y + 80))
-            screen.blit(instruction_text, instruction_rect)
 
         # Fade-in overlay
         if fade_in_alpha > 0:

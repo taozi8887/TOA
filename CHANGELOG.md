@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-02-01
+
+### Added
+- **Comprehensive Settings System** with local storage (toa_settings.json)
+  - Music volume slider (0-100%)
+  - Hitsound volume slider with enable/disable toggle (0-100%)
+  - Scroll speed slider (25-700, default 75)
+  - Fade effects toggle for performance optimization
+  - Keybind remapping for all gameplay keys (WASD)
+  - Mouse button remapping (can map to keyboard keys)
+  - Reset keybinds to default button
+  - Duplicate keybind prevention
+- Settings menu accessible from:
+  - In-game via ESC key (pause)
+  - Level selector via ESC key
+  - Standalone mode
+- **Performance Optimizations**
+  - Image conversion (.convert() and .convert_alpha()) for all surfaces
+  - Gradient surface caching for edge flashes
+  - Optional fade effects toggle for lower-end systems
+- **Confirmation Popups** with overlay system
+  - Quit to menu confirmation
+  - Quit game confirmation
+  - Overlay darkens background instead of black screen
+- **Always-visible mouse cursor** with hover states
+  - Hand cursor on interactive elements (buttons, sliders, toggles)
+  - Arrow cursor on non-interactive areas
+
+### Changed
+- **ESC key behavior**: Opens settings/pause menu instead of double-tap exit
+- **In-game pause**: Shows "Quit to Menu" and "Quit Game" buttons (removed Resume)
+- **Level selector ESC**: Opens settings instead of quitting directly
+- **Keybind system**: Removed Space and Alt keys, kept WASD only
+- **Mouse bindings**: Can now be mapped to keyboard keys in addition to mouse buttons
+- Settings persist across game restarts via JSON file
+- Scroll speed now adjustable from 25 to 700 (previously fixed at 75)
+
+### Fixed
+- Scroll speed slider now properly contains values within bounds
+- Cursor states properly update in settings window
+- Fade effects now apply to all transitions (loading, autoplay, game start)
+- Confirmation popups overlay screen content properly
 
 #
 # ## [0.3.5] - 2026-01-30

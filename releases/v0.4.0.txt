@@ -1,0 +1,60 @@
+## ✨ TOA v0.4.0 - Settings System & Performance Update
+
+### 🎮 Major Features
+
+**Comprehensive Settings System**
+- 🔊 Music volume control (0-100%)
+- 🎵 Hitsound volume control with toggle (0-100%)
+- ⚡ Scroll speed adjustment (25-700, default 75)
+- 🌈 Fade effects toggle for performance
+- ⌨️ Keybind remapping for all gameplay keys (WASD)
+- 🖱️ Mouse button remapping (supports keyboard keys too)
+- 🔄 Reset keybinds to default
+- 🚫 Duplicate keybind prevention
+- 💾 Settings persist locally in toa_settings.json
+
+**Accessible From Multiple Locations**
+- In-game: Press ESC to pause and access settings
+- Level selector: Press ESC to open settings
+- Standalone settings menu
+
+### ⚡ Performance Optimizations
+
+- Image surface conversion for faster rendering
+- Gradient surface caching (reduces repeated calculations)
+- Optional fade effects toggle for lower-end systems
+- Optimized draw calls throughout the game
+
+### 🎨 UI/UX Improvements
+
+**New Confirmation System**
+- Overlay-style confirmation popups (no black screen)
+- "Quit to Menu" and "Quit Game" buttons with confirmations
+- Removed Resume button (settings are the new pause menu)
+
+**Mouse Cursor Enhancements**
+- Always visible during gameplay
+- Hand cursor on interactive elements
+- Arrow cursor on non-interactive areas
+
+### 🔧 Changes
+
+- **ESC Key**: Now opens settings/pause menu (no more double-tap exit)
+- **Keybinds**: Removed Space and Alt keys, streamlined to WASD only
+- **Mouse Bindings**: Can now map mouse buttons to keyboard keys
+- **Scroll Speed**: Fully adjustable from 25-700 (was fixed at 75)
+- **Settings Persistence**: All settings saved locally and restored on launch
+
+### 🐛 Bug Fixes
+
+- Scroll speed slider values now properly contained within bounds
+- Cursor states update correctly in settings window
+- Fade effects apply consistently to all transitions
+- Confirmation popups properly overlay screen content
+
+───────────────────────────────────────────────────────────────────
+
+**Download TOA-v0.4.0.exe** to experience the new settings system!
+
+**Note**: Your settings will be saved to `toa_settings.json` in the game directory.
+If you want to reset all settings, simply delete this file.
