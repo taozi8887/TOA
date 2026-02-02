@@ -1,6 +1,6 @@
 """
 Auto-updater module for TOA game
-Downloads updates from GitHub repository and rebuilds EXE on code changes
+Downloads updates from GitHub repository
 """
 
 import os
@@ -8,8 +8,6 @@ import json
 import hashlib
 import requests
 import time
-import subprocess
-import sys
 from typing import Optional, Tuple, List, Dict
 from pathlib import Path
 
@@ -33,6 +31,7 @@ class AutoUpdater:
         # Store local version.json in hidden folder, but fetch from root on GitHub
         self.local_version_file = os.path.join('.toa', 'version.json')
         self.remote_version_file = 'version.json'
+        self._lock_file = None  # File lock to prevent user access during operations
         
     def is_first_run(self) -> bool:
         """
@@ -168,19 +167,25 @@ class AutoUpdater:
             data_folder = '.toa'
             os.makedirs(data_folder, exist_ok=True)
             
-            # Set folder as hidden on Windows (DISABLED FOR DEBUGGING)
-            # try:
-            #     import ctypes
-            #     ctypes.windll.kernel32.SetFileAttributesW(data_folder, 0x02)  # FILE_ATTRIBUTE_HIDDEN
-            # except:
-            #     pass
+            # Set folder as hidden + system on Windows to prevent user access
+            if os.name == 'nt':  # Windows
+                import subprocess
+                import ctypes
+                # Set hidden + system attributes
+                subprocess.run(['attrib', '+H', '+S', data_folder], shell=True, capture_output=True)
+                # Also use Windows API for immediate effect
+                try:
+                    ctypes.windll.kernel32.SetFileAttributesW(data_folder, 0x02 | 0x04)  # HIDDEN | SYSTEM
+                except:
+                    pass
             
             total_files = len(files_to_download)
             failed_files = []
             
             for idx, file_path in enumerate(files_to_download):
                 if progress_callback:
-                    progress_callback(idx + 1, total_files, file_path)
+                    # Don't pass filename for security - user shouldn't see file operations
+                    progress_callback(idx + 1, total_files, None)
                 
                 # Download file - convert Windows paths to URL paths
                 url_path = file_path.replace('\\', '/')
@@ -204,19 +209,20 @@ class AutoUpdater:
                             with open(hidden_path, 'wb') as f:
                                 f.write(response.content)
                             
-                            print(f"Downloaded: {file_path}")
+                            # Don't print file names for security
                             success = True
                             break
                         else:
-                            print(f"Attempt {attempt+1}: Failed to download {file_path}: HTTP {response.status_code}")
+                            # Don't expose file names - silent failure, will retry
+                            pass
                     
                     except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
-                        print(f"Attempt {attempt+1}: Connection error for {file_path}: {e}")
+                        # Silent retry for security
                         if attempt < max_retries - 1:
                             time.sleep(2)  # Wait 2 seconds before retry
                     
                     except Exception as e:
-                        print(f"Attempt {attempt+1}: Error downloading {file_path}: {e}")
+                        # Silent retry for security
                         if attempt < max_retries - 1:
                             time.sleep(2)
                 
@@ -242,17 +248,13 @@ class AutoUpdater:
                             config_path = os.path.join(data_folder, config_file)
                             with open(config_path, 'wb') as f:
                                 f.write(response.content)
-                            print(f"Downloaded config: {config_file}")
+                            # Silent download for security
                     except:
                         pass  # Config files are optional
             
-            # Report any failed files
+            # Report any failed files (count only, no names)
             if failed_files:
-                print(f"\nWarning: {len(failed_files)} files failed to download:")
-                for f in failed_files[:10]:  # Show first 10
-                    print(f"  - {f}")
-                if len(failed_files) > 10:
-                    print(f"  ... and {len(failed_files) - 10} more")
+                print(f"\nWarning: {len(failed_files)} files failed to download")
                 # Return True if at least code files downloaded
                 return len(failed_files) < total_files * 0.5  # Succeed if >50% downloaded
             
@@ -307,64 +309,6 @@ class AutoUpdater:
             return sha256_hash.hexdigest()
         except:
             return ""
-    
-    def rebuild_exe(self) -> Tuple[bool, Optional[str]]:
-        """
-        Rebuild the executable using PyInstaller
-        This is called when code files have been updated
-        
-        Returns:
-            Tuple of (success: bool, new_exe_path: str or None)
-        """
-        print("\n[AUTO-UPDATE] Code updates detected - rebuilding EXE...")
-        
-        try:
-            # Import build_exe dynamically to avoid circular imports
-            from build_exe import build_exe as build_exe_func
-            
-            success, exe_path = build_exe_func(silent=True, update_mode=True)
-            
-            if success:
-                print(f"[AUTO-UPDATE] ✓ EXE rebuilt successfully: {exe_path}")
-                return (True, exe_path)
-            else:
-                print("[AUTO-UPDATE] ✗ EXE rebuild failed")
-                return (False, None)
-        
-        except ImportError:
-            print("[AUTO-UPDATE] ✗ Could not import build_exe module")
-            return (False, None)
-        except Exception as e:
-            print(f"[AUTO-UPDATE] ✗ Error rebuilding EXE: {e}")
-            return (False, None)
-    
-    def launch_new_exe(self, exe_path: str) -> bool:
-        """
-        Launch the newly built EXE and exit current process
-        
-        Args:
-            exe_path: Path to the new EXE to launch
-            
-        Returns:
-            True if launch successful, False otherwise
-        """
-        try:
-            print(f"[AUTO-UPDATE] Launching new EXE: {exe_path}")
-            
-            # Launch new exe
-            if sys.platform == 'win32':
-                # Use os.startfile on Windows (doesn't wait for process)
-                os.startfile(exe_path)
-            else:
-                # Use subprocess on other platforms
-                subprocess.Popen([exe_path])
-            
-            print("[AUTO-UPDATE] ✓ New EXE launched, exiting old version...")
-            return True
-        
-        except Exception as e:
-            print(f"[AUTO-UPDATE] ✗ Error launching new EXE: {e}")
-            return False
 
 
 def create_version_file(directories: List[str] = None, include_code: bool = True, output_file: str = "version.json"):

@@ -12,17 +12,22 @@ The game will automatically download all required files from GitHub:
 - Music and sound files  
 - Assets and images
 
+SECURITY & INTEGRITY:
+✓ All game files stored in hidden .toa folder (system protected)
+✓ File operations are invisible to users
+✓ Only progress bar and size shown during updates
+✓ Game files protected from user modification
+
 This first download may take 1-2 minutes.
 Make sure you have an internet connection!
 
-AUTO-UPDATE WITH EXE REBUILD:
+AUTO-UPDATE:
 Every time you launch the game:
-✓ Checks GitHub for code updates
-✓ If updates found, rebuilds the EXE automatically
-✓ Launches the new EXE
-✓ Old EXE automatically replaced
+✓ Automatically checks for updates
+✓ Downloads only new/changed files
+✓ No reinstallation needed!
 
-When you push updates to GitHub, users get them automatically!
+When you push updates to GitHub, users get them automatically.
 
 WHAT USERS SEE:
 TOA-v0.5.0.exe

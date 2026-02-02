@@ -53,11 +53,9 @@ def show_installer_window(updater, all_files, is_first_run=True):
     estimated_mb = total_files * 0.5  # Rough estimate
     
     downloaded = [0]  # Use list to allow modification in nested function
-    current_file = [""]
     
-    def progress_callback(current, total, filename):
+    def progress_callback(current, total, filename=None):
         downloaded[0] = current
-        current_file[0] = filename
         
         # Draw window
         screen.fill(WHITE)
@@ -93,13 +91,7 @@ def show_installer_window(updater, all_files, is_first_run=True):
         if fill_width > 0:
             pygame.draw.rect(screen, BLUE, (bar_x, bar_y, fill_width, bar_height), border_radius=15)
         
-        # Current file
-        file_display = filename if len(filename) <= 50 else "..." + filename[-47:]
-        file_text = font_small.render(file_display, True, BLACK)
-        file_rect = file_text.get_rect(center=(300, 280))
-        screen.blit(file_text, file_rect)
-        
-        # Status
+        # Status (no file names shown for security)
         status_text = font_small.render("Please wait...", True, GRAY)
         status_rect = status_text.get_rect(center=(300, 330))
         screen.blit(status_text, status_rect)
@@ -141,7 +133,7 @@ else:
     sys.path.insert(0, application_path)
 
 def check_and_update():
-    """Check for updates and download if available, rebuild EXE if code changed"""
+    """Check for updates and download if available"""
     try:
         from auto_updater import AutoUpdater
         import requests
@@ -176,11 +168,12 @@ def check_and_update():
             # Show GUI installer
             success = show_installer_window(updater, all_files, is_first_run=True)
             
-            # Hide .toa folder on Windows
+            # Hide .toa folder on Windows with system + hidden attributes
             if sys.platform == 'win32':
                 import subprocess
                 toa_path = os.path.join(application_path, '.toa')
-                subprocess.run(['attrib', '+H', toa_path], shell=True, capture_output=True)
+                # Set as hidden + system to make it truly inaccessible
+                subprocess.run(['attrib', '+H', '+S', toa_path], shell=True, capture_output=True)
             
             return False  # Don't restart - this was initial download, not an update
         
@@ -189,43 +182,8 @@ def check_and_update():
         has_updates, files_to_update = updater.check_for_updates(directories, include_code=True)
         
         if has_updates:
-            print(f"\n{'='*60}")
-            print(f"✓ Updates available!")
-            print(f"{'='*60}")
-            print(f"Files to update ({len(files_to_update)}):")
-            for f in files_to_update:
-                print(f"  - {f}")
-            
-            # Check if code files were updated
-            code_files = ['main.py', 'osu_to_level.py', 'unzip.py', 'auto_updater.py', 'batch_process_osz.py']
-            code_was_updated = any(f in files_to_update for f in code_files)
-            
-            if code_was_updated:
-                print(f"\n⚠ Code changes detected - EXE will be rebuilt!")
-            
-            print(f"{'='*60}\n")
-            
             # Show GUI for updates
             success = show_installer_window(updater, files_to_update, is_first_run=False)
-            
-            if success and code_was_updated:
-                print("\n[AUTO-UPDATE] Code files were updated!")
-                
-                # Rebuild EXE
-                success, new_exe_path = updater.rebuild_exe()
-                
-                if success and new_exe_path:
-                    print(f"[AUTO-UPDATE] New EXE built: {new_exe_path}")
-                    
-                    # Launch the new EXE and exit
-                    if updater.launch_new_exe(new_exe_path):
-                        print("[AUTO-UPDATE] Exiting old EXE...")
-                        sys.exit(0)  # Exit the old EXE process
-                    else:
-                        print("[AUTO-UPDATE] Failed to launch new EXE, continuing with old version...")
-                else:
-                    print("[AUTO-UPDATE] Failed to rebuild EXE, continuing with old version...")
-            
             return False  # Don't restart - just continue to load updated code
         else:
             return False
@@ -235,8 +193,6 @@ def check_and_update():
         return False
     except Exception as e:
         print(f"Error during update check: {e}")
-        import traceback
-        traceback.print_exc()
         return False
 
 def main():
@@ -287,8 +243,8 @@ def main():
                 spec.loader.exec_module(game_main)
                 print(f"Force-loaded main.py from: {os.path.abspath(toa_main_path)}")
             else:
-                print("ERROR: No main.py found in .toa folder!")
-                print("The auto-updater may not have downloaded the files correctly.")
+                print("ERROR: Game files not found!")
+                print("Please check your internet connection and restart the game.")
                 sys.exit(1)
         else:
             # When running as script, load from current directory
