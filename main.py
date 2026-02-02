@@ -401,94 +401,7 @@ def show_loading_screen():
             pygame.display.flip()
             clock.tick(60)
 
-    # Check for updates from GitHub
-    if AUTO_UPDATE_AVAILABLE:
-        # Load update configuration
-        update_config = {}
-        try:
-            with open(resource_path('update_config.json'), 'r') as f:
-                update_config = json.load(f).get('auto_update', {})
-        except Exception as e:
-            print(f"Could not load update config: {e}")
-            update_config = {
-                'enabled': False,
-                'github_username': 'YOUR_GITHUB_USERNAME',
-                'repository_name': 'YOUR_REPO_NAME',
-                'branch': 'main',
-                'update_on_startup': True,
-                'directories_to_sync': ['levels', 'beatmaps']
-            }
-        
-        if update_config.get('enabled', False) and update_config.get('update_on_startup', True):
-            updater = AutoUpdater(
-                update_config.get('github_username', 'YOUR_GITHUB_USERNAME'),
-                update_config.get('repository_name', 'YOUR_REPO_NAME'),
-                update_config.get('branch', 'main')
-            )
-            
-            screen.fill(BLACK)
-            title_text = font_title.render("TOA", True, WHITE)
-            title_rect = title_text.get_rect(center=(window_width // 2, window_height // 2 - 100))
-            screen.blit(title_text, title_rect)
-            
-            status_text = font_status.render("Checking for updates...", True, WHITE)
-            status_rect = status_text.get_rect(center=(window_width // 2, window_height // 2 + 50))
-            screen.blit(status_text, status_rect)
-            pygame.display.flip()
-            
-            try:
-                directories = update_config.get('directories_to_sync', ['levels', 'beatmaps'])
-                include_code = update_config.get('update_code', True)
-                print(f"DEBUG: Checking for updates (code={include_code}, dirs={directories})")
-                has_updates, files_to_update = updater.check_for_updates(directories, include_code=include_code)
-                print(f"DEBUG: has_updates={has_updates}, files={files_to_update}")
-            
-                if has_updates:
-                    print(f"Found {len(files_to_update)} files to update")
-                    
-                    # Download updates with progress bar
-                    def update_progress(current, total, filename):
-                        screen.fill(BLACK)
-                        title_text = font_title.render("TOA", True, WHITE)
-                        title_rect = title_text.get_rect(center=(window_width // 2, window_height // 2 - 100))
-                        screen.blit(title_text, title_rect)
-                        
-                        status_text = font_status.render(f"Downloading updates... {current}/{total}", True, WHITE)
-                        status_rect = status_text.get_rect(center=(window_width // 2, window_height // 2 + 50))
-                        screen.blit(status_text, status_rect)
-                        
-                        # Draw progress bar
-                        bar_width = 400
-                        bar_height = 20
-                        bar_x = window_width // 2 - bar_width // 2
-                        bar_y = window_height // 2 + 100
-                        
-                        progress = current / total
-                        pygame.draw.rect(screen, (50, 50, 50), (bar_x, bar_y, bar_width, bar_height), border_radius=10)
-                        filled_width = int(bar_width * progress)
-                        if filled_width > 0:
-                            pygame.draw.rect(screen, BLUE, (bar_x, bar_y, filled_width, bar_height), border_radius=10)
-                        
-                        # Show current file name (truncated if too long)
-                        file_text = font_status.render(filename[-40:] if len(filename) > 40 else filename, True, WHITE)
-                        file_rect = file_text.get_rect(center=(window_width // 2, window_height // 2 + 140))
-                        screen.blit(file_text, file_rect)
-                        
-                        pygame.display.flip()
-                        pygame.event.pump()  # Keep the window responsive
-                    
-                    success = updater.download_updates(files_to_update, progress_callback=update_progress)
-                    
-                    if success:
-                        print("Updates downloaded successfully!")
-                    else:
-                        print("Some updates failed to download")
-                else:
-                    print("No updates available")
-            
-            except Exception as e:
-                print(f"Update check failed: {e}")
-                # Continue loading even if update fails
+    # Launcher already handles updates, so skip redundant check in main.py
 
     # Get available level files
     levels_dir = "levels"
@@ -969,18 +882,6 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
         esc_text = font_hint.render("Press ESC for Settings", True, (200, 200, 200))
         esc_rect = esc_text.get_rect(center=(window_width // 2, window_height - 60))
         screen.blit(esc_text, esc_rect)
-        
-        # AUTO-UPDATE TEST MESSAGE - DRAWN ON TOP
-        test_font = pygame.font.Font(None, 84)
-        test_text = test_font.render("AUTO-UPDATE TEST v0.4.1", True, (255, 0, 0))
-        test_rect = test_text.get_rect(center=(window_width // 2, window_height // 2))
-        # Draw black outline
-        outline_offset = 3
-        for dx, dy in [(-outline_offset, -outline_offset), (-outline_offset, outline_offset), 
-                       (outline_offset, -outline_offset), (outline_offset, outline_offset)]:
-            outline_text = test_font.render("AUTO-UPDATE TEST v0.4.1", True, (0, 0, 0))
-            screen.blit(outline_text, test_rect.move(dx, dy))
-        screen.blit(test_text, test_rect)
 
         # Fade in on first frame
         if first_frame:
