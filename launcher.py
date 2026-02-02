@@ -50,6 +50,20 @@ def check_and_update():
             
             if success:
                 print("Updates downloaded successfully!")
+                print("Saving version.json...")
+                
+                # Ensure version.json is saved
+                try:
+                    remote_version = updater._get_remote_version()
+                    if remote_version:
+                        with open('version.json', 'w') as f:
+                            json.dump(remote_version, f, indent=2)
+                        print("version.json saved successfully!")
+                    else:
+                        print("Warning: Could not fetch remote version to save")
+                except Exception as e:
+                    print(f"Error saving version.json: {e}")
+                
                 # Check if any code files were updated
                 code_updated = any(f.endswith('.py') for f in files_to_update)
                 return code_updated
@@ -58,6 +72,25 @@ def check_and_update():
                 return False
         else:
             print("No updates available")
+            
+            # Still save version.json if it doesn't exist
+            if not os.path.exists('version.json'):
+                print("Creating local version.json...")
+                try:
+                    print(f"Fetching from: {updater.raw_url}/version.json")
+                    remote_version = updater._get_remote_version()
+                    if remote_version:
+                        print(f"Got remote version: {remote_version.get('version', 'unknown')}")
+                        with open('version.json', 'w') as f:
+                            json.dump(remote_version, f, indent=2)
+                        print("version.json created!")
+                    else:
+                        print("ERROR: Could not fetch remote version.json from GitHub")
+                except Exception as e:
+                    print(f"Error creating version.json: {e}")
+                    import traceback
+                    traceback.print_exc()
+            
             return False
     
     except ImportError:
