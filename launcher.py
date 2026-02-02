@@ -82,7 +82,7 @@ def check_and_update():
                 print("DOWNLOAD COMPLETE!")
                 print("Starting game...")
                 print("=" * 60)
-                return True  # Code was downloaded
+                return False  # Don't restart - this was initial download, not an update
             else:
                 print("ERROR: Failed to download game files")
                 return False
@@ -194,6 +194,9 @@ def main():
             # Execute the if __name__ == "__main__" block
             import multiprocessing
             multiprocessing.freeze_support()
+            
+            # Initialize levels/beatmaps from .osz files if needed
+            game_main.initialize_levels_from_osz()
             
             game_main.REGENERATE_LEVEL = False
             
