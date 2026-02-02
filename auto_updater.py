@@ -280,15 +280,46 @@ class AutoUpdater:
         
         return {"version": "0.0.0", "files": {}}
     
-    def _update_local_version(self):
-        """Update local version file after successful download"""
+    def _update_local_version(self, successfully_downloaded_files=None):
+        """Update local version file with hashes of files that actually exist locally"""
         try:
             remote_version = self._get_remote_version()
-            if remote_version:
-                # Ensure .toa directory exists
-                os.makedirs(os.path.dirname(self.local_version_file), exist_ok=True)
-                with open(self.local_version_file, 'w') as f:
-                    json.dump(remote_version, f, indent=2)
+            if not remote_version:
+                return
+                
+            # Start with empty local version
+            local_version = {"version": remote_version.get("version", "0.0.0"), "files": {}}
+            
+            # Only include hashes for files that actually exist locally
+            data_folder = '.toa'
+            
+            for category, files in remote_version.get('files', {}).items():
+                local_version['files'][category] = {}
+                
+                for file_path, remote_hash in files.items():
+                    if category == 'code':
+                        # Code files are in .toa root
+                        local_file_path = os.path.join(data_folder, file_path)
+                    else:
+                        # Asset files are in .toa/category/
+                        local_file_path = os.path.join(data_folder, category, file_path)
+                    
+                    # Only include hash if file actually exists locally
+                    if os.path.exists(local_file_path):
+                        # Verify the hash matches what we expect
+                        actual_hash = self._calculate_file_hash(local_file_path)
+                        if actual_hash == remote_hash:
+                            local_version['files'][category][file_path] = remote_hash
+                        else:
+                            print(f"Hash mismatch for {file_path}: expected {remote_hash}, got {actual_hash}")
+                    else:
+                        print(f"File not found locally: {local_file_path}")
+            
+            # Write the updated local version
+            os.makedirs(os.path.dirname(self.local_version_file), exist_ok=True)
+            with open(self.local_version_file, 'w') as f:
+                json.dump(local_version, f, indent=2)
+                
         except Exception as e:
             print(f"Error updating local version: {e}")
     
