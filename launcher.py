@@ -120,10 +120,21 @@ def main():
         python = sys.executable
         os.execl(python, python, *sys.argv)
     
+    # CRITICAL: Remove any cached/bundled modules before importing
+    # This ensures we load the downloaded files, not bundled ones
+    modules_to_reload = ['main', 'osu_to_level', 'unzip', 'auto_updater', 'batch_process_osz']
+    for module in modules_to_reload:
+        if module in sys.modules:
+            del sys.modules[module]
+    
     # Import and run the game
     print("Starting TOA...")
+    print(f"Working directory: {os.getcwd()}")
+    print(f"Loading main.py from: {os.path.abspath('main.py')}")
+    
     try:
         import main as game_main
+        print(f"Loaded main.py version: {game_main.__version__}")
         
         # Run the game's main entry point
         if hasattr(game_main, '__name__'):
