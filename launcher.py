@@ -29,7 +29,15 @@ else:
 
 # Change to application directory and add to path FIRST
 os.chdir(application_path)
-sys.path.insert(0, application_path)
+
+# When running as exe, prioritize .toa folder for module imports
+if getattr(sys, 'frozen', False):
+    toa_path = os.path.join(application_path, '.toa')
+    if os.path.exists(toa_path):
+        sys.path.insert(0, toa_path)  # .toa folder has highest priority
+    sys.path.insert(0, application_path)
+else:
+    sys.path.insert(0, application_path)
 
 def check_and_update():
     """Check for updates and download if available"""
