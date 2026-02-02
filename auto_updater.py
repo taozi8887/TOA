@@ -28,8 +28,9 @@ class AutoUpdater:
         self.branch = branch
         self.base_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}"
         self.raw_url = f"https://raw.githubusercontent.com/{repo_owner}/{repo_name}/{branch}"
-        # Store version.json in hidden folder
-        self.version_file = os.path.join('.toa', 'version.json')
+        # Store local version.json in hidden folder, but fetch from root on GitHub
+        self.local_version_file = os.path.join('.toa', 'version.json')
+        self.remote_version_file = 'version.json'
         
     def is_first_run(self) -> bool:
         """
@@ -255,7 +256,7 @@ class AutoUpdater:
     def _get_remote_version(self) -> Optional[Dict]:
         """Get version info from remote repository"""
         try:
-            url = f"{self.raw_url}/{self.version_file}"
+            url = f"{self.raw_url}/{self.remote_version_file}"
             response = requests.get(url, timeout=10)
             
             if response.status_code == 200:
@@ -264,13 +265,14 @@ class AutoUpdater:
         
         except Exception as e:
             print(f"Error fetching remote version: {e}")
+            print(f"URL attempted: {url}")
             return None
     
     def _get_local_version(self) -> Dict:
         """Get local version info"""
         try:
-            if os.path.exists(self.version_file):
-                with open(self.version_file, 'r') as f:
+            if os.path.exists(self.local_version_file):
+                with open(self.local_version_file, 'r') as f:
                     return json.load(f)
         except Exception as e:
             print(f"Error reading local version: {e}")
@@ -282,7 +284,9 @@ class AutoUpdater:
         try:
             remote_version = self._get_remote_version()
             if remote_version:
-                with open(self.version_file, 'w') as f:
+                # Ensure .toa directory exists
+                os.makedirs(os.path.dirname(self.local_version_file), exist_ok=True)
+                with open(self.local_version_file, 'w') as f:
                     json.dump(remote_version, f, indent=2)
         except Exception as e:
             print(f"Error updating local version: {e}")
