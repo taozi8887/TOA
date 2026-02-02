@@ -145,8 +145,9 @@ class AutoUpdater:
                 if progress_callback:
                     progress_callback(idx + 1, total_files, file_path)
                 
-                # Download file
-                url = f"{self.raw_url}/{file_path}"
+                # Download file - convert Windows paths to URL paths
+                url_path = file_path.replace('\\', '/')
+                url = f"{self.raw_url}/{url_path}"
                 response = requests.get(url, timeout=30)
                 
                 if response.status_code == 200:

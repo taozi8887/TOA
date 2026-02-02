@@ -12,6 +12,14 @@ import json
 if getattr(sys, 'frozen', False):
     # Running as compiled exe - use the directory where exe is located
     application_path = os.path.dirname(sys.executable)
+    
+    # Extract bundled config file if it doesn't exist
+    if not os.path.exists(os.path.join(application_path, 'update_config.json')):
+        import shutil
+        bundled_config = os.path.join(sys._MEIPASS, 'update_config.json')
+        if os.path.exists(bundled_config):
+            shutil.copy2(bundled_config, os.path.join(application_path, 'update_config.json'))
+            print("Extracted update_config.json")
 else:
     # Running as script - use script directory
     application_path = os.path.dirname(os.path.abspath(__file__))
