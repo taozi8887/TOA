@@ -10,8 +10,22 @@ from datetime import datetime
 from pathlib import Path
 
 def calculate_file_hash(file_path: str) -> str:
-    """Calculate SHA256 hash of a file"""
+    """Calculate SHA256 hash of a file, normalizing line endings for text files"""
     sha256_hash = hashlib.sha256()
+    
+    # For Python files, normalize line endings to LF (GitHub style)
+    if file_path.endswith('.py'):
+        try:
+            with open(file_path, 'r', encoding='utf-8', newline='') as f:
+                content = f.read()
+                # Normalize to LF
+                content = content.replace('\r\n', '\n')
+                sha256_hash.update(content.encode('utf-8'))
+                return sha256_hash.hexdigest()
+        except:
+            pass  # Fall through to binary mode
+    
+    # For binary files and fallback
     with open(file_path, "rb") as f:
         for byte_block in iter(lambda: f.read(4096), b""):
             sha256_hash.update(byte_block)

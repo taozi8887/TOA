@@ -394,23 +394,37 @@ class AutoUpdater:
                 Path(local_path).parent.mkdir(parents=True, exist_ok=True)
                 temp_path = local_path + '.tmp'
                 
-                sha256_hash = hashlib.sha256()
+                # For Python files, we need to handle them specially
+                is_python_file = file_path.endswith('.py')
+                sha256_hash = hashlib.sha256() if not is_python_file else None
                 
                 with open(temp_path, 'wb') as f:
                     for chunk in response.iter_content(chunk_size=self.chunk_size):
                         if chunk:
                             f.write(chunk)
-                            sha256_hash.update(chunk)
+                            if not is_python_file:
+                                sha256_hash.update(chunk)
                             downloaded += len(chunk)
                             if progress_callback:
                                 progress_callback(downloaded, total_size)
                 
                 # Verify hash if provided
                 if expected_hash:
-                    actual_hash = sha256_hash.hexdigest()
+                    if is_python_file:
+                        # For Python files, normalize line endings before hashing
+                        try:
+                            with open(temp_path, 'r', encoding='utf-8', newline='') as f:
+                                content = f.read()
+                                content = content.replace('\r\n', '\n')
+                                actual_hash = hashlib.sha256(content.encode('utf-8')).hexdigest()
+                        except:
+                            # Fallback to binary hash
+                            actual_hash = self._calculate_file_hash(temp_path)
+                    else:
+                        actual_hash = sha256_hash.hexdigest()
+                    
                     if actual_hash != expected_hash:
                         os.remove(temp_path)
-                        print(f"Hash mismatch for {file_path}")
                         time.sleep(2)
                         continue
                 
