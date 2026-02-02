@@ -175,6 +175,13 @@ def check_and_update():
             
             # Show GUI installer
             success = show_installer_window(updater, all_files, is_first_run=True)
+            
+            # Hide .toa folder on Windows
+            if sys.platform == 'win32':
+                import subprocess
+                toa_path = os.path.join(application_path, '.toa')
+                subprocess.run(['attrib', '+H', toa_path], shell=True, capture_output=True)
+            
             return False  # Don't restart - this was initial download, not an update
         
         # Normal update check
