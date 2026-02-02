@@ -30,6 +30,107 @@ else:
 # Change to application directory and add to path FIRST
 os.chdir(application_path)
 
+def show_installer_window(updater, all_files, is_first_run=True):
+    """Show GUI installer window with download progress"""
+    import pygame
+    
+    pygame.init()
+    screen = pygame.display.set_mode((600, 400))
+    pygame.display.set_caption("TOA Installer")
+    clock = pygame.time.Clock()
+    
+    font_large = pygame.font.Font(None, 48)
+    font_medium = pygame.font.Font(None, 32)
+    font_small = pygame.font.Font(None, 24)
+    
+    WHITE = (255, 255, 255)
+    BLACK = (0, 0, 0)
+    BLUE = (100, 150, 255)
+    GRAY = (200, 200, 200)
+    
+    # Calculate total size (rough estimate)
+    total_files = len(all_files)
+    estimated_mb = total_files * 0.5  # Rough estimate
+    
+    downloaded = [0]  # Use list to allow modification in nested function
+    current_file = [""]
+    
+    def progress_callback(current, total, filename):
+        downloaded[0] = current
+        current_file[0] = filename
+        
+        # Draw window
+        screen.fill(WHITE)
+        
+        # Title
+        title = "Installing TOA..." if is_first_run else "Updating TOA..."
+        title_text = font_large.render(title, True, BLACK)
+        title_rect = title_text.get_rect(center=(300, 60))
+        screen.blit(title_text, title_rect)
+        
+        # Progress text
+        progress_text = font_medium.render(f"{current}/{total} files", True, BLACK)
+        progress_rect = progress_text.get_rect(center=(300, 140))
+        screen.blit(progress_text, progress_rect)
+        
+        # Size estimate
+        downloaded_mb = (current / total) * estimated_mb
+        size_text = font_small.render(f"{downloaded_mb:.1f} / {estimated_mb:.1f} MB", True, GRAY)
+        size_rect = size_text.get_rect(center=(300, 180))
+        screen.blit(size_text, size_rect)
+        
+        # Progress bar
+        bar_width = 500
+        bar_height = 30
+        bar_x = 50
+        bar_y = 220
+        
+        # Background
+        pygame.draw.rect(screen, GRAY, (bar_x, bar_y, bar_width, bar_height), border_radius=15)
+        
+        # Fill
+        fill_width = int((current / total) * bar_width)
+        if fill_width > 0:
+            pygame.draw.rect(screen, BLUE, (bar_x, bar_y, fill_width, bar_height), border_radius=15)
+        
+        # Current file
+        file_display = filename if len(filename) <= 50 else "..." + filename[-47:]
+        file_text = font_small.render(file_display, True, BLACK)
+        file_rect = file_text.get_rect(center=(300, 280))
+        screen.blit(file_text, file_rect)
+        
+        # Status
+        status_text = font_small.render("Please wait...", True, GRAY)
+        status_rect = status_text.get_rect(center=(300, 330))
+        screen.blit(status_text, status_rect)
+        
+        pygame.display.flip()
+        pygame.event.pump()  # Keep window responsive
+        clock.tick(60)
+    
+    # Start download
+    success = updater.download_updates(all_files, progress_callback=progress_callback, is_initial_download=is_first_run)
+    
+    if success:
+        # Show completion message
+        screen.fill(WHITE)
+        complete_text = font_large.render("Complete!", True, BLUE)
+        complete_rect = complete_text.get_rect(center=(300, 180))
+        screen.blit(complete_text, complete_rect)
+        
+        status_text = font_medium.render("Starting game...", True, BLACK)
+        status_rect = status_text.get_rect(center=(300, 240))
+        screen.blit(status_text, status_rect)
+        
+        pygame.display.flip()
+        pygame.time.wait(1000)
+    
+    pygame.quit()
+    return success
+
+# Change to application directory and add to path FIRST
+os.chdir(application_path)
+
 # When running as exe, prioritize .toa folder for module imports
 if getattr(sys, 'frozen', False):
     toa_path = os.path.join(application_path, '.toa')
@@ -66,63 +167,25 @@ def check_and_update():
         
         # Check if this is first run (no files downloaded yet)
         if updater.is_first_run():
-            print("=" * 60)
-            print("FIRST RUN DETECTED")
-            print("Downloading all game files from GitHub...")
-            print("This may take a few minutes...")
-            print("=" * 60)
-            
             # Get all files from remote
             all_files = updater.get_all_remote_files()
             
             if not all_files:
-                print("ERROR: Could not retrieve file list from GitHub")
-                print("Please check your internet connection")
                 return False
             
-            print(f"Downloading {len(all_files)} files...")
-            
-            # Define progress callback
-            def progress(current, total, filename):
-                print(f"[{current}/{total}] {filename}")
-            
-            # Download all files
-            success = updater.download_updates(all_files, progress_callback=progress, is_initial_download=True)
-            
-            if success:
-                print("=" * 60)
-                print("DOWNLOAD COMPLETE!")
-                print("Starting game...")
-                print("=" * 60)
-                return False  # Don't restart - this was initial download, not an update
-            else:
-                print("ERROR: Failed to download game files")
-                return False
+            # Show GUI installer
+            success = show_installer_window(updater, all_files, is_first_run=True)
+            return False  # Don't restart - this was initial download, not an update
         
         # Normal update check
-        print("Checking for updates...")
-        
-        # Check for updates (including code)
         directories = config.get('directories_to_sync', ['levels', 'beatmaps'])
         has_updates, files_to_update = updater.check_for_updates(directories, include_code=True)
         
         if has_updates:
-            print(f"Found {len(files_to_update)} files to update")
-            print("Downloading updates...")
-            
-            # Download updates
-            success = updater.download_updates(files_to_update)
-            
-            if success:
-                print("Updates downloaded successfully!")
-                
-                # Don't restart for normal updates - just continue to load the updated code
-                return False
-            else:
-                print("Some updates failed to download")
-                return False
+            # Show GUI for updates
+            success = show_installer_window(updater, files_to_update, is_first_run=False)
+            return False  # Don't restart - just continue to load updated code
         else:
-            print("No updates available")
             return False
     
     except ImportError:
