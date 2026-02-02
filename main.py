@@ -972,7 +972,7 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
         
         # AUTO-UPDATE TEST MESSAGE - DRAWN ON TOP
         test_font = pygame.font.Font(None, 84)
-        test_text = test_font.render("AUTO-UPDATE TEST v0.4.1", True, (0, 0, 255))
+        test_text = test_font.render("AUTO-UPDATE TEST v0.4.1", True, (255, 0, 0))
         test_rect = test_text.get_rect(center=(window_width // 2, window_height // 2))
         # Draw black outline
         outline_offset = 3
