@@ -70,6 +70,7 @@ desktop.ini
 separated/
 deprecatedlevels/
 *.mp3
+assets/oldosz/
 
 # Beatmaps and levels are generated from .osz files, don't commit them
 beatmaps/
