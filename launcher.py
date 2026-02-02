@@ -8,8 +8,17 @@ import sys
 import subprocess
 import json
 
-# Add the current directory to path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Determine the actual directory where the exe/script is running from
+if getattr(sys, 'frozen', False):
+    # Running as compiled exe - use the directory where exe is located
+    application_path = os.path.dirname(sys.executable)
+else:
+    # Running as script - use script directory
+    application_path = os.path.dirname(os.path.abspath(__file__))
+
+# Change to application directory and add to path FIRST
+os.chdir(application_path)
+sys.path.insert(0, application_path)
 
 def check_and_update():
     """Check for updates and download if available"""
