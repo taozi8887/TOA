@@ -105,35 +105,45 @@ class AutoUpdater:
             directories = ['levels', 'beatmaps']
         
         try:
-            # Download and replace version.json first
+            # Get current local version first
+            local_version = self._get_local_version()
+            
+            # Download remote version.json
             version_url = f"{self.raw_url}/version.json"
             response = requests.get(version_url, timeout=10)
             response.raise_for_status()
-            
-            # Create .toa directory if it doesn't exist
-            os.makedirs('.toa', exist_ok=True)
-            
-            # Save new version.json to .toa folder
-            with open(self.local_version_file, 'w') as f:
-                f.write(response.text)
-            
-            # Parse the new version file to get all files that should exist
             remote_version = json.loads(response.text)
             
-            # Get all files from remote version
-            all_files = []
+            # Compare versions and find changed files
+            changed_files = []
             
-            # Add asset files
+            # Check asset files
             if 'assets' in remote_version.get('files', {}):
-                for file_path in remote_version['files']['assets']:
-                    all_files.append(f"assets/{file_path}")
+                remote_assets = remote_version['files']['assets']
+                local_assets = local_version.get('files', {}).get('assets', {})
+                
+                for file_path, remote_hash in remote_assets.items():
+                    local_hash = local_assets.get(file_path, "")
+                    if remote_hash != local_hash:
+                        changed_files.append(f"assets/{file_path}")
             
-            # Add code files if requested
+            # Check code files if requested
             if include_code and 'code' in remote_version.get('files', {}):
-                for file_path in remote_version['files']['code']:
-                    all_files.append(file_path)
+                remote_code = remote_version['files']['code']
+                local_code = local_version.get('files', {}).get('code', {})
+                
+                for file_path, remote_hash in remote_code.items():
+                    local_hash = local_code.get(file_path, "")
+                    if remote_hash != local_hash:
+                        changed_files.append(file_path)
             
-            return len(all_files) > 0, all_files
+            # If there are changes, update local version.json
+            if changed_files:
+                os.makedirs('.toa', exist_ok=True)
+                with open(self.local_version_file, 'w') as f:
+                    f.write(response.text)
+            
+            return len(changed_files) > 0, changed_files
         
         except Exception as e:
             print(f"Error checking for updates: {e}")
