@@ -46,29 +46,37 @@ class AutoUpdater:
     def get_all_remote_files(self) -> List[str]:
         """
         Get list of all files from remote version.json
+        Prioritizes Python code files, then assets, then levels/beatmaps
         
         Returns:
-            List of all file paths that need to be downloaded
+            List of all file paths that need to be downloaded (prioritized order)
         """
         try:
             remote_version = self._get_remote_version()
             if not remote_version:
                 return []
             
-            all_files = []
+            code_files = []
+            asset_files = []
+            content_files = []
             files_dict = remote_version.get('files', {})
             
-            # Add data directory files (levels, beatmaps, etc.)
+            # Separate files by priority: code > assets > content (levels/beatmaps)
             for directory, files in files_dict.items():
                 if directory == 'code':
-                    # Code files are at root level
-                    all_files.extend(files.keys())
-                else:
-                    # Data files are in subdirectories
+                    # Code files are at root level - highest priority
+                    code_files.extend(files.keys())
+                elif directory == 'assets':
+                    # Assets are second priority
                     for file_name in files.keys():
-                        all_files.append(os.path.join(directory, file_name))
+                        asset_files.append(os.path.join(directory, file_name))
+                else:
+                    # Content files (levels, beatmaps) are last
+                    for file_name in files.keys():
+                        content_files.append(os.path.join(directory, file_name))
             
-            return all_files
+            # Return in priority order: code first, then assets, then content
+            return code_files + asset_files + content_files
         
         except Exception as e:
             print(f"Error getting remote files: {e}")
