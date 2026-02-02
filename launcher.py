@@ -159,14 +159,19 @@ def main():
         if module in sys.modules:
             del sys.modules[module]
     
+    # Clear importlib caches to ensure fresh imports
+    import importlib
+    importlib.invalidate_caches()
+    
     # Import and run the game
     print("Starting TOA...")
     print(f"Working directory: {os.getcwd()}")
-    print(f"Loading main.py from: {os.path.abspath('main.py')}")
+    print(f"Python path: {sys.path[:3]}")  # Show first 3 paths
     
     try:
         import main as game_main
         print(f"Loaded main.py version: {game_main.__version__}")
+        print(f"main.py loaded from: {game_main.__file__}")  # Show actual file path
         
         # Run the game's main entry point
         if hasattr(game_main, '__name__'):
