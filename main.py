@@ -366,7 +366,7 @@ def show_loading_screen():
         pygame.display.set_icon(icon_surface)
     except Exception as e:
         print(f"Warning: Could not set window icon: {e}")
-    pygame.display.set_caption(f"TOA v{__version__} - Loading")
+    pygame.display.set_caption(f"TOA - Loading")
     pygame.mouse.set_visible(True)
     window_width, window_height = screen.get_size()
     clock = pygame.time.Clock()
@@ -577,7 +577,7 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
 
     # Window setup - fullscreen borderless
     screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
-    pygame.display.set_caption(f"TOA v{__version__} - Select Level")
+    pygame.display.set_caption(f"TOA - Select Level")
     pygame.mouse.set_visible(True)  # Show mouse in level selector
     window_width, window_height = screen.get_size()
     clock = pygame.time.Clock()
@@ -1020,7 +1020,7 @@ def show_settings_menu(from_game=False, from_selector=False):
         'RESUME' to resume game, 'QUIT' to quit, or None
     """
     screen = pygame.display.get_surface()
-    pygame.display.set_caption(f"TOA v{__version__} - Settings")
+    pygame.display.set_caption(f"TOA - Settings")
     pygame.mouse.set_visible(True)
     window_width, window_height = screen.get_size()
     clock = pygame.time.Clock()
@@ -1459,7 +1459,7 @@ def show_settings_menu(from_game=False, from_selector=False):
 def show_autoplay_popup():
     """Show popup window to ask about autoplay"""
     screen = pygame.display.get_surface()
-    pygame.display.set_caption(f"TOA v{__version__} - Setup")
+    pygame.display.set_caption(f"TOA - Setup")
     pygame.mouse.set_visible(True)
     window_width, window_height = screen.get_size()
     clock = pygame.time.Clock()
@@ -1548,7 +1548,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         return 'RESTART'
 
     screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
-    pygame.display.set_caption(f"TOA v{__version__}")
+    pygame.display.set_caption(f"TOA")
     pygame.mouse.set_visible(True)
 
     pygame.event.pump()
