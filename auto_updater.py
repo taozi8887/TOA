@@ -346,7 +346,7 @@ def create_version_file(directories: List[str] = None, include_code: bool = True
             
             for root, dirs, files in os.walk(directory):
                 for file in files:
-                    if file.endswith(('.json', '.osu', '.mp3', '.wav', '.ogg', '.jpg', '.png')):
+                    if file.endswith(('.json', '.osu', '.mp3', '.wav', '.ogg', '.jpg', '.png', '.osz')):
                         file_path = os.path.join(root, file)
                         relative_path = os.path.relpath(file_path, directory)
                         
