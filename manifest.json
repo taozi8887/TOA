@@ -91,8 +91,8 @@
     },
     "code": {
       "main.py": {
-        "hash": "3a7ccce773b4884641bee21c4d0fa1ef4b22449e6771d541638f3aca09c16294",
-        "size": 106382
+        "hash": "dbb13d18fc53fc0000395b3255eaabf6b30466b27c8549bdd396eb29e3e9492e",
+        "size": 106380
       },
       "osu_to_level.py": {
         "hash": "8047e2151219faaf2f5829438bfa010cca4a9a1f0e3d1d03d37c32ecf987fd57",
@@ -120,33 +120,7 @@
     "from_0.5.0": {
       "description": "Patch from 0.5.0 to 0.5.0",
       "changed_files": [
-        "assets/box.jpg",
-        "assets/boxblue.jpg",
-        "assets/boxred.jpg",
-        "assets/dot.jpg",
-        "assets/dot2.jpg",
-        "assets/icon.png",
-        "assets/icon_black.png",
-        "assets/icon_white.png",
-        "assets/osz/allthethingsshesaid.osz",
-        "assets/osz/drumgodum.osz",
-        "assets/osz/giants.osz",
-        "assets/osz/gods.osz",
-        "assets/osz/misfittoys.osz",
-        "assets/osz/more.osz",
-        "assets/osz/popstars.osz",
-        "assets/osz/rise.osz",
-        "assets/osz/starwalkin.osz",
-        "assets/osz/takeover.osz",
-        "assets/osz/thebaddest.osz",
-        "assets/osz/villain.osz",
-        "assets/osz/warriors.osz",
-        "main.py",
-        "osu_to_level.py",
-        "unzip.py",
-        "auto_updater.py",
-        "batch_process_osz.py",
-        "launcher.py"
+        "main.py"
       ],
       "removed_files": []
     }
