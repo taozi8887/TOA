@@ -106,9 +106,16 @@ def initialize_levels_from_osz():
     
     # Check if levels and beatmaps exist and have content
     needs_init = False
-    if not os.path.exists(levels_dir) or not os.listdir(levels_dir):
+    try:
+        if not os.path.exists(levels_dir) or not os.listdir(levels_dir):
+            needs_init = True
+    except:
         needs_init = True
-    if not os.path.exists(beatmaps_dir) or not os.listdir(beatmaps_dir):
+    
+    try:
+        if not os.path.exists(beatmaps_dir) or not os.listdir(beatmaps_dir):
+            needs_init = True
+    except:
         needs_init = True
     
     if not needs_init:
@@ -488,15 +495,19 @@ def show_loading_screen():
     level_files = []
     try:
         levels_path = resource_path(levels_dir)
-        level_files = [f for f in os.listdir(levels_path) if f.endswith('.json')]
-        level_files.sort()
+        if os.path.exists(levels_path):
+            level_files = [f for f in os.listdir(levels_path) if f.endswith('.json')]
+            level_files.sort()
     except Exception as e:
         print(f"Error: Could not read levels directory: {levels_dir}")
         print(f"Full error: {e}")
+        print(f"Tried path: {resource_path(levels_dir)}")
         return None
 
     if not level_files:
         print("Error: No level files found!")
+        print(f"Checked directory: {resource_path(levels_dir)}")
+        print("Make sure .osz files are in assets/osz/ directory")
         return None
 
     # Load metadata and background images for each level with progress bar
