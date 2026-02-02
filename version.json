@@ -25,11 +25,13 @@
       "osz/warriors.osz": "acbe4d220dfaf490fcb2ad5ca075e9c814667dea58fe90b97e4cd5e83bd07bd2"
     },
     "code": {
-      "main.py": "4a969ed9d1b6ddb817aaa295417071d999209c4b0d1a736759259af47138c1e5",
+      "main.py": "05f1a5303bf43ab2126905e876ff6aa715626982262443f54867adeb67cacbb3",
       "osu_to_level.py": "a93d4370e3ea9d6d0f49c79e3b4d5c8bc347574500464d2680185d4695645d00",
       "unzip.py": "5ad3dc665f5f2000c269d3912586558be08bed2ba12459ae4106dd47c339e609",
-      "auto_updater.py": "6882cc3f4b100d52061ab9f32ef67e607676f118403220fdb2637a563ba22ef3",
-      "batch_process_osz.py": "ea91cd87e57ddfa1d9481b450e15a55658f8942203e89637e41760f02caf373d"
+      "auto_updater.py": "3222fd2536ccf4a9598852f779a3db3267e27ac21fdf288511fb22dba785c694",
+      "batch_process_osz.py": "ea91cd87e57ddfa1d9481b450e15a55658f8942203e89637e41760f02caf373d",
+      "build_exe.py": "287e6e9efe4d1151a422690c713cbfb046ec717321a5abb13664ab3c2d8650b1",
+      "launcher.py": "ce6d72c948da57af98af71b698bdeb8b3dbaab9ef52358d11d376464df5d23be"
     }
   }
 }
