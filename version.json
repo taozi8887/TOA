@@ -318,6 +318,13 @@
       "warriors\\soft-hitclap.wav": "576758b3ecf10265355c3ac9b69b5249fadf3f384dd44462644002d45f95b9e4",
       "warriors\\soft-hitnormal.wav": "f74de86ef680c111d912f8fba8902e5ac10a39571845f304329551d3bbd8c44c",
       "warriors\\ssw.jpg": "74204a2898c50995fc3cd47c06e530d1c90f70e05257198738c3829f4218d51d"
+    },
+    "code": {
+      "main.py": "6a4696415240f43660d02be5ab998617b035a44d6a9b2cd77d8da5f93b8a0b25",
+      "osu_to_level.py": "8047e2151219faaf2f5829438bfa010cca4a9a1f0e3d1d03d37c32ecf987fd57",
+      "unzip.py": "e2cc6f3cadaf217e736cbfd4a4e765f1d3a12c0994bb2aab88caf643c581299f",
+      "auto_updater.py": "59195c89f1f0474481bd5a71aec8187aa5f603d90484e97f66cfe221c5c13b27",
+      "batch_process_osz.py": "c93dffea3e0cbb03c8bd164c89511141686e07e1e4ac5380128751cd229c1cb7"
     }
   }
 }

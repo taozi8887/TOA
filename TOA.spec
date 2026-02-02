@@ -2,11 +2,11 @@
 
 
 a = Analysis(
-    ['main.py', 'unzip.py', 'osu_to_level.py'],
+    ['launcher.py'],
     pathex=[],
     binaries=[],
-    datas=[('assets', 'assets'), ('levels', 'levels'), ('beatmaps', 'beatmaps')],
-    hiddenimports=[],
+    datas=[('assets', 'assets'), ('levels', 'levels'), ('beatmaps', 'beatmaps'), ('update_config.json', '.'), ('main.py', '.'), ('osu_to_level.py', '.'), ('unzip.py', '.'), ('auto_updater.py', '.')],
+    hiddenimports=['requests', 'main', 'osu_to_level', 'unzip', 'auto_updater'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

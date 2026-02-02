@@ -5,10 +5,11 @@
     "repository_name": "TOA",
     "branch": "main",
     "update_on_startup": true,
+    "update_code": true,
     "directories_to_sync": [
       "levels",
       "beatmaps"
     ]
   },
-  "comment": "Configure auto-update settings here. Change 'enabled' to false to disable auto-updates."
+  "comment": "Configure auto-update settings here. Change 'enabled' to false to disable auto-updates. Set 'update_code' to true to auto-update game code."
 }
