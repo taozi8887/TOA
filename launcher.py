@@ -13,12 +13,15 @@ if getattr(sys, 'frozen', False):
     # Running as compiled exe - use the directory where exe is located
     application_path = os.path.dirname(sys.executable)
     
-    # Extract bundled config file if it doesn't exist
-    if not os.path.exists(os.path.join(application_path, 'update_config.json')):
+    # Extract bundled config file to .toa folder if it doesn't exist
+    toa_folder = os.path.join(application_path, '.toa')
+    config_path = os.path.join(toa_folder, 'update_config.json')
+    if not os.path.exists(config_path):
+        os.makedirs(toa_folder, exist_ok=True)
         import shutil
         bundled_config = os.path.join(sys._MEIPASS, 'update_config.json')
         if os.path.exists(bundled_config):
-            shutil.copy2(bundled_config, os.path.join(application_path, 'update_config.json'))
+            shutil.copy2(bundled_config, config_path)
             print("Extracted update_config.json")
 else:
     # Running as script - use script directory
@@ -36,7 +39,8 @@ def check_and_update():
         
         # Load configuration
         try:
-            with open('update_config.json', 'r') as f:
+            config_path = os.path.join('.toa', 'update_config.json') if getattr(sys, 'frozen', False) else 'update_config.json'
+            with open(config_path, 'r') as f:
                 config = json.load(f).get('auto_update', {})
         except:
             print("Could not load update config, skipping auto-update")
@@ -117,33 +121,13 @@ def check_and_update():
                 except Exception as e:
                     print(f"Error saving version.json: {e}")
                 
-                # Check if any code files were updated
-                code_updated = any(f.endswith('.py') for f in files_to_update)
-                return code_updated
+                # Don't restart for normal updates - just continue to load the updated code
+                return False
             else:
                 print("Some updates failed to download")
                 return False
         else:
             print("No updates available")
-            
-            # Still save version.json if it doesn't exist
-            if not os.path.exists('version.json'):
-                print("Creating local version.json...")
-                try:
-                    print(f"Fetching from: {updater.raw_url}/version.json")
-                    remote_version = updater._get_remote_version()
-                    if remote_version:
-                        print(f"Got remote version: {remote_version.get('version', 'unknown')}")
-                        with open('version.json', 'w') as f:
-                            json.dump(remote_version, f, indent=2)
-                        print("version.json created!")
-                    else:
-                        print("ERROR: Could not fetch remote version.json from GitHub")
-                except Exception as e:
-                    print(f"Error creating version.json: {e}")
-                    import traceback
-                    traceback.print_exc()
-            
             return False
     
     except ImportError:
