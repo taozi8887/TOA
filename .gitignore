@@ -69,7 +69,6 @@ desktop.ini
 # Game specific
 separated/
 deprecatedlevels/
-*.osz
 *.mp3
 
 # Beatmaps and levels are generated from .osz files, don't commit them

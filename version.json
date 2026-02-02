@@ -10,15 +10,6 @@
       "icon.png": "12c5b4de023eba843697089e2662aa7daa76db504265f8bfe13731e4b87a814c",
       "icon_black.png": "e6ab93d2aae19b98997a8cfb848aa8ba86c5e429e67c49454424c247d73ddab1",
       "icon_white.png": "4d51b8fac5c06f492db45b306f3645bcbf1f312a60c8d2c834ead0ad8207948d",
-      "oldosz\\bluezenith.osz": "6792e8494c072952b4606c69b9d20f071069e9a73ee6590c4c74b92ebf14255f",
-      "oldosz\\envidia.osz": "68463ecd172e9765ac32f5b04d9b1819da389bfc61cbc74b8c47a7fb92c1e744",
-      "oldosz\\finenight.osz": "0ea841f09db961fbf448aed7aca000c2f5183cc8771b191d033ed1cbadf0f00b",
-      "oldosz\\howfarwevecome.osz": "c7cbdfc1ffd7e448a5d8e501be65ef71cc1c3470ae43cbfbf6bbca0bf1fcb1aa",
-      "oldosz\\kemomimi.osz": "18727f094ea635a3b7969c264d8e2cf067f6aad814b39e22765ba86e17045715",
-      "oldosz\\pingpong.osz": "107f0e4bdf0000f7fad06140b28d8d1cefeec71e3cd29334e226af571955ed87",
-      "oldosz\\smiling.osz": "fc16eddee2610ada932bd09822019fc59acfe5ad6332a6a1c8368493f8324496",
-      "oldosz\\thebigblack.osz": "99fb4017fac2de3332b627eea715ba0dede181451170d45b8b950c15a3ca1bd8",
-      "oldosz\\uta.osz": "6845485d6ef49f8e0dbb04989f792936cc7c93121702c6709a02a7bd65c12d32",
       "osz\\allthethingsshesaid.osz": "9962cfebb31fe419ea539b0a39134cf7e51d00916d97a0e6881a3c557273c010",
       "osz\\drumgodum.osz": "9a0a4d83461bbd2294af7760020a53f8f73c913cd3da4b6ad545be1e3de335bc",
       "osz\\giants.osz": "8780b3d1e30c172a19b35d50e046713b88088394adff2bd639e2368e281be702",
@@ -37,7 +28,7 @@
       "main.py": "aa7669250362113f51d7299237355443dafd59447bd89df5a87db31a6a4f2de0",
       "osu_to_level.py": "8047e2151219faaf2f5829438bfa010cca4a9a1f0e3d1d03d37c32ecf987fd57",
       "unzip.py": "e2cc6f3cadaf217e736cbfd4a4e765f1d3a12c0994bb2aab88caf643c581299f",
-      "auto_updater.py": "2fc190d3e49e7a43939db4fb42a70510d74f07f6acbb13661118c7aa710afb52",
+      "auto_updater.py": "1e5da9c3a66a64528805cbad380f5e2c84145e4b8f97d9a1b2eae079f6329b84",
       "batch_process_osz.py": "c93dffea3e0cbb03c8bd164c89511141686e07e1e4ac5380128751cd229c1cb7"
     }
   }
