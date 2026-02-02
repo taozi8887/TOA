@@ -169,9 +169,25 @@ def main():
     print(f"Python path: {sys.path[:3]}")  # Show first 3 paths
     
     try:
-        import main as game_main
+        # Force import from .toa folder when running as exe
+        if getattr(sys, 'frozen', False) and os.path.exists('.toa'):
+            # Add .toa to path temporarily and import
+            import importlib.util
+            toa_main_path = os.path.abspath(os.path.join('.toa', 'main.py'))
+            if os.path.exists(toa_main_path):
+                spec = importlib.util.spec_from_file_location("main", toa_main_path)
+                game_main = importlib.util.module_from_spec(spec)
+                sys.modules['main'] = game_main
+                spec.loader.exec_module(game_main)
+                print(f"Force-loaded main.py from: {toa_main_path}")
+            else:
+                import main as game_main
+                print(f"Fallback: loaded main.py from: {game_main.__file__}")
+        else:
+            import main as game_main
+            print(f"Script mode: loaded main.py from: {game_main.__file__}")
+        
         print(f"Loaded main.py version: {game_main.__version__}")
-        print(f"main.py loaded from: {game_main.__file__}")  # Show actual file path
         
         # Run the game's main entry point
         if hasattr(game_main, '__name__'):
