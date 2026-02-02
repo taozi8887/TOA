@@ -107,19 +107,6 @@ def check_and_update():
             
             if success:
                 print("Updates downloaded successfully!")
-                print("Saving version.json...")
-                
-                # Ensure version.json is saved
-                try:
-                    remote_version = updater._get_remote_version()
-                    if remote_version:
-                        with open('version.json', 'w') as f:
-                            json.dump(remote_version, f, indent=2)
-                        print("version.json saved successfully!")
-                    else:
-                        print("Warning: Could not fetch remote version to save")
-                except Exception as e:
-                    print(f"Error saving version.json: {e}")
                 
                 # Don't restart for normal updates - just continue to load the updated code
                 return False
