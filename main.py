@@ -665,12 +665,6 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
         title_text = font_title.render("Select a Level", True, BLACK)
         title_rect = title_text.get_rect(center=(window_width // 2, 55))
         screen.blit(title_text, title_rect)
-        
-        # AUTO-UPDATE TEST MESSAGE
-        test_font = pygame.font.Font(None, 64)
-        test_text = test_font.render("AUTO-UPDATE TEST v0.4.1", True, (255, 0, 0))
-        test_rect = test_text.get_rect(center=(window_width // 2, window_height - 100))
-        screen.blit(test_text, test_rect)
 
         # Draw level list
         list_start_y = 100
@@ -856,6 +850,18 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
         esc_text = font_hint.render("Press ESC for Settings", True, (200, 200, 200))
         esc_rect = esc_text.get_rect(center=(window_width // 2, window_height - 60))
         screen.blit(esc_text, esc_rect)
+        
+        # AUTO-UPDATE TEST MESSAGE - DRAWN ON TOP
+        test_font = pygame.font.Font(None, 84)
+        test_text = test_font.render("AUTO-UPDATE TEST v0.4.1", True, (255, 0, 0))
+        test_rect = test_text.get_rect(center=(window_width // 2, window_height // 2))
+        # Draw black outline
+        outline_offset = 3
+        for dx, dy in [(-outline_offset, -outline_offset), (-outline_offset, outline_offset), 
+                       (outline_offset, -outline_offset), (outline_offset, outline_offset)]:
+            outline_text = test_font.render("AUTO-UPDATE TEST v0.4.1", True, (0, 0, 0))
+            screen.blit(outline_text, test_rect.move(dx, dy))
+        screen.blit(test_text, test_rect)
 
         # Fade in on first frame
         if first_frame:
