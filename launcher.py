@@ -189,9 +189,21 @@ def check_and_update():
         has_updates, files_to_update = updater.check_for_updates(directories, include_code=True)
         
         if has_updates:
+            print(f"\n{'='*60}")
+            print(f"✓ Updates available!")
+            print(f"{'='*60}")
+            print(f"Files to update ({len(files_to_update)}):")
+            for f in files_to_update:
+                print(f"  - {f}")
+            
             # Check if code files were updated
             code_files = ['main.py', 'osu_to_level.py', 'unzip.py', 'auto_updater.py', 'batch_process_osz.py']
             code_was_updated = any(f in files_to_update for f in code_files)
+            
+            if code_was_updated:
+                print(f"\n⚠ Code changes detected - EXE will be rebuilt!")
+            
+            print(f"{'='*60}\n")
             
             # Show GUI for updates
             success = show_installer_window(updater, files_to_update, is_first_run=False)
