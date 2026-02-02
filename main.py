@@ -1755,8 +1755,19 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         print(f"Error finding audio file: {e}")
         audio_path = os.path.join(audio_dir, "audio.mp3")
 
-    pygame.mixer.music.load(resource_path(audio_path))
-    pygame.mixer.music.set_volume(game_settings.get('music_volume', 0.7))
+    # Load music with error handling
+    try:
+        full_audio_path = resource_path(audio_path)
+        print(f"Loading music from: {full_audio_path}")
+        if not os.path.exists(full_audio_path):
+            print(f"WARNING: Audio file not found: {full_audio_path}")
+            print(f"Audio directory contents: {os.listdir(resource_path(audio_dir)) if os.path.exists(resource_path(audio_dir)) else 'Directory not found'}")
+        pygame.mixer.music.load(full_audio_path)
+        pygame.mixer.music.set_volume(game_settings.get('music_volume', 0.7))
+        print(f"Music loaded successfully: {audio_path}")
+    except Exception as e:
+        print(f"ERROR loading music: {e}")
+        print(f"Attempted to load from: {resource_path(audio_path)}")
     music_start_time = None
 
     # Load hitsounds
