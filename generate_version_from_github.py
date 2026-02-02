@@ -40,7 +40,7 @@ def create_version_file_from_github(output_file: str = "version.json"):
         print("Loaded existing version.json")
     else:
         version_data = {
-            "version": "0.4.1",
+            "version": "0.5.0",
             "files": {
                 "assets": {},
                 "code": {}
