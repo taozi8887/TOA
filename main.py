@@ -377,7 +377,7 @@ def show_loading_screen():
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
     BLUE = (100, 150, 255)
-    GREEN = (181, 107, 255) #(112, 255, 148)
+    GREEN = (125, 255, 251)#(181, 107, 255) #(112, 255, 148)
 
     # Start with black screen
     screen.fill(BLACK)
