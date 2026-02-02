@@ -160,12 +160,12 @@ class AutoUpdater:
             data_folder = '.toa'
             os.makedirs(data_folder, exist_ok=True)
             
-            # Set folder as hidden on Windows
-            try:
-                import ctypes
-                ctypes.windll.kernel32.SetFileAttributesW(data_folder, 0x02)  # FILE_ATTRIBUTE_HIDDEN
-            except:
-                pass
+            # Set folder as hidden on Windows (DISABLED FOR DEBUGGING)
+            # try:
+            #     import ctypes
+            #     ctypes.windll.kernel32.SetFileAttributesW(data_folder, 0x02)  # FILE_ATTRIBUTE_HIDDEN
+            # except:
+            #     pass
             
             total_files = len(files_to_download)
             failed_files = []
@@ -349,6 +349,8 @@ def create_version_file(directories: List[str] = None, include_code: bool = True
                     if file.endswith(('.json', '.osu', '.mp3', '.wav', '.ogg', '.jpg', '.png', '.osz')):
                         file_path = os.path.join(root, file)
                         relative_path = os.path.relpath(file_path, directory)
+                        # Normalize path separators to forward slashes for cross-platform compatibility
+                        relative_path = relative_path.replace('\\', '/')
                         
                         # Calculate file hash
                         try:
