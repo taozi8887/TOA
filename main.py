@@ -377,6 +377,7 @@ def show_loading_screen():
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
     BLUE = (100, 150, 255)
+    GREEN = (112, 255, 148)
 
     # Start with black screen
     screen.fill(BLACK)
@@ -453,7 +454,7 @@ def show_loading_screen():
         # Progress bar
         filled_width = int(bar_width * progress)
         if filled_width > 0:
-            pygame.draw.rect(screen, BLUE, (bar_x, bar_y, filled_width, bar_height), border_radius=10)
+            pygame.draw.rect(screen, GREEN, (bar_x, bar_y, filled_width, bar_height), border_radius=10)
 
         pygame.display.flip()
         clock.tick(60)
@@ -504,7 +505,7 @@ def show_loading_screen():
     bar_height = 20
     bar_x = window_width // 2 - bar_width // 2
     bar_y = window_height // 2 + 100
-    pygame.draw.rect(screen, BLUE, (bar_x, bar_y, bar_width, bar_height), border_radius=10)
+    pygame.draw.rect(screen, GREEN, (bar_x, bar_y, bar_width, bar_height), border_radius=10)
 
     pygame.display.flip()
     time.sleep(0.3)  # Brief pause to show completion
@@ -591,6 +592,7 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
     BLACK = (0, 0, 0)
     GRAY = (200, 200, 200)
     BLUE = (100, 150, 255)
+    GREEN = (112, 255, 148)
 
     # Scrolling setup - pixel-based smooth scrolling
     scroll_offset = 0.0  # Current scroll position in pixels
@@ -1035,7 +1037,7 @@ def show_settings_menu(from_game=False, from_selector=False):
     GRAY = (200, 200, 200)
     DARK_GRAY = (100, 100, 100)
     BLUE = (100, 150, 255)
-    GREEN = (100, 200, 100)
+    GREEN = (112, 255, 148)
     RED = (255, 100, 100)
     
     # UI layout
@@ -1074,7 +1076,7 @@ def show_settings_menu(from_game=False, from_selector=False):
         # Filled portion
         filled_width = int((value - min_val) / (max_val - min_val) * width)
         filled_rect = pygame.Rect(x, y, filled_width, height)
-        pygame.draw.rect(screen, BLUE, filled_rect, border_radius=4)
+        pygame.draw.rect(screen, GREEN, filled_rect, border_radius=4)
         
         # Knob
         knob_x = x + filled_width
