@@ -92,7 +92,7 @@ class AutoUpdater:
     
     def check_for_updates(self, directories: List[str] = None, include_code: bool = True) -> Tuple[bool, List[str]]:
         """
-        Check if updates are available
+        Check if updates are available - simplified to always sync with GitHub
         
         Args:
             directories: List of directories to check (e.g., ['levels', 'beatmaps'])
@@ -105,39 +105,35 @@ class AutoUpdater:
             directories = ['levels', 'beatmaps']
         
         try:
-            # Get remote version info
-            remote_version = self._get_remote_version()
-            if remote_version is None:
-                return False, []
+            # Download and replace version.json first
+            version_url = f"{self.raw_url}/version.json"
+            response = requests.get(version_url, timeout=10)
+            response.raise_for_status()
             
-            # Get local version info
-            local_version = self._get_local_version()
+            # Create .toa directory if it doesn't exist
+            os.makedirs('.toa', exist_ok=True)
             
-            # Compare and find differences
-            changed_files = []
+            # Save new version.json to .toa folder
+            with open(self.local_version_file, 'w') as f:
+                f.write(response.text)
             
-            # Check data directories (levels, beatmaps)
-            for directory in directories:
-                if directory in remote_version.get('files', {}):
-                    remote_files = remote_version['files'][directory]
-                    local_files = local_version.get('files', {}).get(directory, {})
-                    
-                    for file_path, remote_hash in remote_files.items():
-                        local_hash = local_files.get(file_path, "")
-                        if remote_hash != local_hash:
-                            changed_files.append(os.path.join(directory, file_path))
+            # Parse the new version file to get all files that should exist
+            remote_version = json.loads(response.text)
             
-            # Check Python code files if include_code is True
+            # Get all files from remote version
+            all_files = []
+            
+            # Add asset files
+            if 'assets' in remote_version.get('files', {}):
+                for file_path in remote_version['files']['assets']:
+                    all_files.append(f"assets/{file_path}")
+            
+            # Add code files if requested
             if include_code and 'code' in remote_version.get('files', {}):
-                remote_code = remote_version['files']['code']
-                local_code = local_version.get('files', {}).get('code', {})
-                
-                for file_path, remote_hash in remote_code.items():
-                    local_hash = local_code.get(file_path, "")
-                    if remote_hash != local_hash:
-                        changed_files.append(file_path)
+                for file_path in remote_version['files']['code']:
+                    all_files.append(file_path)
             
-            return len(changed_files) > 0, changed_files
+            return len(all_files) > 0, all_files
         
         except Exception as e:
             print(f"Error checking for updates: {e}")
@@ -281,51 +277,10 @@ class AutoUpdater:
         return {"version": "0.0.0", "files": {}}
     
     def _update_local_version(self, successfully_downloaded_files=None):
-        """Update local version file with hashes of files that actually exist locally"""
+        """Update local version file - simplified to just use GitHub version"""
         try:
-            remote_version = self._get_remote_version()
-            if not remote_version:
-                return
-                
-            # Start with empty local version
-            local_version = {"version": remote_version.get("version", "0.0.0"), "files": {}}
-            
-            # Only include hashes for files that actually exist locally
-            data_folder = '.toa'
-            
-            for category, files in remote_version.get('files', {}).items():
-                local_version['files'][category] = {}
-                
-                for file_path, remote_hash in files.items():
-                    if category == 'code':
-                        # Code files are in .toa root
-                        local_file_path = os.path.join(data_folder, file_path)
-                    else:
-                        # Asset files are in .toa/category/
-                        local_file_path = os.path.join(data_folder, category, file_path)
-                    
-                    # Only include hash if file actually exists locally
-                    if os.path.exists(local_file_path):
-                        # Verify the hash matches what we expect
-                        actual_hash = self._calculate_file_hash(local_file_path)
-                        if actual_hash == remote_hash:
-                            local_version['files'][category][file_path] = remote_hash
-                            print(f"✓ Hash verified for {file_path}")
-                        else:
-                            print(f"Hash mismatch for {file_path}: expected {remote_hash}, got {actual_hash}")
-                            # For debugging: show file sizes
-                            try:
-                                file_size = os.path.getsize(local_file_path)
-                                print(f"  File size: {file_size} bytes")
-                            except:
-                                pass
-                    else:
-                        print(f"File not found locally: {local_file_path}")
-            
-            # Write the updated local version
-            os.makedirs(os.path.dirname(self.local_version_file), exist_ok=True)
-            with open(self.local_version_file, 'w') as f:
-                json.dump(local_version, f, indent=2)
+            # Local version.json is already updated in check_for_updates
+            print("Local version.json updated from GitHub")
                 
         except Exception as e:
             print(f"Error updating local version: {e}")
