@@ -87,13 +87,12 @@ game_settings = Settings()
 def resource_path(relative_path):
     """Get absolute path to resource, works for dev and for PyInstaller"""
     try:
-        # When running as exe, use the directory where the exe is located
-        # NOT the temp extraction folder (_MEIPASS)
+        # When running as exe, use the hidden .toa folder in exe directory
         if getattr(sys, 'frozen', False):
-            # Running as exe - use exe directory
-            base_path = os.path.dirname(sys.executable)
+            # Running as exe - use .toa hidden folder in exe directory
+            base_path = os.path.join(os.path.dirname(sys.executable), '.toa')
         else:
-            # Running as script
+            # Running as script - use current directory
             base_path = os.path.abspath(".")
     except Exception:
         base_path = os.path.abspath(".")

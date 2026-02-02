@@ -7,6 +7,7 @@ import os
 import json
 import hashlib
 import requests
+import time
 from typing import Optional, Tuple, List, Dict
 from pathlib import Path
 
@@ -27,7 +28,8 @@ class AutoUpdater:
         self.branch = branch
         self.base_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}"
         self.raw_url = f"https://raw.githubusercontent.com/{repo_owner}/{repo_name}/{branch}"
-        self.version_file = "version.json"
+        # Store version.json in hidden folder
+        self.version_file = os.path.join('.toa', 'version.json')
         
     def is_first_run(self) -> bool:
         """
@@ -36,10 +38,14 @@ class AutoUpdater:
         Returns:
             True if this is first run, False otherwise
         """
-        # Check if essential files/folders exist
+        # Check if essential files/folders exist in hidden folder
+        hidden_folder = '.toa'
+        if not os.path.exists(hidden_folder):
+            return True
         required_paths = ['levels', 'beatmaps', 'assets', 'main.py']
         for path in required_paths:
-            if not os.path.exists(path):
+            full_path = os.path.join(hidden_folder, path)
+            if not os.path.exists(full_path):
                 return True
         return False
     
@@ -148,7 +154,20 @@ class AutoUpdater:
             True if successful, False otherwise
         """
         try:
+            # Use hidden folder for game data
+            data_folder = '.toa'
+            os.makedirs(data_folder, exist_ok=True)
+            
+            # Set folder as hidden on Windows
+            try:
+                import ctypes
+                ctypes.windll.kernel32.SetFileAttributesW(data_folder, 0x02)  # FILE_ATTRIBUTE_HIDDEN
+            except:
+                pass
+            
             total_files = len(files_to_download)
+            failed_files = []
+            
             for idx, file_path in enumerate(files_to_download):
                 if progress_callback:
                     progress_callback(idx + 1, total_files, file_path)
@@ -156,26 +175,53 @@ class AutoUpdater:
                 # Download file - convert Windows paths to URL paths
                 url_path = file_path.replace('\\', '/')
                 url = f"{self.raw_url}/{url_path}"
-                response = requests.get(url, timeout=30)
                 
-                if response.status_code == 200:
-                    # Create directory if needed
-                    local_path = Path(file_path)
-                    local_path.parent.mkdir(parents=True, exist_ok=True)
+                # Retry logic: try up to 3 times
+                max_retries = 3
+                success = False
+                
+                for attempt in range(max_retries):
+                    try:
+                        response = requests.get(url, timeout=30)
+                        
+                        if response.status_code == 200:
+                            # Download to hidden folder
+                            hidden_path = os.path.join(data_folder, file_path)
+                            local_path = Path(hidden_path)
+                            local_path.parent.mkdir(parents=True, exist_ok=True)
+                            
+                            # Write file
+                            with open(hidden_path, 'wb') as f:
+                                f.write(response.content)
+                            
+                            print(f"Downloaded: {file_path}")
+                            success = True
+                            break
+                        else:
+                            print(f"Attempt {attempt+1}: Failed to download {file_path}: HTTP {response.status_code}")
                     
-                    # Write file
-                    with open(file_path, 'wb') as f:
-                        f.write(response.content)
+                    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+                        print(f"Attempt {attempt+1}: Connection error for {file_path}: {e}")
+                        if attempt < max_retries - 1:
+                            time.sleep(2)  # Wait 2 seconds before retry
                     
-                    print(f"Downloaded: {file_path}")
-                else:
-                    print(f"Failed to download {file_path}: HTTP {response.status_code}")
-                    return False
+                    except Exception as e:
+                        print(f"Attempt {attempt+1}: Error downloading {file_path}: {e}")
+                        if attempt < max_retries - 1:
+                            time.sleep(2)
+                
+                if not success:
+                    failed_files.append(file_path)
+                    # Continue downloading other files instead of failing completely
+                
+                # Small delay between downloads to avoid overwhelming connection
+                if idx < total_files - 1:  # Don't delay after last file
+                    time.sleep(0.1)
             
             # Update local version info after successful download
             self._update_local_version()
             
-            # If this was initial download, also download config files
+            # If this was initial download, also download config files to hidden folder
             if is_initial_download:
                 config_files = ['update_config.json', 'toa_settings.json']
                 for config_file in config_files:
@@ -183,11 +229,22 @@ class AutoUpdater:
                         url = f"{self.raw_url}/{config_file}"
                         response = requests.get(url, timeout=10)
                         if response.status_code == 200:
-                            with open(config_file, 'wb') as f:
+                            config_path = os.path.join(data_folder, config_file)
+                            with open(config_path, 'wb') as f:
                                 f.write(response.content)
                             print(f"Downloaded config: {config_file}")
                     except:
                         pass  # Config files are optional
+            
+            # Report any failed files
+            if failed_files:
+                print(f"\nWarning: {len(failed_files)} files failed to download:")
+                for f in failed_files[:10]:  # Show first 10
+                    print(f"  - {f}")
+                if len(failed_files) > 10:
+                    print(f"  ... and {len(failed_files) - 10} more")
+                # Return True if at least code files downloaded
+                return len(failed_files) < total_files * 0.5  # Succeed if >50% downloaded
             
             return True
         
