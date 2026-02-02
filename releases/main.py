@@ -87,119 +87,11 @@ game_settings = Settings()
 def resource_path(relative_path):
     """Get absolute path to resource, works for dev and for PyInstaller"""
     try:
-        # When running as exe, use the hidden .toa folder in exe directory
-        if getattr(sys, 'frozen', False):
-            # Running as exe - use .toa hidden folder in exe directory
-            base_path = os.path.join(os.path.dirname(sys.executable), '.toa')
-        else:
-            # Running as script - use current directory
-            base_path = os.path.abspath(".")
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
     except Exception:
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
-
-def initialize_levels_from_osz():
-    """Initialize levels and beatmaps from .osz files if they don't exist"""
-    beatmaps_dir = resource_path('beatmaps')
-    levels_dir = resource_path('levels')
-    osz_dir = resource_path('assets/osz')
-    
-    # Check if levels and beatmaps exist and have content
-    needs_init = False
-    if not os.path.exists(levels_dir) or not os.listdir(levels_dir):
-        needs_init = True
-    if not os.path.exists(beatmaps_dir) or not os.listdir(beatmaps_dir):
-        needs_init = True
-    
-    if not needs_init:
-        return  # Already initialized
-    
-    print("\n" + "="*60)
-    print("INITIALIZING GAME DATA")
-    print("Extracting beatmaps and generating levels from .osz files...")
-    print("This only happens once!")
-    print("="*60 + "\n")
-    
-    # Create directories
-    os.makedirs(beatmaps_dir, exist_ok=True)
-    os.makedirs(levels_dir, exist_ok=True)
-    
-    # Check if osz directory exists
-    if not os.path.exists(osz_dir):
-        print(f"Warning: OSZ directory not found: {osz_dir}")
-        return
-    
-    # Get all .osz files
-    osz_files = [f for f in os.listdir(osz_dir) if f.endswith('.osz')]
-    
-    if not osz_files:
-        print(f"Warning: No .osz files found in {osz_dir}")
-        return
-    
-    print(f"Found {len(osz_files)} beatmap(s) to process\n")
-    
-    from unzip import read_osz_file
-    from osu_to_level import create_level_json
-    
-    def sanitize_filename(name):
-        invalid_chars = '<>:"/\\|?*'
-        for char in invalid_chars:
-            name = name.replace(char, '_')
-        return name.strip()
-    
-    def get_difficulty_name(osu_file_path):
-        try:
-            with open(osu_file_path, 'r', encoding='utf-8') as f:
-                for line in f:
-                    if line.startswith('Version:'):
-                        return line.split(':', 1)[1].strip()
-        except:
-            pass
-        basename = os.path.basename(osu_file_path)
-        if '[' in basename and ']' in basename:
-            start = basename.rfind('[')
-            end = basename.rfind(']')
-            if start < end:
-                return basename[start+1:end]
-        return "Unknown"
-    
-    # Process each .osz file
-    for idx, osz_file in enumerate(osz_files, 1):
-        print(f"[{idx}/{len(osz_files)}] Processing: {osz_file}")
-        
-        osz_path = os.path.join(osz_dir, osz_file)
-        extract_name = sanitize_filename(os.path.splitext(osz_file)[0])
-        extract_dir = os.path.join(beatmaps_dir, extract_name)
-        
-        try:
-            # Extract .osz file
-            osu_files = read_osz_file(osz_path, extract_dir)
-            
-            if not osu_files:
-                print(f"  ✗ No .osu files found")
-                continue
-            
-            # Process each difficulty
-            for osu_file in osu_files:
-                difficulty = get_difficulty_name(osu_file)
-                difficulty_safe = sanitize_filename(difficulty)
-                
-                if len(osu_files) == 1:
-                    output_json = os.path.join(levels_dir, f"{extract_name}.json")
-                else:
-                    output_json = os.path.join(levels_dir, f"{extract_name}_{difficulty_safe}.json")
-                
-                if not os.path.exists(output_json):
-                    create_level_json(osu_file, output_json, seed=42)
-                    print(f"  ✓ Created: {os.path.basename(output_json)}")
-            
-        except Exception as e:
-            print(f"  ✗ Error: {e}")
-            continue
-    
-    print("\n" + "="*60)
-    print("Initialization complete!")
-    print("="*60 + "\n")
 
 def process_osz_to_level(osz_path, extract_name, output_json, seed=42):
     """
@@ -2550,9 +2442,6 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
 if __name__ == "__main__":
     import multiprocessing
     multiprocessing.freeze_support()
-
-    # Initialize levels/beatmaps from .osz files if needed
-    initialize_levels_from_osz()
 
     REGENERATE_LEVEL = False
 

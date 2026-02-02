@@ -10,13 +10,14 @@ if __name__ == "__main__":
     print("TOA Auto-Update Version Generator")
     print("=" * 60)
     print("\nThis will create a version.json file tracking:")
-    print("  - All levels and beatmaps")
+    print("  - Assets (including .osz files)")
     print("  - Python code files (main.py, etc.)")
-    print("\nCommit this file to your repository for auto-update to work.")
+    print("\nNote: Beatmaps and levels are generated from .osz files at runtime")
+    print("      and are not tracked in version.json")
     print()
     
-    # Create version file tracking levels, beatmaps, AND code
-    create_version_file(directories=['levels', 'beatmaps'], include_code=True, output_file='version.json')
+    # Create version file tracking assets AND code (but NOT beatmaps/levels)
+    create_version_file(directories=['assets'], include_code=True, output_file='version.json')
     
     print("\n" + "=" * 60)
     print("NEXT STEPS:")

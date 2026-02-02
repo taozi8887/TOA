@@ -7,7 +7,6 @@ import os
 import json
 import hashlib
 import requests
-import time
 from typing import Optional, Tuple, List, Dict
 from pathlib import Path
 
@@ -28,9 +27,7 @@ class AutoUpdater:
         self.branch = branch
         self.base_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}"
         self.raw_url = f"https://raw.githubusercontent.com/{repo_owner}/{repo_name}/{branch}"
-        # Store local version.json in hidden folder, but fetch from root on GitHub
-        self.local_version_file = os.path.join('.toa', 'version.json')
-        self.remote_version_file = 'version.json'
+        self.version_file = "version.json"
         
     def is_first_run(self) -> bool:
         """
@@ -39,15 +36,10 @@ class AutoUpdater:
         Returns:
             True if this is first run, False otherwise
         """
-        # Check if essential files/folders exist in hidden folder
-        # Note: beatmaps and levels are generated from .osz, not downloaded
-        hidden_folder = '.toa'
-        if not os.path.exists(hidden_folder):
-            return True
-        required_paths = ['assets', 'main.py']
+        # Check if essential files/folders exist
+        required_paths = ['levels', 'beatmaps', 'assets', 'main.py']
         for path in required_paths:
-            full_path = os.path.join(hidden_folder, path)
-            if not os.path.exists(full_path):
+            if not os.path.exists(path):
                 return True
         return False
     
@@ -156,20 +148,7 @@ class AutoUpdater:
             True if successful, False otherwise
         """
         try:
-            # Use hidden folder for game data
-            data_folder = '.toa'
-            os.makedirs(data_folder, exist_ok=True)
-            
-            # Set folder as hidden on Windows
-            try:
-                import ctypes
-                ctypes.windll.kernel32.SetFileAttributesW(data_folder, 0x02)  # FILE_ATTRIBUTE_HIDDEN
-            except:
-                pass
-            
             total_files = len(files_to_download)
-            failed_files = []
-            
             for idx, file_path in enumerate(files_to_download):
                 if progress_callback:
                     progress_callback(idx + 1, total_files, file_path)
@@ -177,53 +156,26 @@ class AutoUpdater:
                 # Download file - convert Windows paths to URL paths
                 url_path = file_path.replace('\\', '/')
                 url = f"{self.raw_url}/{url_path}"
+                response = requests.get(url, timeout=30)
                 
-                # Retry logic: try up to 3 times
-                max_retries = 3
-                success = False
-                
-                for attempt in range(max_retries):
-                    try:
-                        response = requests.get(url, timeout=30)
-                        
-                        if response.status_code == 200:
-                            # Download to hidden folder
-                            hidden_path = os.path.join(data_folder, file_path)
-                            local_path = Path(hidden_path)
-                            local_path.parent.mkdir(parents=True, exist_ok=True)
-                            
-                            # Write file
-                            with open(hidden_path, 'wb') as f:
-                                f.write(response.content)
-                            
-                            print(f"Downloaded: {file_path}")
-                            success = True
-                            break
-                        else:
-                            print(f"Attempt {attempt+1}: Failed to download {file_path}: HTTP {response.status_code}")
+                if response.status_code == 200:
+                    # Create directory if needed
+                    local_path = Path(file_path)
+                    local_path.parent.mkdir(parents=True, exist_ok=True)
                     
-                    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
-                        print(f"Attempt {attempt+1}: Connection error for {file_path}: {e}")
-                        if attempt < max_retries - 1:
-                            time.sleep(2)  # Wait 2 seconds before retry
+                    # Write file
+                    with open(file_path, 'wb') as f:
+                        f.write(response.content)
                     
-                    except Exception as e:
-                        print(f"Attempt {attempt+1}: Error downloading {file_path}: {e}")
-                        if attempt < max_retries - 1:
-                            time.sleep(2)
-                
-                if not success:
-                    failed_files.append(file_path)
-                    # Continue downloading other files instead of failing completely
-                
-                # Small delay between downloads to avoid overwhelming connection
-                if idx < total_files - 1:  # Don't delay after last file
-                    time.sleep(0.1)
+                    print(f"Downloaded: {file_path}")
+                else:
+                    print(f"Failed to download {file_path}: HTTP {response.status_code}")
+                    return False
             
             # Update local version info after successful download
             self._update_local_version()
             
-            # If this was initial download, also download config files to hidden folder
+            # If this was initial download, also download config files
             if is_initial_download:
                 config_files = ['update_config.json', 'toa_settings.json']
                 for config_file in config_files:
@@ -231,22 +183,11 @@ class AutoUpdater:
                         url = f"{self.raw_url}/{config_file}"
                         response = requests.get(url, timeout=10)
                         if response.status_code == 200:
-                            config_path = os.path.join(data_folder, config_file)
-                            with open(config_path, 'wb') as f:
+                            with open(config_file, 'wb') as f:
                                 f.write(response.content)
                             print(f"Downloaded config: {config_file}")
                     except:
                         pass  # Config files are optional
-            
-            # Report any failed files
-            if failed_files:
-                print(f"\nWarning: {len(failed_files)} files failed to download:")
-                for f in failed_files[:10]:  # Show first 10
-                    print(f"  - {f}")
-                if len(failed_files) > 10:
-                    print(f"  ... and {len(failed_files) - 10} more")
-                # Return True if at least code files downloaded
-                return len(failed_files) < total_files * 0.5  # Succeed if >50% downloaded
             
             return True
         
@@ -257,7 +198,7 @@ class AutoUpdater:
     def _get_remote_version(self) -> Optional[Dict]:
         """Get version info from remote repository"""
         try:
-            url = f"{self.raw_url}/{self.remote_version_file}"
+            url = f"{self.raw_url}/{self.version_file}"
             response = requests.get(url, timeout=10)
             
             if response.status_code == 200:
@@ -266,14 +207,13 @@ class AutoUpdater:
         
         except Exception as e:
             print(f"Error fetching remote version: {e}")
-            print(f"URL attempted: {url}")
             return None
     
     def _get_local_version(self) -> Dict:
         """Get local version info"""
         try:
-            if os.path.exists(self.local_version_file):
-                with open(self.local_version_file, 'r') as f:
+            if os.path.exists(self.version_file):
+                with open(self.version_file, 'r') as f:
                     return json.load(f)
         except Exception as e:
             print(f"Error reading local version: {e}")
@@ -285,9 +225,7 @@ class AutoUpdater:
         try:
             remote_version = self._get_remote_version()
             if remote_version:
-                # Ensure .toa directory exists
-                os.makedirs(os.path.dirname(self.local_version_file), exist_ok=True)
-                with open(self.local_version_file, 'w') as f:
+                with open(self.version_file, 'w') as f:
                     json.dump(remote_version, f, indent=2)
         except Exception as e:
             print(f"Error updating local version: {e}")

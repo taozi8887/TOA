@@ -72,9 +72,9 @@ deprecatedlevels/
 *.osz
 *.mp3
 
-# Keep example beatmaps but ignore user-added ones
-# Uncomment if you want to ignore all beatmaps:
-# beatmaps/*/
+# Beatmaps and levels are generated from .osz files, don't commit them
+beatmaps/
+levels/
 
 # Build outputs
 dist/
