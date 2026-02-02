@@ -310,8 +310,15 @@ class AutoUpdater:
                         actual_hash = self._calculate_file_hash(local_file_path)
                         if actual_hash == remote_hash:
                             local_version['files'][category][file_path] = remote_hash
+                            print(f"✓ Hash verified for {file_path}")
                         else:
                             print(f"Hash mismatch for {file_path}: expected {remote_hash}, got {actual_hash}")
+                            # For debugging: show file sizes
+                            try:
+                                file_size = os.path.getsize(local_file_path)
+                                print(f"  File size: {file_size} bytes")
+                            except:
+                                pass
                     else:
                         print(f"File not found locally: {local_file_path}")
             
