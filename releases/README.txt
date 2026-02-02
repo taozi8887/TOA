@@ -1,8 +1,8 @@
-TOA v0.4.1 - Rhythm Game
+TOA v0.5.0 - Rhythm Game
 ============================
 
 INSTALLATION:
-1. Download TOA-v0.4.1.exe
+1. Download TOA-v0.5.0.exe
 2. Place it in a folder (it will create subfolders)
 3. Run it!
 
@@ -24,10 +24,10 @@ Every time you launch the game:
 When you push updates to GitHub, users get them automatically.
 
 WHAT USERS SEE:
-TOA-v0.4.1.exe
+TOA-v0.5.0.exe
 levels/ (downloaded automatically)
 beatmaps/ (downloaded automatically)
 assets/ (downloaded automatically)
 + Python files (downloaded automatically)
 
-Version: 0.4.1
+Version: 0.5.0

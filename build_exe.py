@@ -9,9 +9,21 @@ import subprocess
 import sys
 import os
 import shutil
+import re
 
-# Version should match __version__ in main.py
-VERSION = "0.4.1"
+def get_version_from_spec():
+    """Extract version from TOA.spec file"""
+    try:
+        with open('TOA.spec', 'r') as f:
+            content = f.read()
+            match = re.search(r"name='TOA-v([\d.]+)'", content)
+            if match:
+                return match.group(1)
+    except:
+        pass
+    return "0.5.0"  # Fallback
+
+VERSION = get_version_from_spec()
 
 def build_exe():
     """Build the executable using PyInstaller with version info"""
