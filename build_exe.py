@@ -17,6 +17,7 @@ def build_exe():
     """Build the executable using PyInstaller with version info"""
     
     exe_name = f"TOA-v{VERSION}"
+    release_folder = f"releases"
     
     # Use the TOA.spec file which has all the proper configuration
     print(f"\nBuilding {exe_name}.exe...")
@@ -26,18 +27,80 @@ def build_exe():
         result = subprocess.run(['pyinstaller', 'TOA.spec'], check=True)
         print("\n✓ Build successful!")
         
-        # Copy Python files to dist folder so they can be auto-updated
-        dist_folder = "dist"
-        python_files = ['main.py', 'osu_to_level.py', 'unzip.py', 'auto_updater.py', 'batch_process_osz.py']
+        # Create release folder
+        os.makedirs(release_folder, exist_ok=True)
         
-        print("\nCopying Python files for auto-update...")
-        for file in python_files:
-            if os.path.exists(file):
-                shutil.copy2(file, dist_folder)
-                print(f"  Copied {file}")
+        # Copy ONLY the exe to release folder
+        shutil.copy2(f"dist/{exe_name}.exe", release_folder)
+        print(f"\n✓ Copied exe to {release_folder}")
         
-        print(f"\n✓ Your executable is ready: dist/{exe_name}.exe")
-        print("✓ Python files copied for auto-update support")
+        print("\nAUTO-UPDATE MODE:")
+        print("  ✓ launcher.py + auto_updater.py (bundled in exe)")
+        print("  ✓ update_config.json (bundled in exe)")
+        print("\nOn first run, the exe will automatically download:")
+        print("  - All Python game files (main.py, etc.)")
+        print("  - assets/ folder")
+        print("  - levels/ folder")
+        print("  - beatmaps/ folder")
+        print("  - version.json")
+        print("\nOn subsequent runs:")
+        print("  - Checks GitHub for updates")
+        print("  - Downloads only changed files")
+        print("  - No re-download needed!")
+        
+        # Create README for distribution
+        readme_content = f"""TOA v{VERSION} - Rhythm Game
+============================
+
+INSTALLATION:
+1. Download TOA-v{VERSION}.exe
+2. Place it in a folder (it will create subfolders)
+3. Run it!
+
+FIRST RUN:
+The game will automatically download all required files from GitHub:
+- Game levels and beatmaps
+- Music and sound files  
+- Assets and images
+
+This first download may take 1-2 minutes.
+Make sure you have an internet connection!
+
+AUTO-UPDATE:
+Every time you launch the game:
+✓ Automatically checks for updates
+✓ Downloads only new/changed files
+✓ No reinstallation needed!
+
+When you push updates to GitHub, users get them automatically.
+
+WHAT USERS SEE:
+TOA-v{VERSION}.exe
+levels/ (downloaded automatically)
+beatmaps/ (downloaded automatically)
+assets/ (downloaded automatically)
++ Python files (downloaded automatically)
+
+Version: {VERSION}
+"""
+        
+        with open(os.path.join(release_folder, "README.txt"), "w", encoding='utf-8') as f:
+            f.write(readme_content)
+        
+        print(f"\n{'='*60}")
+        print(f"✓ AUTO-UPDATE EXE READY: {release_folder}")
+        print(f"{'='*60}")
+        print(f"\nYour exe is in: {release_folder}/")
+        print(f"File: TOA-v{VERSION}.exe")
+        print(f"Size: ~{os.path.getsize(f'{release_folder}/{exe_name}.exe') / (1024*1024):.1f} MB")
+        print("\nDISTRIBUTION:")
+        print("  1. Upload the .exe to GitHub releases")
+        print("  2. Users download the exe")
+        print("  3. Users run it - files download automatically!")
+        print("\nFUTURE UPDATES:")
+        print("  → Just push changes to GitHub")
+        print("  → Users run game - updates download automatically")
+        print("  → NO REBUILD NEEDED!")
         
     except subprocess.CalledProcessError as e:
         print(f"\n✗ Build failed with error: {e}")

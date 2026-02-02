@@ -5,7 +5,7 @@ a = Analysis(
     ['launcher.py'],
     pathex=[],
     binaries=[],
-    datas=[('assets', 'assets'), ('levels', 'levels'), ('beatmaps', 'beatmaps'), ('update_config.json', '.'), ('version.json', '.')],
+    datas=[('update_config.json', '.')],
     hiddenimports=['requests'],
     hookspath=[],
     hooksconfig={},

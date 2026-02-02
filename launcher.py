@@ -44,6 +44,42 @@ def check_and_update():
             config.get('branch', 'main')
         )
         
+        # Check if this is first run (no files downloaded yet)
+        if updater.is_first_run():
+            print("=" * 60)
+            print("FIRST RUN DETECTED")
+            print("Downloading all game files from GitHub...")
+            print("This may take a few minutes...")
+            print("=" * 60)
+            
+            # Get all files from remote
+            all_files = updater.get_all_remote_files()
+            
+            if not all_files:
+                print("ERROR: Could not retrieve file list from GitHub")
+                print("Please check your internet connection")
+                return False
+            
+            print(f"Downloading {len(all_files)} files...")
+            
+            # Define progress callback
+            def progress(current, total, filename):
+                print(f"[{current}/{total}] {filename}")
+            
+            # Download all files
+            success = updater.download_updates(all_files, progress_callback=progress, is_initial_download=True)
+            
+            if success:
+                print("=" * 60)
+                print("DOWNLOAD COMPLETE!")
+                print("Starting game...")
+                print("=" * 60)
+                return True  # Code was downloaded
+            else:
+                print("ERROR: Failed to download game files")
+                return False
+        
+        # Normal update check
         print("Checking for updates...")
         
         # Check for updates (including code)

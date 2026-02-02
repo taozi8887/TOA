@@ -29,6 +29,51 @@ class AutoUpdater:
         self.raw_url = f"https://raw.githubusercontent.com/{repo_owner}/{repo_name}/{branch}"
         self.version_file = "version.json"
         
+    def is_first_run(self) -> bool:
+        """
+        Check if this is the first run (no local files exist)
+        
+        Returns:
+            True if this is first run, False otherwise
+        """
+        # Check if essential files/folders exist
+        required_paths = ['levels', 'beatmaps', 'assets', 'main.py']
+        for path in required_paths:
+            if not os.path.exists(path):
+                return True
+        return False
+    
+    def get_all_remote_files(self) -> List[str]:
+        """
+        Get list of all files from remote version.json
+        
+        Returns:
+            List of all file paths that need to be downloaded
+        """
+        try:
+            remote_version = self._get_remote_version()
+            if not remote_version:
+                return []
+            
+            all_files = []
+            files_dict = remote_version.get('files', {})
+            
+            # Add data directory files (levels, beatmaps, etc.)
+            for directory, files in files_dict.items():
+                if directory == 'code':
+                    # Code files are at root level
+                    all_files.extend(files.keys())
+                else:
+                    # Data files are in subdirectories
+                    for file_name in files.keys():
+                        all_files.append(os.path.join(directory, file_name))
+            
+            return all_files
+        
+        except Exception as e:
+            print(f"Error getting remote files: {e}")
+            return []
+    
     def check_for_updates(self, directories: List[str] = None, include_code: bool = True) -> Tuple[bool, List[str]]:
         """
         Check if updates are available
@@ -82,13 +127,14 @@ class AutoUpdater:
             print(f"Error checking for updates: {e}")
             return False, []
     
-    def download_updates(self, files_to_download: List[str], progress_callback=None) -> bool:
+    def download_updates(self, files_to_download: List[str], progress_callback=None, is_initial_download: bool = False) -> bool:
         """
         Download updated files from GitHub
         
         Args:
             files_to_download: List of file paths to download
             progress_callback: Optional callback function(current, total, filename)
+            is_initial_download: If True, this is the first-time download of all files
             
         Returns:
             True if successful, False otherwise
@@ -119,6 +165,21 @@ class AutoUpdater:
             
             # Update local version info after successful download
             self._update_local_version()
+            
+            # If this was initial download, also download config files
+            if is_initial_download:
+                config_files = ['update_config.json', 'toa_settings.json']
+                for config_file in config_files:
+                    try:
+                        url = f"{self.raw_url}/{config_file}"
+                        response = requests.get(url, timeout=10)
+                        if response.status_code == 200:
+                            with open(config_file, 'wb') as f:
+                                f.write(response.content)
+                            print(f"Downloaded config: {config_file}")
+                    except:
+                        pass  # Config files are optional
+            
             return True
         
         except Exception as e:
