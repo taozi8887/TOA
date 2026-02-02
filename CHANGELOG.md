@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-02-02
+
+### Added
+- **Auto-Update System** with GUI installer
+  - Launcher pattern for code hot-swapping without rebuilding exe
+  - Automatic update checks on every launch
+  - GUI installer window (600x400) with progress bar and file information
+  - Downloads only changed files to minimize bandwidth
+  - Updates game code, levels, beatmaps, and assets from GitHub
+  - First-run automatic installation of all game files
+- **Hidden Console Window** for professional appearance
+- **Hidden .toa folder** on Windows (contains runtime files)
+- **Dynamic version reading** in build_exe.py from TOA.spec
+- **Optimized update workflow** with update.py script
+  - One-command push: `python update.py "commit message"`
+  - Automatically updates version.json with only changed files
+  - Uses GitHub raw URLs for hash calculation
+
+### Changed
+- Runtime level/beatmap generation from .osz files instead of pre-generated JSON
+- Simplified update system to always sync with GitHub (no hash verification during updates)
+- Removed redundant update check from main.py (launcher handles all updates)
+- Removed auto-update test text overlay from gameplay
+
+### Fixed
+- Pygame DLL loading issues with pre-load strategy
+- Path separator issues (standardized to forward slashes for cross-platform compatibility)
+- Hash mismatch issues by calculating hashes from GitHub-served files
+- Restart logic to prevent pygame temp directory issues
+
+### Technical
+- version.json tracks 26 files (5 Python files, 8 images, 13 .osz files)
+- SHA256 hash verification for version tracking
+- Supports extensions: .json, .osu, .mp3, .wav, .ogg, .jpg, .png, .osz
+- Launcher shows GUI installer for first run and updates
+- Console hidden via console=False in TOA.spec
+
 ## [0.4.0] - 2026-02-01
 
 ### Added
