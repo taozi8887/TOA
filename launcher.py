@@ -53,9 +53,21 @@ def show_installer_window(updater, all_files, is_first_run=True):
     estimated_mb = total_files * 0.5  # Rough estimate
     
     downloaded = [0]  # Use list to allow modification in nested function
+    current_file_info = {'name': '', 'downloaded': 0, 'total': 0, 'start_time': 0}
+    import time
     
-    def progress_callback(current, total, filename=None):
+    def progress_callback(current, total, filename, file_downloaded, file_total):
         downloaded[0] = current
+        
+        # Update current file info
+        if filename != current_file_info['name']:
+            current_file_info['name'] = filename or ''
+            current_file_info['downloaded'] = 0
+            current_file_info['total'] = file_total
+            current_file_info['start_time'] = time.time()
+        else:
+            current_file_info['downloaded'] = file_downloaded
+            current_file_info['total'] = file_total
         
         # Draw window
         screen.fill(WHITE)
@@ -71,11 +83,24 @@ def show_installer_window(updater, all_files, is_first_run=True):
         progress_rect = progress_text.get_rect(center=(300, 140))
         screen.blit(progress_text, progress_rect)
         
-        # Size estimate
-        downloaded_mb = (current / total) * estimated_mb
-        size_text = font_small.render(f"{downloaded_mb:.1f} / {estimated_mb:.1f} MB", True, GRAY)
-        size_rect = size_text.get_rect(center=(300, 180))
-        screen.blit(size_text, size_rect)
+        # Current file progress
+        if file_total > 0:
+            file_mb = file_downloaded / 1024 / 1024
+            total_file_mb = file_total / 1024 / 1024
+            
+            # Calculate download speed
+            elapsed = time.time() - current_file_info['start_time']
+            speed_text = ""
+            if elapsed > 0 and file_downloaded > 0:
+                speed = file_downloaded / elapsed / 1024  # KB/s
+                if speed > 1024:
+                    speed_text = f" ({speed/1024:.1f} MB/s)"
+                else:
+                    speed_text = f" ({speed:.0f} KB/s)"
+            
+            file_text = font_small.render(f"{file_mb:.1f}/{total_file_mb:.1f} MB{speed_text}", True, GRAY)
+            file_rect = file_text.get_rect(center=(300, 180))
+            screen.blit(file_text, file_rect)
         
         # Progress bar
         bar_width = 500
@@ -91,8 +116,14 @@ def show_installer_window(updater, all_files, is_first_run=True):
         if fill_width > 0:
             pygame.draw.rect(screen, BLUE, (bar_x, bar_y, fill_width, bar_height), border_radius=15)
         
-        # Status (no file names shown for security)
-        status_text = font_small.render("Please wait...", True, GRAY)
+        # Percentage
+        percentage = int((current / total) * 100)
+        percent_text = font_small.render(f"{percentage}%", True, BLACK)
+        percent_rect = percent_text.get_rect(center=(300, 227))
+        screen.blit(percent_text, percent_rect)
+        
+        # Status
+        status_text = font_small.render("Downloading from GitHub...", True, GRAY)
         status_rect = status_text.get_rect(center=(300, 330))
         screen.blit(status_text, status_rect)
         
@@ -179,9 +210,15 @@ def check_and_update():
         
         # Normal update check
         directories = config.get('directories_to_sync', ['levels', 'beatmaps'])
-        has_updates, files_to_update = updater.check_for_updates(directories, include_code=True)
+        has_updates, files_to_update, update_info = updater.check_for_updates(directories, include_code=True)
         
         if has_updates:
+            # Print update info
+            if update_info:
+                print(f"Update available: v{update_info.get('to_version', 'unknown')}")
+                if update_info.get('release_date'):
+                    print(f"Released: {update_info['release_date']}")
+            
             # Show GUI for updates
             success = show_installer_window(updater, files_to_update, is_first_run=False)
             return False  # Don't restart - just continue to load updated code

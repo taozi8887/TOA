@@ -8,8 +8,11 @@ import json
 import hashlib
 import requests
 import time
-from typing import Optional, Tuple, List, Dict
+import shutil
+import tempfile
+from typing import Optional, Tuple, List, Dict, Callable
 from pathlib import Path
+from datetime import datetime
 
 class AutoUpdater:
     """Handles auto-updates from GitHub repository"""
@@ -28,10 +31,17 @@ class AutoUpdater:
         self.branch = branch
         self.base_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}"
         self.raw_url = f"https://raw.githubusercontent.com/{repo_owner}/{repo_name}/{branch}"
-        # Store local version.json in hidden folder, but fetch from root on GitHub
+        # Manifest-based system
+        self.local_manifest_file = os.path.join('.toa', 'manifest.json')
+        self.remote_manifest_file = 'manifest.json'
+        # Legacy support
         self.local_version_file = os.path.join('.toa', 'version.json')
         self.remote_version_file = 'version.json'
-        self._lock_file = None  # File lock to prevent user access during operations
+        # Backup folder for rollback
+        self.backup_folder = os.path.join('.toa', 'backup')
+        # Chunk size for downloads (1MB)
+        self.chunk_size = 1024 * 1024
+        self._lock_file = None
         
     def is_first_run(self) -> bool:
         """
@@ -91,177 +101,162 @@ class AutoUpdater:
             print(f"Error getting remote files: {e}")
             return []
     
-    def check_for_updates(self, directories: List[str] = None, include_code: bool = True) -> Tuple[bool, List[str]]:
+    def check_for_updates(self, directories: List[str] = None, include_code: bool = True) -> Tuple[bool, List[str], Dict]:
         """
-        Check if updates are available - simplified to always sync with GitHub
+        Check if updates are available using manifest-based system
         
         Args:
             directories: List of directories to check (e.g., ['levels', 'beatmaps'])
             include_code: If True, also check for Python code updates
             
         Returns:
-            Tuple of (has_updates, list_of_changed_files)
+            Tuple of (has_updates, list_of_changed_files, update_info)
         """
         if directories is None:
             directories = ['levels', 'beatmaps']
         
         try:
-            # Get current local version first
-            local_version = self._get_local_version()
+            # Get local and remote manifests
+            local_manifest = self._get_local_manifest()
+            remote_manifest = self._get_remote_manifest()
             
-            # Download remote version.json
-            version_url = f"{self.raw_url}/version.json"
-            response = requests.get(version_url, timeout=10)
-            response.raise_for_status()
-            remote_version = json.loads(response.text)
+            if not remote_manifest:
+                # Fallback to legacy version.json system
+                has_updates, changed = self._legacy_check_updates(directories, include_code)
+                return has_updates, changed, {}
             
-            # Compare versions and find changed files
+            local_version = local_manifest.get('version', '0.0.0')
+            remote_version = remote_manifest.get('version', '0.0.0')
+            
+            # Compare versions
+            if self._version_compare(remote_version, local_version) <= 0:
+                return False, [], {}
+            
+            # Find changed/new files
             changed_files = []
+            remote_files = remote_manifest.get('files', {})
+            local_files = local_manifest.get('files', {})
             
-            # Check asset files
-            if 'assets' in remote_version.get('files', {}):
-                remote_assets = remote_version['files']['assets']
-                local_assets = local_version.get('files', {}).get('assets', {})
-                
-                for file_path, remote_hash in remote_assets.items():
-                    local_hash = local_assets.get(file_path, "")
+            # Check assets
+            if 'assets' in remote_files:
+                for file_path, file_info in remote_files['assets'].items():
+                    local_info = local_files.get('assets', {}).get(file_path, {})
+                    remote_hash = file_info if isinstance(file_info, str) else file_info.get('hash', '')
+                    local_hash = local_info if isinstance(local_info, str) else local_info.get('hash', '')
                     if remote_hash != local_hash:
                         changed_files.append(f"assets/{file_path}")
             
-            # Check code files if requested
-            if include_code and 'code' in remote_version.get('files', {}):
-                remote_code = remote_version['files']['code']
-                local_code = local_version.get('files', {}).get('code', {})
-                
-                for file_path, remote_hash in remote_code.items():
-                    local_hash = local_code.get(file_path, "")
+            # Check code files
+            if include_code and 'code' in remote_files:
+                for file_path, file_info in remote_files['code'].items():
+                    local_info = local_files.get('code', {}).get(file_path, {})
+                    remote_hash = file_info if isinstance(file_info, str) else file_info.get('hash', '')
+                    local_hash = local_info if isinstance(local_info, str) else local_info.get('hash', '')
                     if remote_hash != local_hash:
                         changed_files.append(file_path)
             
-            # If there are changes, update local version.json
-            if changed_files:
-                os.makedirs('.toa', exist_ok=True)
-                with open(self.local_version_file, 'w') as f:
-                    f.write(response.text)
+            # Get patch info if available
+            update_info = {
+                'from_version': local_version,
+                'to_version': remote_version,
+                'can_patch': False,
+                'patch_info': None,
+                'release_date': remote_manifest.get('release_date', ''),
+                'total_size': 0
+            }
             
-            return len(changed_files) > 0, changed_files
+            # Check if delta patch is available
+            patches = remote_manifest.get('patches', {})
+            patch_key = f"from_{local_version}"
+            if patch_key in patches:
+                update_info['can_patch'] = True
+                update_info['patch_info'] = patches[patch_key]
+            
+            return len(changed_files) > 0, changed_files, update_info
         
         except Exception as e:
             print(f"Error checking for updates: {e}")
-            return False, []
+            return False, [], {}
     
-    def download_updates(self, files_to_download: List[str], progress_callback=None, is_initial_download: bool = False) -> bool:
+    def download_updates(self, files_to_download: List[str], progress_callback: Callable[[int, int, str, int, int], None] = None, is_initial_download: bool = False, create_backup: bool = True) -> bool:
         """
-        Download updated files from GitHub
+        Download updated files from GitHub with chunked download and hash verification
         
         Args:
             files_to_download: List of file paths to download
-            progress_callback: Optional callback function(current, total, filename)
-            is_initial_download: If True, this is the first-time download of all files
+            progress_callback: Optional callback(current_file, total_files, filename, downloaded_bytes, total_bytes)
+            is_initial_download: If True, this is the first-time download
+            create_backup: If True, backup existing files before updating
             
         Returns:
             True if successful, False otherwise
         """
         try:
-            # Use hidden folder for game data
             data_folder = '.toa'
             os.makedirs(data_folder, exist_ok=True)
             
-            # Set folder as hidden + system on Windows to prevent user access
-            if os.name == 'nt':  # Windows
+            # Set folder as hidden + system on Windows
+            if os.name == 'nt':
                 import subprocess
                 import ctypes
-                # Set hidden + system attributes
                 subprocess.run(['attrib', '+H', '+S', data_folder], shell=True, capture_output=True)
-                # Also use Windows API for immediate effect
                 try:
-                    ctypes.windll.kernel32.SetFileAttributesW(data_folder, 0x02 | 0x04)  # HIDDEN | SYSTEM
+                    ctypes.windll.kernel32.SetFileAttributesW(data_folder, 0x02 | 0x04)
                 except:
                     pass
             
+            # Create backup if requested and not initial download
+            if create_backup and not is_initial_download:
+                self._create_backup(files_to_download)
+            
             total_files = len(files_to_download)
             failed_files = []
+            remote_manifest = self._get_remote_manifest()
             
             for idx, file_path in enumerate(files_to_download):
-                if progress_callback:
-                    # Don't pass filename for security - user shouldn't see file operations
-                    progress_callback(idx + 1, total_files, None)
+                # Get expected hash from manifest
+                expected_hash = self._get_file_hash_from_manifest(remote_manifest, file_path)
                 
-                # Download file - convert Windows paths to URL paths
-                url_path = file_path.replace('\\', '/')
-                url = f"{self.raw_url}/{url_path}"
-                
-                # Retry logic: try up to 3 times
-                max_retries = 3
-                success = False
-                
-                for attempt in range(max_retries):
-                    try:
-                        response = requests.get(url, timeout=30)
-                        
-                        if response.status_code == 200:
-                            # Download to hidden folder
-                            hidden_path = os.path.join(data_folder, file_path)
-                            local_path = Path(hidden_path)
-                            local_path.parent.mkdir(parents=True, exist_ok=True)
-                            
-                            # Write file
-                            with open(hidden_path, 'wb') as f:
-                                f.write(response.content)
-                            
-                            # Don't print file names for security
-                            success = True
-                            break
-                        else:
-                            # Don't expose file names - silent failure, will retry
-                            pass
-                    
-                    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
-                        # Silent retry for security
-                        if attempt < max_retries - 1:
-                            time.sleep(2)  # Wait 2 seconds before retry
-                    
-                    except Exception as e:
-                        # Silent retry for security
-                        if attempt < max_retries - 1:
-                            time.sleep(2)
+                # Download with chunked streaming and hash verification
+                success = self._download_file_chunked(
+                    file_path, 
+                    data_folder, 
+                    expected_hash,
+                    lambda downloaded, total: progress_callback(idx + 1, total_files, file_path, downloaded, total) if progress_callback else None
+                )
                 
                 if not success:
                     failed_files.append(file_path)
-                    # Continue downloading other files instead of failing completely
                 
-                # Small delay between downloads to avoid overwhelming connection
-                if idx < total_files - 1:  # Don't delay after last file
-                    time.sleep(0.1)
+                time.sleep(0.1)
             
-            # Update local version info after successful download
-            self._update_local_version()
+            # Update manifest after successful download
+            if len(failed_files) < total_files * 0.5:
+                self._update_local_manifest(remote_manifest)
+                
+                # Download config files if initial install
+                if is_initial_download:
+                    for config_file in ['update_config.json', 'toa_settings.json']:
+                        try:
+                            url = f"{self.raw_url}/{config_file}"
+                            response = requests.get(url, timeout=10)
+                            if response.status_code == 200:
+                                with open(os.path.join(data_folder, config_file), 'wb') as f:
+                                    f.write(response.content)
+                        except:
+                            pass
             
-            # If this was initial download, also download config files to hidden folder
-            if is_initial_download:
-                config_files = ['update_config.json', 'toa_settings.json']
-                for config_file in config_files:
-                    try:
-                        url = f"{self.raw_url}/{config_file}"
-                        response = requests.get(url, timeout=10)
-                        if response.status_code == 200:
-                            config_path = os.path.join(data_folder, config_file)
-                            with open(config_path, 'wb') as f:
-                                f.write(response.content)
-                            # Silent download for security
-                    except:
-                        pass  # Config files are optional
-            
-            # Report any failed files (count only, no names)
             if failed_files:
                 print(f"\nWarning: {len(failed_files)} files failed to download")
-                # Return True if at least code files downloaded
-                return len(failed_files) < total_files * 0.5  # Succeed if >50% downloaded
+                return len(failed_files) < total_files * 0.5
             
             return True
         
         except Exception as e:
             print(f"Error downloading updates: {e}")
+            # Rollback if backup exists
+            if create_backup and not is_initial_download:
+                self._rollback_from_backup()
             return False
     
     def _get_remote_version(self) -> Optional[Dict]:
@@ -309,6 +304,211 @@ class AutoUpdater:
             return sha256_hash.hexdigest()
         except:
             return ""
+    
+    def _get_local_manifest(self) -> Dict:
+        """Get local manifest file"""
+        try:
+            if os.path.exists(self.local_manifest_file):
+                with open(self.local_manifest_file, 'r') as f:
+                    return json.load(f)
+        except:
+            pass
+        # Fallback to version.json
+        return self._get_local_version()
+    
+    def _get_remote_manifest(self) -> Optional[Dict]:
+        """Get remote manifest from GitHub"""
+        try:
+            url = f"{self.raw_url}/{self.remote_manifest_file}"
+            response = requests.get(url, timeout=10)
+            if response.status_code == 200:
+                return json.loads(response.content)
+        except:
+            pass
+        # Fallback to version.json
+        return self._get_remote_version()
+    
+    def _update_local_manifest(self, manifest: Dict):
+        """Update local manifest file"""
+        try:
+            os.makedirs('.toa', exist_ok=True)
+            with open(self.local_manifest_file, 'w') as f:
+                json.dump(manifest, f, indent=2)
+        except Exception as e:
+            print(f"Error updating manifest: {e}")
+    
+    def _version_compare(self, version1: str, version2: str) -> int:
+        """Compare two version strings. Returns: 1 if v1 > v2, -1 if v1 < v2, 0 if equal"""
+        try:
+            v1_parts = [int(x) for x in version1.split('.')]
+            v2_parts = [int(x) for x in version2.split('.')]
+            for i in range(max(len(v1_parts), len(v2_parts))):
+                v1 = v1_parts[i] if i < len(v1_parts) else 0
+                v2 = v2_parts[i] if i < len(v2_parts) else 0
+                if v1 > v2:
+                    return 1
+                elif v1 < v2:
+                    return -1
+            return 0
+        except:
+            return 0
+    
+    def _get_file_hash_from_manifest(self, manifest: Dict, file_path: str) -> str:
+        """Extract expected file hash from manifest"""
+        try:
+            files = manifest.get('files', {})
+            # Handle both 'assets/file.png' and 'file.py' paths
+            if '/' in file_path:
+                dir_name, file_name = file_path.split('/', 1)
+                file_info = files.get(dir_name, {}).get(file_name, '')
+            else:
+                file_info = files.get('code', {}).get(file_path, '')
+            
+            # Handle both string hash and dict with 'hash' key
+            if isinstance(file_info, str):
+                return file_info
+            elif isinstance(file_info, dict):
+                return file_info.get('hash', '')
+        except:
+            pass
+        return ''
+    
+    def _download_file_chunked(self, file_path: str, data_folder: str, expected_hash: str, progress_callback: Callable = None) -> bool:
+        """Download file in chunks with hash verification"""
+        url_path = file_path.replace('\\', '/')
+        url = f"{self.raw_url}/{url_path}"
+        local_path = os.path.join(data_folder, file_path)
+        
+        for attempt in range(3):
+            try:
+                # Stream download
+                response = requests.get(url, stream=True, timeout=30)
+                if response.status_code != 200:
+                    time.sleep(2)
+                    continue
+                
+                total_size = int(response.headers.get('content-length', 0))
+                downloaded = 0
+                
+                # Create temp file
+                Path(local_path).parent.mkdir(parents=True, exist_ok=True)
+                temp_path = local_path + '.tmp'
+                
+                sha256_hash = hashlib.sha256()
+                
+                with open(temp_path, 'wb') as f:
+                    for chunk in response.iter_content(chunk_size=self.chunk_size):
+                        if chunk:
+                            f.write(chunk)
+                            sha256_hash.update(chunk)
+                            downloaded += len(chunk)
+                            if progress_callback:
+                                progress_callback(downloaded, total_size)
+                
+                # Verify hash if provided
+                if expected_hash:
+                    actual_hash = sha256_hash.hexdigest()
+                    if actual_hash != expected_hash:
+                        os.remove(temp_path)
+                        print(f"Hash mismatch for {file_path}")
+                        time.sleep(2)
+                        continue
+                
+                # Move temp file to final location
+                if os.path.exists(local_path):
+                    os.remove(local_path)
+                os.rename(temp_path, local_path)
+                
+                return True
+            
+            except Exception as e:
+                if os.path.exists(temp_path):
+                    try:
+                        os.remove(temp_path)
+                    except:
+                        pass
+                if attempt < 2:
+                    time.sleep(2)
+        
+        return False
+    
+    def _create_backup(self, files_to_backup: List[str]):
+        """Create backup of files before updating"""
+        try:
+            if os.path.exists(self.backup_folder):
+                shutil.rmtree(self.backup_folder)
+            os.makedirs(self.backup_folder, exist_ok=True)
+            
+            data_folder = '.toa'
+            for file_path in files_to_backup:
+                src = os.path.join(data_folder, file_path)
+                if os.path.exists(src):
+                    dst = os.path.join(self.backup_folder, file_path)
+                    Path(dst).parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(src, dst)
+            
+            # Backup manifest
+            if os.path.exists(self.local_manifest_file):
+                shutil.copy2(self.local_manifest_file, os.path.join(self.backup_folder, 'manifest.json'))
+        
+        except Exception as e:
+            print(f"Error creating backup: {e}")
+    
+    def _rollback_from_backup(self) -> bool:
+        """Rollback to backup if update fails"""
+        try:
+            if not os.path.exists(self.backup_folder):
+                return False
+            
+            data_folder = '.toa'
+            for root, dirs, files in os.walk(self.backup_folder):
+                for file in files:
+                    src = os.path.join(root, file)
+                    rel_path = os.path.relpath(src, self.backup_folder)
+                    dst = os.path.join(data_folder, rel_path)
+                    Path(dst).parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(src, dst)
+            
+            print("Rolled back to previous version")
+            return True
+        
+        except Exception as e:
+            print(f"Error rolling back: {e}")
+            return False
+    
+    def _legacy_check_updates(self, directories: List[str], include_code: bool) -> Tuple[bool, List[str]]:
+        """Legacy version.json based update check"""
+        try:
+            local_version = self._get_local_version()
+            version_url = f"{self.raw_url}/version.json"
+            response = requests.get(version_url, timeout=10)
+            response.raise_for_status()
+            remote_version = json.loads(response.text)
+            
+            changed_files = []
+            if 'assets' in remote_version.get('files', {}):
+                remote_assets = remote_version['files']['assets']
+                local_assets = local_version.get('files', {}).get('assets', {})
+                for file_path, remote_hash in remote_assets.items():
+                    if remote_hash != local_assets.get(file_path, ""):
+                        changed_files.append(f"assets/{file_path}")
+            
+            if include_code and 'code' in remote_version.get('files', {}):
+                remote_code = remote_version['files']['code']
+                local_code = local_version.get('files', {}).get('code', {})
+                for file_path, remote_hash in remote_code.items():
+                    if remote_hash != local_code.get(file_path, ""):
+                        changed_files.append(file_path)
+            
+            if changed_files:
+                os.makedirs('.toa', exist_ok=True)
+                with open(self.local_version_file, 'w') as f:
+                    f.write(response.text)
+            
+            return len(changed_files) > 0, changed_files
+        except Exception as e:
+            print(f"Error in legacy check: {e}")
+            return False, []
 
 
 def create_version_file(directories: List[str] = None, include_code: bool = True, output_file: str = "version.json"):

@@ -25,13 +25,12 @@
       "osz/warriors.osz": "acbe4d220dfaf490fcb2ad5ca075e9c814667dea58fe90b97e4cd5e83bd07bd2"
     },
     "code": {
-      "main.py": "05f1a5303bf43ab2126905e876ff6aa715626982262443f54867adeb67cacbb3",
-      "osu_to_level.py": "a93d4370e3ea9d6d0f49c79e3b4d5c8bc347574500464d2680185d4695645d00",
-      "unzip.py": "5ad3dc665f5f2000c269d3912586558be08bed2ba12459ae4106dd47c339e609",
-      "auto_updater.py": "3222fd2536ccf4a9598852f779a3db3267e27ac21fdf288511fb22dba785c694",
-      "batch_process_osz.py": "ea91cd87e57ddfa1d9481b450e15a55658f8942203e89637e41760f02caf373d",
-      "build_exe.py": "287e6e9efe4d1151a422690c713cbfb046ec717321a5abb13664ab3c2d8650b1",
-      "launcher.py": "ce6d72c948da57af98af71b698bdeb8b3dbaab9ef52358d11d376464df5d23be"
+      "main.py": "3a7ccce773b4884641bee21c4d0fa1ef4b22449e6771d541638f3aca09c16294",
+      "osu_to_level.py": "8047e2151219faaf2f5829438bfa010cca4a9a1f0e3d1d03d37c32ecf987fd57",
+      "unzip.py": "e2cc6f3cadaf217e736cbfd4a4e765f1d3a12c0994bb2aab88caf643c581299f",
+      "auto_updater.py": "61f83bcca7f1e5021956867614a0491cc7df388e86a36311bafc6fa81554c0d8",
+      "batch_process_osz.py": "c93dffea3e0cbb03c8bd164c89511141686e07e1e4ac5380128751cd229c1cb7",
+      "launcher.py": "a3da10c26e89ce9215b182578cb7c29020dd924c9f6e3175ad005da1eddc0e2c"
     }
   }
 }

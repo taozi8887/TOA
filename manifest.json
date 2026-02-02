@@ -1,0 +1,158 @@
+{
+  "version": "0.5.0",
+  "release_date": "2026-02-02",
+  "manifest_version": 1,
+  "files": {
+    "assets": {
+      "box.jpg": {
+        "hash": "40ed857c173a25d0d9ed4b3f6dffb6ac38641bb729b7dcd52bf5a32196871095",
+        "size": 16423
+      },
+      "boxblue.jpg": {
+        "hash": "45e02472869152250298f37cee0bc369a64efdbda2f77550586a6e0b93d491aa",
+        "size": 20133
+      },
+      "boxred.jpg": {
+        "hash": "c1c36807a8b77d0d28724e1dd451b6466cc5496e772870284dc6f951f5cc8a25",
+        "size": 21948
+      },
+      "dot.jpg": {
+        "hash": "626ccd7d94074aaa4953d92750478865d52b6782628531563748d8b2f3489f04",
+        "size": 12551
+      },
+      "dot2.jpg": {
+        "hash": "d7806f0cccae53a6757a7f9192e4a3f977d4408245b33fa92b5816b9878f47a0",
+        "size": 20888
+      },
+      "icon.png": {
+        "hash": "12c5b4de023eba843697089e2662aa7daa76db504265f8bfe13731e4b87a814c",
+        "size": 5834
+      },
+      "icon_black.png": {
+        "hash": "e6ab93d2aae19b98997a8cfb848aa8ba86c5e429e67c49454424c247d73ddab1",
+        "size": 5491
+      },
+      "icon_white.png": {
+        "hash": "4d51b8fac5c06f492db45b306f3645bcbf1f312a60c8d2c834ead0ad8207948d",
+        "size": 5826
+      },
+      "osz/allthethingsshesaid.osz": {
+        "hash": "9962cfebb31fe419ea539b0a39134cf7e51d00916d97a0e6881a3c557273c010",
+        "size": 4632961
+      },
+      "osz/drumgodum.osz": {
+        "hash": "9a0a4d83461bbd2294af7760020a53f8f73c913cd3da4b6ad545be1e3de335bc",
+        "size": 7195724
+      },
+      "osz/giants.osz": {
+        "hash": "8780b3d1e30c172a19b35d50e046713b88088394adff2bd639e2368e281be702",
+        "size": 14925594
+      },
+      "osz/gods.osz": {
+        "hash": "7b21a5344363a2d0812ab84078f132f1ef5ffd56bab421893d9b5faf5a510893",
+        "size": 29894762
+      },
+      "osz/misfittoys.osz": {
+        "hash": "6fb19a3a7acb522a1b75fa9b18e277f5fe026b5d37b9b047b63d28fa6bb3f0fe",
+        "size": 5143124
+      },
+      "osz/more.osz": {
+        "hash": "835bc4ea7bdd262af65b4784323c469caf32ec4def8720846e419fecf695982c",
+        "size": 11999120
+      },
+      "osz/popstars.osz": {
+        "hash": "8b8ed78df9f691827da78cd575081e93319a61ebc2edaabfa0f0fc8ad722dbf6",
+        "size": 6466477
+      },
+      "osz/rise.osz": {
+        "hash": "2d70f7e62f501885a124b5a0312d8db37705ea7a3ec60a4779b0f6ed1d18d27b",
+        "size": 14242061
+      },
+      "osz/starwalkin.osz": {
+        "hash": "c97f6b31e393ed4a402739760a27c4652dc0837bd7a32975e235d02fa7d0454f",
+        "size": 6441370
+      },
+      "osz/takeover.osz": {
+        "hash": "23ea475fff25db7d21ffa6ede20a137d149f557fdccd50e167acbd7eaf7209bb",
+        "size": 3707850
+      },
+      "osz/thebaddest.osz": {
+        "hash": "52cda6f32acecef25b219d7a52a38e3c811f69feb8e3336df97d8bd4aad5226d",
+        "size": 8353729
+      },
+      "osz/villain.osz": {
+        "hash": "c5c6b6b8015cc3c7fd25c9e249fed96f80faf08b0d803ac141567fed2364f428",
+        "size": 6174861
+      },
+      "osz/warriors.osz": {
+        "hash": "acbe4d220dfaf490fcb2ad5ca075e9c814667dea58fe90b97e4cd5e83bd07bd2",
+        "size": 8897808
+      }
+    },
+    "code": {
+      "main.py": {
+        "hash": "3a7ccce773b4884641bee21c4d0fa1ef4b22449e6771d541638f3aca09c16294",
+        "size": 106382
+      },
+      "osu_to_level.py": {
+        "hash": "8047e2151219faaf2f5829438bfa010cca4a9a1f0e3d1d03d37c32ecf987fd57",
+        "size": 5724
+      },
+      "unzip.py": {
+        "hash": "e2cc6f3cadaf217e736cbfd4a4e765f1d3a12c0994bb2aab88caf643c581299f",
+        "size": 1426
+      },
+      "auto_updater.py": {
+        "hash": "61f83bcca7f1e5021956867614a0491cc7df388e86a36311bafc6fa81554c0d8",
+        "size": 25801
+      },
+      "batch_process_osz.py": {
+        "hash": "c93dffea3e0cbb03c8bd164c89511141686e07e1e4ac5380128751cd229c1cb7",
+        "size": 5350
+      },
+      "launcher.py": {
+        "hash": "a3da10c26e89ce9215b182578cb7c29020dd924c9f6e3175ad005da1eddc0e2c",
+        "size": 12903
+      }
+    }
+  },
+  "patches": {
+    "from_0.5.0": {
+      "description": "Patch from 0.5.0 to 0.5.0",
+      "changed_files": [
+        "assets/box.jpg",
+        "assets/boxblue.jpg",
+        "assets/boxred.jpg",
+        "assets/dot.jpg",
+        "assets/dot2.jpg",
+        "assets/icon.png",
+        "assets/icon_black.png",
+        "assets/icon_white.png",
+        "assets/osz/allthethingsshesaid.osz",
+        "assets/osz/drumgodum.osz",
+        "assets/osz/giants.osz",
+        "assets/osz/gods.osz",
+        "assets/osz/misfittoys.osz",
+        "assets/osz/more.osz",
+        "assets/osz/popstars.osz",
+        "assets/osz/rise.osz",
+        "assets/osz/starwalkin.osz",
+        "assets/osz/takeover.osz",
+        "assets/osz/thebaddest.osz",
+        "assets/osz/villain.osz",
+        "assets/osz/warriors.osz",
+        "main.py",
+        "osu_to_level.py",
+        "unzip.py",
+        "auto_updater.py",
+        "batch_process_osz.py",
+        "launcher.py"
+      ],
+      "removed_files": []
+    }
+  },
+  "rollback": {
+    "previous_version": "0.5.0",
+    "can_rollback": true
+  }
+}

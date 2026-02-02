@@ -31,27 +31,11 @@ The executable will be created in the `dist` folder:
 
 ## Distribution
 
-To share your game, distribute just the `TOA.exe` file. The exe is self-contained and includes:
-- Auto-update system
-- Game launcher
-- Update configuration
-
-**Security Features:**
-- Game files are stored in a hidden `.toa` folder with system attributes
-- File names are never displayed during updates to protect integrity
-- Users cannot access or modify game files during operation
-- All game files are downloaded/updated automatically from GitHub
-
-**On first run, the game will automatically:**
-1. Create hidden `.toa` folder (invisible to users)
-2. Download all game files (code, assets, levels)
-3. Set folder as system + hidden for protection
-4. Launch the game
-
-**On subsequent runs:**
-- Checks for updates automatically
-- Downloads only changed files
-- All operations are hidden from user view
+To share your game, distribute the entire `dist` folder or just the `TOA.exe` file. The exe is self-contained and includes:
+- All Python dependencies
+- Assets (images, sounds)
+- Level data
+- Autoplay script
 
 ## Troubleshooting
 
