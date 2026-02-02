@@ -25,7 +25,7 @@
       "osz/warriors.osz": "acbe4d220dfaf490fcb2ad5ca075e9c814667dea58fe90b97e4cd5e83bd07bd2"
     },
     "code": {
-      "main.py": "4c87cb3729416a3a9ee2fa9713f7e5c1e3a3883f080632b97ff347daac24e2e3",
+      "main.py": "de0bdab5867cfe9a4cab39f1690b46056e134bf2b3c63c472b36974c1fd5360c",
       "osu_to_level.py": "8047e2151219faaf2f5829438bfa010cca4a9a1f0e3d1d03d37c32ecf987fd57",
       "unzip.py": "e2cc6f3cadaf217e736cbfd4a4e765f1d3a12c0994bb2aab88caf643c581299f",
       "auto_updater.py": "f8c2f183e3c36f681e0093291ee981d4b7810717ccb3dc96f928d9f802d4fa5d",
