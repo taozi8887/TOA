@@ -324,8 +324,10 @@ def show_loading_screen():
             try:
                 directories = update_config.get('directories_to_sync', ['levels', 'beatmaps'])
                 include_code = update_config.get('update_code', True)
+                print(f"DEBUG: Checking for updates (code={include_code}, dirs={directories})")
                 has_updates, files_to_update = updater.check_for_updates(directories, include_code=include_code)
-                
+                print(f"DEBUG: has_updates={has_updates}, files={files_to_update}")
+            
                 if has_updates:
                     print(f"Found {len(files_to_update)} files to update")
                     
@@ -663,6 +665,12 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
         title_text = font_title.render("Select a Level", True, BLACK)
         title_rect = title_text.get_rect(center=(window_width // 2, 55))
         screen.blit(title_text, title_rect)
+        
+        # AUTO-UPDATE TEST MESSAGE
+        test_font = pygame.font.Font(None, 64)
+        test_text = test_font.render("AUTO-UPDATE TEST v0.4.1", True, (255, 0, 0))
+        test_rect = test_text.get_rect(center=(window_width // 2, window_height - 100))
+        screen.blit(test_text, test_rect)
 
         # Draw level list
         list_start_y = 100
