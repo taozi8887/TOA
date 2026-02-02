@@ -164,6 +164,15 @@ def main():
         python = sys.executable
         os.execl(python, python, *sys.argv)
     
+    # CRITICAL: Pre-load bundled libraries (like pygame) BEFORE clearing cache
+    # This ensures native dependencies are loaded from the correct location
+    if getattr(sys, 'frozen', False):
+        try:
+            import pygame  # Pre-load from bundled location
+            print(f"Pre-loaded pygame from bundled location")
+        except ImportError:
+            pass  # If not bundled, that's okay
+    
     # CRITICAL: Remove any cached/bundled modules before importing
     # This ensures we load the downloaded files, not bundled ones
     modules_to_reload = ['main', 'osu_to_level', 'unzip', 'auto_updater', 'batch_process_osz']
