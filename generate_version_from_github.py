@@ -1,6 +1,7 @@
 """
 Generate version.json file by downloading files from GitHub to ensure hash compatibility.
 This fixes the hash mismatch issue where local files have different line endings than GitHub-served files.
+Only updates files that have been committed in the most recent commit.
 """
 
 import os
@@ -8,73 +9,87 @@ import json
 import hashlib
 import requests
 import time
+import subprocess
+
+def get_changed_files():
+    """Get list of files changed in the most recent commit"""
+    try:
+        result = subprocess.run(
+            ['git', 'diff-tree', '--no-commit-id', '--name-only', '-r', 'HEAD'],
+            capture_output=True,
+            text=True
+        )
+        if result.returncode == 0:
+            files = result.stdout.strip().split('\n')
+            return [f for f in files if f]
+        return []
+    except Exception as e:
+        print(f"Error getting changed files: {e}")
+        return []
 
 def create_version_file_from_github(output_file: str = "version.json"):
     """
-    Create version.json by downloading files from GitHub to match download hashes.
+    Update version.json by downloading only changed files from GitHub.
     """
     raw_url = "https://raw.githubusercontent.com/taozi8887/TOA/main"
     
-    version_data = {
-        "version": "0.4.1",
-        "files": {}
-    }
+    # Load existing version.json
+    if os.path.exists(output_file):
+        with open(output_file, 'r') as f:
+            version_data = json.load(f)
+        print("Loaded existing version.json")
+    else:
+        version_data = {
+            "version": "0.4.1",
+            "files": {
+                "assets": {},
+                "code": {}
+            }
+        }
+        print("Creating new version.json")
     
-    print("Generating version.json from GitHub raw files...")
+    # Get files that changed in last commit
+    changed_files = get_changed_files()
+    if not changed_files:
+        print("No files changed in last commit")
+        return
     
-    # Track assets directory
-    directories = ['assets']
-    for directory in directories:
-        if os.path.exists(directory):
-            version_data['files'][directory] = {}
-            print(f"Processing directory: {directory}")
-            
-            # Walk through directory and get files from GitHub
-            for root, _, files in os.walk(directory):
-                for file in files:
-                    if file.lower().endswith(('.json', '.osu', '.mp3', '.wav', '.ogg', '.jpg', '.png', '.osz')):
-                        file_path = os.path.join(root, file)
-                        relative_path = os.path.relpath(file_path, directory)
-                        relative_path = relative_path.replace('\\', '/')
-                        
-                        try:
-                            github_url = f"{raw_url}/{directory}/{relative_path}"
-                            print(f"  Fetching: {relative_path}")
-                            response = requests.get(github_url, timeout=30)
-                            if response.status_code == 200:
-                                sha256_hash = hashlib.sha256()
-                                sha256_hash.update(response.content)
-                                file_hash = sha256_hash.hexdigest()
-                                version_data['files'][directory][relative_path] = file_hash
-                            else:
-                                print(f"    Failed: HTTP {response.status_code}")
-                        except Exception as e:
-                            print(f"    Error: {e}")
-                        
-                        time.sleep(0.1)  # Be nice to GitHub
+    print(f"\nUpdating hashes for {len(changed_files)} changed file(s)...")
     
-    # Track Python code files
-    print("Processing code files...")
-    version_data['files']['code'] = {}
-    code_files = ['main.py', 'osu_to_level.py', 'unzip.py', 'auto_updater.py', 'batch_process_osz.py']
-    
-    for code_file in code_files:
-        if os.path.exists(code_file):
-            try:
-                github_url = f"{raw_url}/{code_file}"
-                print(f"  Fetching: {code_file}")
-                response = requests.get(github_url, timeout=30)
-                if response.status_code == 200:
-                    sha256_hash = hashlib.sha256()
-                    sha256_hash.update(response.content)
-                    file_hash = sha256_hash.hexdigest()
-                    version_data['files']['code'][code_file] = file_hash
-                else:
-                    print(f"    Failed: HTTP {response.status_code}")
-            except Exception as e:
-                print(f"    Error: {e}")
-            
-            time.sleep(0.1)
+    for file_path in changed_files:
+        # Normalize path separators
+        file_path = file_path.replace('\\', '/')
+        
+        # Determine category
+        if file_path.startswith('assets/'):
+            category = 'assets'
+            relative_path = file_path[7:]  # Remove 'assets/' prefix
+        elif file_path.endswith('.py'):
+            category = 'code'
+            relative_path = file_path
+        else:
+            continue  # Skip files we don't track
+        
+        # Ensure category exists
+        if category not in version_data['files']:
+            version_data['files'][category] = {}
+        
+        try:
+            github_url = f"{raw_url}/{file_path}"
+            print(f"  Fetching: {file_path}")
+            response = requests.get(github_url, timeout=30)
+            if response.status_code == 200:
+                sha256_hash = hashlib.sha256()
+                sha256_hash.update(response.content)
+                file_hash = sha256_hash.hexdigest()
+                version_data['files'][category][relative_path] = file_hash
+                print(f"    ✓ Updated hash")
+            else:
+                print(f"    Failed: HTTP {response.status_code}")
+        except Exception as e:
+            print(f"    Error: {e}")
+        
+        time.sleep(0.1)
     
     with open(output_file, 'w') as f:
         json.dump(version_data, f, indent=2)
