@@ -185,8 +185,25 @@ def create_version_file(directories: List[str] = None, include_code: bool = True
     if directories is None:
         directories = ['levels', 'beatmaps']
     
+    # Auto-detect version from main.py
+    game_version = "0.4.0"  # Default fallback
+    try:
+        with open('main.py', 'r', encoding='utf-8') as f:
+            for line in f:
+                if line.strip().startswith('__version__'):
+                    # Extract version string from __version__ = "x.x.x"
+                    parts = line.split('=')[1].strip()
+                    # Remove quotes and comments
+                    for quote in ['"', "'"]:
+                        if quote in parts:
+                            game_version = parts.split(quote)[1]
+                            break
+                    break
+    except Exception as e:
+        print(f"Warning: Could not auto-detect version from main.py: {e}")
+    
     version_data = {
-        "version": "0.4.0",  # Should match __version__ in main.py
+        "version": game_version,
         "files": {}
     }
     

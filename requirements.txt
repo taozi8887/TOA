@@ -1,6 +1,9 @@
 # Core game requirements
 pygame>=2.6.1
 
+# Auto-update functionality
+requests>=2.31.0
+
 # Audio processing and level generation
 numpy>=2.0.0
 librosa>=0.10.2

@@ -1,0 +1,17 @@
+{
+  "music_volume": 0.2633333333333333,
+  "hitsound_volume": 0.07333333333333333,
+  "hitsounds_enabled": true,
+  "scroll_speed": 173,
+  "fade_effects": true,
+  "keybinds": {
+    "top": 119,
+    "right": 100,
+    "bottom": 115,
+    "left": 97
+  },
+  "mouse_binds": {
+    "red": 1,
+    "blue": 3
+  }
+}
