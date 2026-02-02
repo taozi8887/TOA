@@ -141,7 +141,7 @@ else:
     sys.path.insert(0, application_path)
 
 def check_and_update():
-    """Check for updates and download if available"""
+    """Check for updates and download if available, rebuild EXE if code changed"""
     try:
         from auto_updater import AutoUpdater
         import requests
@@ -189,8 +189,31 @@ def check_and_update():
         has_updates, files_to_update = updater.check_for_updates(directories, include_code=True)
         
         if has_updates:
+            # Check if code files were updated
+            code_files = ['main.py', 'osu_to_level.py', 'unzip.py', 'auto_updater.py', 'batch_process_osz.py']
+            code_was_updated = any(f in files_to_update for f in code_files)
+            
             # Show GUI for updates
             success = show_installer_window(updater, files_to_update, is_first_run=False)
+            
+            if success and code_was_updated:
+                print("\n[AUTO-UPDATE] Code files were updated!")
+                
+                # Rebuild EXE
+                success, new_exe_path = updater.rebuild_exe()
+                
+                if success and new_exe_path:
+                    print(f"[AUTO-UPDATE] New EXE built: {new_exe_path}")
+                    
+                    # Launch the new EXE and exit
+                    if updater.launch_new_exe(new_exe_path):
+                        print("[AUTO-UPDATE] Exiting old EXE...")
+                        sys.exit(0)  # Exit the old EXE process
+                    else:
+                        print("[AUTO-UPDATE] Failed to launch new EXE, continuing with old version...")
+                else:
+                    print("[AUTO-UPDATE] Failed to rebuild EXE, continuing with old version...")
+            
             return False  # Don't restart - just continue to load updated code
         else:
             return False
@@ -200,6 +223,8 @@ def check_and_update():
         return False
     except Exception as e:
         print(f"Error during update check: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 def main():

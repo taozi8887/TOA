@@ -1,6 +1,6 @@
 """
 Auto-updater module for TOA game
-Downloads updates from GitHub repository
+Downloads updates from GitHub repository and rebuilds EXE on code changes
 """
 
 import os
@@ -8,6 +8,8 @@ import json
 import hashlib
 import requests
 import time
+import subprocess
+import sys
 from typing import Optional, Tuple, List, Dict
 from pathlib import Path
 
@@ -305,6 +307,64 @@ class AutoUpdater:
             return sha256_hash.hexdigest()
         except:
             return ""
+    
+    def rebuild_exe(self) -> Tuple[bool, Optional[str]]:
+        """
+        Rebuild the executable using PyInstaller
+        This is called when code files have been updated
+        
+        Returns:
+            Tuple of (success: bool, new_exe_path: str or None)
+        """
+        print("\n[AUTO-UPDATE] Code updates detected - rebuilding EXE...")
+        
+        try:
+            # Import build_exe dynamically to avoid circular imports
+            from build_exe import build_exe as build_exe_func
+            
+            success, exe_path = build_exe_func(silent=True, update_mode=True)
+            
+            if success:
+                print(f"[AUTO-UPDATE] ✓ EXE rebuilt successfully: {exe_path}")
+                return (True, exe_path)
+            else:
+                print("[AUTO-UPDATE] ✗ EXE rebuild failed")
+                return (False, None)
+        
+        except ImportError:
+            print("[AUTO-UPDATE] ✗ Could not import build_exe module")
+            return (False, None)
+        except Exception as e:
+            print(f"[AUTO-UPDATE] ✗ Error rebuilding EXE: {e}")
+            return (False, None)
+    
+    def launch_new_exe(self, exe_path: str) -> bool:
+        """
+        Launch the newly built EXE and exit current process
+        
+        Args:
+            exe_path: Path to the new EXE to launch
+            
+        Returns:
+            True if launch successful, False otherwise
+        """
+        try:
+            print(f"[AUTO-UPDATE] Launching new EXE: {exe_path}")
+            
+            # Launch new exe
+            if sys.platform == 'win32':
+                # Use os.startfile on Windows (doesn't wait for process)
+                os.startfile(exe_path)
+            else:
+                # Use subprocess on other platforms
+                subprocess.Popen([exe_path])
+            
+            print("[AUTO-UPDATE] ✓ New EXE launched, exiting old version...")
+            return True
+        
+        except Exception as e:
+            print(f"[AUTO-UPDATE] ✗ Error launching new EXE: {e}")
+            return False
 
 
 def create_version_file(directories: List[str] = None, include_code: bool = True, output_file: str = "version.json"):
