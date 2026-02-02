@@ -164,9 +164,18 @@ def main():
         python = sys.executable
         os.execl(python, python, *sys.argv)
     
+    # CRITICAL: Pre-load pygame BEFORE clearing cache to keep DLLs loaded
+    if getattr(sys, 'frozen', False):
+        try:
+            import pygame
+            print(f"Pre-loaded pygame from bundled location")
+        except Exception as e:
+            print(f"Warning: Could not pre-load pygame: {e}")
+    
     # CRITICAL: Remove any cached/bundled modules before importing
     # This ensures we load the downloaded files, not bundled ones
-    modules_to_reload = ['main', 'osu_to_level', 'unzip', 'auto_updater', 'batch_process_osz', 'pygame']
+    # DO NOT remove pygame - we need to keep it loaded!
+    modules_to_reload = ['main', 'osu_to_level', 'unzip', 'auto_updater', 'batch_process_osz']
     for module in modules_to_reload:
         if module in sys.modules:
             del sys.modules[module]
@@ -201,7 +210,10 @@ def main():
                     break
                 returning = True
             
-            # Pygame cleanup is handled by main.py
+            # Pygame cleanup
+            if 'pygame' in sys.modules:
+                pygame.display.quit()
+                pygame.quit()
             sys.exit()
     
     except Exception as e:
