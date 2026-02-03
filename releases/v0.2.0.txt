@@ -1,0 +1,25 @@
+## 🎮 TOA v0.2.0 - Combo & Performance Update
+
+**New Gameplay Features:**
+• **Combo Counter** - Displays current combo with pop animation on hits
+• Combo counter shake effect during animations
+• Always-visible combo display (including "0x" for zero)
+
+**Gameplay Improvements:**
+• Fixed autoplay missing notes (removed frame-dependent timing)
+• Approach indicators now travel at consistent speed regardless of direction
+• Normalized travel distance for all directions (half screen width)
+
+**Visual Enhancements:**
+• Combo counter positioned 30px from left, 130px from bottom
+• Larger combo font (92pt)
+• Faster combo animation (0.08s duration)
+• Upright combo display (removed tilt)
+
+**Added Beatmaps:**
+• The Big Black
+• Blue Zenith
+• fine night (goreshit)
+• envidia
+
+───────────────────────────────────────────────────────────────────

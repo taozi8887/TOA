@@ -1,0 +1,21 @@
+## 🎮 TOA v0.1.0 - Initial Release
+
+**Core Gameplay:**
+• WASD controls for rhythm game mechanics
+• 300/100/50 hit judgments based on timing accuracy
+• Visual approach indicators with gradients
+• Score, accuracy, and progress tracking
+• Autoplay mode for demonstration
+• Screen shake effects on hits/misses
+
+**Controls:**
+• WASD - Hit notes
+• P - Pause/Resume
+• ESC (double press) - Return to level selector
+
+**UI:**
+• Level selector with scrollable list
+• Mouse cursor visibility in menus
+• Real-time stats display during gameplay
+
+───────────────────────────────────────────────────────────────────

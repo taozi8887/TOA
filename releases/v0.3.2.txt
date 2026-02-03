@@ -1,0 +1,12 @@
+## 🔊 TOA v0.3.2 - Hitsound & Autoplay Fixes
+
+**Audio & Timing Improvements:**
+• Hitsounds now play correctly in autoplay mode
+• Hitsounds only play on successful hits (not on misses)
+• Volume for all hitsounds set to 50%
+
+**Bug Fixes & Logic:**
+• Fixed logic so ghost clicks and misses do not trigger hitsounds
+• Code cleanup for hitsound playback logic
+
+───────────────────────────────────────────────────────────────────

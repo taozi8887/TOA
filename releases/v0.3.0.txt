@@ -1,0 +1,30 @@
+## 🎮 TOA v0.3.0 - Polish & Performance Update
+
+**Gameplay Improvements:**
+• **Perfect Beat Sync** - Tile flashes and miss judgments now trigger at exact beat timings
+• Hit detection remains forgiving at ±0.2s early/late for player-friendly gameplay
+• Visual feedback perfectly synchronized with music rhythm
+
+**Quality of Life:**
+• **Loading Screen** - Progress bar that preloads all level assets
+• **Smooth Transitions** - Fade effects between all screens (0.3-0.5s)
+• **Single Window** - No more reopening between screens
+• **Faster Response** - All assets preloaded for lag-free experience
+• Game fade-in optimized (1.0s with 0.3s render delay)
+
+**Controls & Navigation:**
+• ESC on autoplay prompt returns to level selector
+• Any non-Y key on autoplay registers as "No"
+• Improved cursor management (hidden during gameplay, visible in menus)
+
+**Visual Polish:**
+• Level selector title repositioned for better spacing
+• Bars fully render before fade-in completes
+• Eliminated black screen flashing between transitions
+
+**Technical:**
+• Maintained single pygame instance throughout application
+• Preloading system caches all metadata and images
+• Optimized fade durations for smoother experience
+
+───────────────────────────────────────────────────────────────────

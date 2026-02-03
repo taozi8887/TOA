@@ -1,0 +1,12 @@
+## ✨ TOA v0.3.3 - Timing Feedback + Fairer Early Clicks
+
+**Gameplay & Timing:**
+• Box now **shakes exactly when the tile reaches it** (level-timing driven), even if you miss or don't click at all
+• Added a brief **spawn lockout** so a note can’t be judged instantly the moment it appears on screen
+• Slightly **stricter 300 window** (more precise “perfect” timing)
+
+**Bug Fixes:**
+• Resolved remaining **hitsound**, **hitcheck**, and **ghost-click** edge cases (more consistent timing + audio feedback)
+• Fixed **autoplay** not playing the normal hitsound
+
+───────────────────────────────────────────────────────────────────
