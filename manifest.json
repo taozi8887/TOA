@@ -116,17 +116,9 @@
       }
     }
   },
-  "patches": {
-    "from_0.5.7": {
-      "description": "Patch from 0.5.7 to 0.5.8",
-      "changed_files": [
-        "main.py"
-      ],
-      "removed_files": []
-    }
-  },
+  "patches": {},
   "rollback": {
-    "previous_version": "0.5.7",
+    "previous_version": "0.5.8",
     "can_rollback": true
   }
 }
