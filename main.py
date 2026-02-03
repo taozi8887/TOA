@@ -16,7 +16,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.6.21"
+__version__ = "0.6.22"
 
 # Settings management
 class Settings:
@@ -961,10 +961,10 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
         screen.blit(esc_text, esc_rect)
 
         # Draw UPDATE TEST in center over everything
-        # font_update_test = pygame.font.Font(None, 120)
-        # update_test_text = font_update_test.render("UPDATE TEST", True, (160, 32, 240))
-        # update_test_rect = update_test_text.get_rect(center=(window_width // 2, window_height // 2))
-        # screen.blit(update_test_text, update_test_rect)
+        font_update_test = pygame.font.Font(None, 120)
+        update_test_text = font_update_test.render("UPDATE TEST", True, (160, 32, 240))
+        update_test_rect = update_test_text.get_rect(center=(window_width // 2, window_height // 2))
+        screen.blit(update_test_text, update_test_rect)
 
         # Fade in on first frame
         if first_frame:

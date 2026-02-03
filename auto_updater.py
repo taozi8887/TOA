@@ -191,7 +191,7 @@ class AutoUpdater:
                 'release_date': remote_manifest.get('release_date', ''),
                 'total_size': total_size
             }
-            }
+            
             
             # Check if delta patch is available
             patches = remote_manifest.get('patches', {})
