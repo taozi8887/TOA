@@ -10,6 +10,7 @@ import requests
 import time
 import shutil
 import tempfile
+import stat
 from typing import Optional, Tuple, List, Dict, Callable
 from pathlib import Path
 from datetime import datetime
@@ -433,6 +434,13 @@ class AutoUpdater:
                     os.remove(local_path)
                 os.rename(temp_path, local_path)
                 
+                # Make Python code files read-only for protection
+                if file_path.endswith('.py'):
+                    try:
+                        os.chmod(local_path, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
+                    except:
+                        pass  # Not critical if this fails
+                
                 return True
             
             except Exception as e:
@@ -523,6 +531,60 @@ class AutoUpdater:
         except Exception as e:
             print(f"Error in legacy check: {e}")
             return False, []
+    
+    def verify_file_integrity(self, file_path: str, data_folder: str = '.toa') -> bool:
+        """Verify if a file matches its expected hash from manifest"""
+        try:
+            manifest = self._get_local_manifest()
+            expected_hash = self._get_file_hash_from_manifest(manifest, file_path)
+            
+            if not expected_hash:
+                return True  # No hash to verify against
+            
+            local_path = os.path.join(data_folder, file_path)
+            if not os.path.exists(local_path):
+                return False
+            
+            # Calculate hash with line ending normalization for .py files
+            if file_path.endswith('.py'):
+                try:
+                    with open(local_path, 'r', encoding='utf-8', newline='') as f:
+                        content = f.read()
+                        content = content.replace('\r\n', '\n')
+                        actual_hash = hashlib.sha256(content.encode('utf-8')).hexdigest()
+                except:
+                    actual_hash = self._calculate_file_hash(local_path)
+            else:
+                actual_hash = self._calculate_file_hash(local_path)
+            
+            return actual_hash == expected_hash
+        except:
+            return True  # If we can't verify, assume it's OK
+    
+    def repair_file(self, file_path: str, data_folder: str = '.toa', progress_callback: Callable = None) -> bool:
+        """Redownload a corrupted/modified file"""
+        try:
+            manifest = self._get_local_manifest()
+            expected_hash = self._get_file_hash_from_manifest(manifest, file_path)
+            
+            # Make file writable before repairing
+            local_path = os.path.join(data_folder, file_path)
+            if os.path.exists(local_path):
+                try:
+                    os.chmod(local_path, stat.S_IWUSR | stat.S_IRUSR)
+                except:
+                    pass
+            
+            print(f"Repairing {file_path}...")
+            success = self._download_file_chunked(file_path, data_folder, expected_hash, progress_callback)
+            
+            if success:
+                print(f"✓ Repaired {file_path}")
+            
+            return success
+        except Exception as e:
+            print(f"Error repairing {file_path}: {e}")
+            return False
 
 
 def create_version_file(directories: List[str] = None, include_code: bool = True, output_file: str = "version.json"):

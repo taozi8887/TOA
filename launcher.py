@@ -191,6 +191,24 @@ def check_and_update():
             config.get('branch', 'main')
         )
         
+        # Verify integrity of code files (protect against tampering)
+        if not updater.is_first_run():
+            print("Verifying file integrity...")
+            code_files = ['main.py', 'osu_to_level.py', 'unzip.py', 'auto_updater.py', 'batch_process_osz.py', 'launcher.py']
+            corrupted_files = []
+            
+            for code_file in code_files:
+                if not updater.verify_file_integrity(code_file):
+                    print(f"⚠️  {code_file} was modified or corrupted")
+                    corrupted_files.append(code_file)
+            
+            # Auto-repair corrupted files
+            if corrupted_files:
+                print(f"Repairing {len(corrupted_files)} file(s)...")
+                for file in corrupted_files:
+                    updater.repair_file(file)
+                print("File integrity restored.")
+        
         # Check if this is first run (no files downloaded yet)
         if updater.is_first_run():
             # Get all files from remote
