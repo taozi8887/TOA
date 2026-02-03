@@ -26,9 +26,9 @@ def get_version_from_spec():
 VERSION = get_version_from_spec()
 
 def build_exe():
-    """Build the executable using PyInstaller with version info"""
+    """Build the executable using PyInstaller"""
     
-    exe_name = f"TOA-v{VERSION}"
+    exe_name = "TOA"
     release_folder = f"releases"
     
     # Use the TOA.spec file which has all the proper configuration

@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='TOA-v0.5.0',
+    name='TOA',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

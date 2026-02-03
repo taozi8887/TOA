@@ -119,7 +119,7 @@ def show_installer_window(updater, all_files, is_first_run=True):
         # Percentage
         percentage = int((current / total) * 100)
         percent_text = font_small.render(f"{percentage}%", True, BLACK)
-        percent_rect = percent_text.get_rect(center=(300, 227))
+        percent_rect = percent_text.get_rect(center=(bar_x + bar_width // 2, bar_y + bar_height // 2))
         screen.blit(percent_text, percent_rect)
         
         # Status
