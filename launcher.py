@@ -232,63 +232,146 @@ def check_and_update():
             print(f"Local: v{update_info.get('from_version', 'unknown')} -> Remote: v{update_info.get('to_version', 'unknown')}")
         
         if has_updates and len(files_to_update) > 0:
-            # Show confirmation dialog
+            # Show unified update window with confirmation, progress, and completion
             remote_version = update_info.get('to_version', 'unknown')
             print(f"\nUpdate available: v{remote_version}")
             
-            # Show confirmation dialog with pygame
             import pygame
+            import time
             pygame.init()
-            screen = pygame.display.set_mode((600, 250))
+            screen = pygame.display.set_mode((600, 400))
             pygame.display.set_caption("Update Available")
-            font_title = pygame.font.SysFont("Arial", 32)
-            font_text = pygame.font.SysFont("Arial", 24)
-            font_button = pygame.font.SysFont("Arial", 28)
+            font_title = pygame.font.Font(None, 42)
+            font_text = pygame.font.Font(None, 28)
+            font_button = pygame.font.Font(None, 32)
+            font_small = pygame.font.Font(None, 24)
             clock = pygame.time.Clock()
             
-            # Button rectangles
-            yes_button = pygame.Rect(150, 160, 120, 50)
-            no_button = pygame.Rect(330, 160, 120, 50)
-            
-            waiting_for_input = True
+            # State machine: 'confirm' -> 'installing' -> 'complete'
+            state = 'confirm'
             user_confirmed = False
             
-            while waiting_for_input:
+            # Progress tracking
+            downloaded = [0]
+            total_files = len(files_to_update)
+            current_file_info = {'name': '', 'downloaded': 0, 'total': 0, 'start_time': 0}
+            
+            def progress_callback(current, total, filename, file_downloaded, file_total):
+                downloaded[0] = current
+                if filename != current_file_info['name']:
+                    current_file_info['name'] = filename or ''
+                    current_file_info['downloaded'] = 0
+                    current_file_info['total'] = file_total
+                    current_file_info['start_time'] = time.time()
+                else:
+                    current_file_info['downloaded'] = file_downloaded
+                    current_file_info['total'] = file_total
+            
+            # Main loop
+            running = True
+            success = False
+            
+            while running:
                 mouse_pos = pygame.mouse.get_pos()
                 
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
-                        waiting_for_input = False
-                        user_confirmed = False
+                        running = False
                     if event.type == pygame.MOUSEBUTTONDOWN:
-                        if yes_button.collidepoint(mouse_pos):
-                            waiting_for_input = False
-                            user_confirmed = True
-                        elif no_button.collidepoint(mouse_pos):
-                            waiting_for_input = False
-                            user_confirmed = False
+                        if state == 'confirm':
+                            # Check button clicks
+                            yes_button = pygame.Rect(150, 260, 120, 50)
+                            no_button = pygame.Rect(330, 260, 120, 50)
+                            if yes_button.collidepoint(mouse_pos):
+                                state = 'installing'
+                                user_confirmed = True
+                            elif no_button.collidepoint(mouse_pos):
+                                running = False
+                        elif state == 'complete':
+                            running = False
                 
                 screen.fill((40, 40, 50))
                 
-                # Title
-                title = font_title.render(f"Update v{remote_version} found", True, (100, 200, 255))
-                screen.blit(title, (600//2 - title.get_width()//2, 30))
+                if state == 'confirm':
+                    # Confirmation screen
+                    title = font_title.render(f"Update v{remote_version} found", True, (100, 200, 255))
+                    screen.blit(title, (600//2 - title.get_width()//2, 60))
+                    
+                    msg = font_text.render("Install this update?", True, (255, 255, 255))
+                    screen.blit(msg, (600//2 - msg.get_width()//2, 140))
+                    
+                    # Buttons
+                    yes_button = pygame.Rect(150, 260, 120, 50)
+                    no_button = pygame.Rect(330, 260, 120, 50)
+                    yes_hover = yes_button.collidepoint(mouse_pos)
+                    no_hover = no_button.collidepoint(mouse_pos)
+                    
+                    pygame.draw.rect(screen, (50, 200, 50) if yes_hover else (40, 150, 40), yes_button, border_radius=8)
+                    pygame.draw.rect(screen, (200, 50, 50) if no_hover else (150, 40, 40), no_button, border_radius=8)
+                    
+                    yes_text = font_button.render("Yes", True, (255, 255, 255))
+                    no_text = font_button.render("No", True, (255, 255, 255))
+                    screen.blit(yes_text, (yes_button.centerx - yes_text.get_width()//2, yes_button.centery - yes_text.get_height()//2))
+                    screen.blit(no_text, (no_button.centerx - no_text.get_width()//2, no_button.centery - no_text.get_height()//2))
                 
-                # Message
-                msg = font_text.render("Install this update?", True, (255, 255, 255))
-                screen.blit(msg, (600//2 - msg.get_width()//2, 90))
+                elif state == 'installing':
+                    # Start download if not started
+                    if downloaded[0] == 0 and current_file_info['name'] == '':
+                        # Trigger download in background
+                        import threading
+                        def do_download():
+                            nonlocal success
+                            success = updater.download_updates(files_to_update, progress_callback=progress_callback, is_initial_download=False)
+                            nonlocal state
+                            state = 'complete'
+                        
+                        download_thread = threading.Thread(target=do_download, daemon=True)
+                        download_thread.start()
+                    
+                    # Progress screen
+                    title = font_title.render("Installing Update...", True, (100, 200, 255))
+                    screen.blit(title, (600//2 - title.get_width()//2, 40))
+                    
+                    progress_text = font_text.render(f"{downloaded[0]}/{total_files} files", True, (255, 255, 255))
+                    screen.blit(progress_text, (600//2 - progress_text.get_width()//2, 100))
+                    
+                    # Progress bar
+                    bar_width = 500
+                    bar_height = 30
+                    bar_x = 50
+                    bar_y = 180
+                    pygame.draw.rect(screen, (80, 80, 90), (bar_x, bar_y, bar_width, bar_height), border_radius=15)
+                    if total_files > 0:
+                        fill_width = int((downloaded[0] / total_files) * bar_width)
+                        if fill_width > 0:
+                            pygame.draw.rect(screen, (100, 200, 255), (bar_x, bar_y, fill_width, bar_height), border_radius=15)
+                        percentage = int((downloaded[0] / total_files) * 100)
+                        percent_text = font_small.render(f"{percentage}%", True, (255, 255, 255))
+                        screen.blit(percent_text, (bar_x + bar_width // 2 - percent_text.get_width()//2, bar_y + bar_height // 2 - percent_text.get_height()//2))
+                    
+                    # Current file
+                    if current_file_info['name']:
+                        file_text = font_small.render(current_file_info['name'], True, (200, 200, 200))
+                        screen.blit(file_text, (600//2 - file_text.get_width()//2, 240))
                 
-                # Buttons
-                yes_hover = yes_button.collidepoint(mouse_pos)
-                no_hover = no_button.collidepoint(mouse_pos)
-                
-                pygame.draw.rect(screen, (50, 200, 50) if yes_hover else (40, 150, 40), yes_button)
-                pygame.draw.rect(screen, (200, 50, 50) if no_hover else (150, 40, 40), no_button)
-                
-                yes_text = font_button.render("Yes", True, (255, 255, 255))
-                no_text = font_button.render("No", True, (255, 255, 255))
-                screen.blit(yes_text, (yes_button.centerx - yes_text.get_width()//2, yes_button.centery - yes_text.get_height()//2))
-                screen.blit(no_text, (no_button.centerx - no_text.get_width()//2, no_button.centery - no_text.get_height()//2))
+                elif state == 'complete':
+                    # Completion screen
+                    if success:
+                        title = font_title.render("Install Complete!", True, (100, 255, 100))
+                        screen.blit(title, (600//2 - title.get_width()//2, 80))
+                        
+                        msg1 = font_text.render("Exit this window and rerun the exe", True, (255, 255, 255))
+                        msg2 = font_text.render("to start with the update.", True, (255, 255, 255))
+                        hint = font_small.render("(Click anywhere to exit)", True, (150, 150, 150))
+                        
+                        screen.blit(msg1, (600//2 - msg1.get_width()//2, 180))
+                        screen.blit(msg2, (600//2 - msg2.get_width()//2, 220))
+                        screen.blit(hint, (600//2 - hint.get_width()//2, 300))
+                    else:
+                        title = font_title.render("Update Failed", True, (255, 100, 100))
+                        screen.blit(title, (600//2 - title.get_width()//2, 150))
+                        hint = font_small.render("(Click to exit)", True, (150, 150, 150))
+                        screen.blit(hint, (600//2 - hint.get_width()//2, 250))
                 
                 pygame.display.flip()
                 clock.tick(30)
@@ -299,46 +382,7 @@ def check_and_update():
                 print("Update declined by user. Exiting...")
                 sys.exit(0)
             
-            # User confirmed - proceed with update
-            print(f"Installing update v{remote_version}...")
-            if update_info.get('release_date'):
-                print(f"Released: {update_info['release_date']}")
-            print(f"Files to update: {len(files_to_update)}")
-            
-            # Show GUI for updates
-            success = show_installer_window(updater, files_to_update, is_first_run=False)
-            
             if success:
-                # Show completion message
-                pygame.init()
-                screen = pygame.display.set_mode((600, 250))
-                pygame.display.set_caption("Update Complete")
-                font_title = pygame.font.SysFont("Arial", 32)
-                font_text = pygame.font.SysFont("Arial", 22)
-                clock = pygame.time.Clock()
-                
-                waiting = True
-                while waiting:
-                    for event in pygame.event.get():
-                        if event.type == pygame.QUIT or event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
-                            waiting = False
-                    
-                    screen.fill((40, 40, 50))
-                    
-                    title = font_title.render("Install Complete!", True, (100, 255, 100))
-                    msg1 = font_text.render("Exit this window and rerun the exe", True, (255, 255, 255))
-                    msg2 = font_text.render("to start the game with the update.", True, (255, 255, 255))
-                    hint = font_text.render("(Click anywhere to exit)", True, (150, 150, 150))
-                    
-                    screen.blit(title, (600//2 - title.get_width()//2, 40))
-                    screen.blit(msg1, (600//2 - msg1.get_width()//2, 100))
-                    screen.blit(msg2, (600//2 - msg2.get_width()//2, 130))
-                    screen.blit(hint, (600//2 - hint.get_width()//2, 180))
-                    
-                    pygame.display.flip()
-                    clock.tick(30)
-                
-                pygame.quit()
                 sys.exit(0)
             else:
                 print("Update failed. Exiting...")
