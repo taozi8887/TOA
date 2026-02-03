@@ -271,19 +271,11 @@ def main():
     code_was_updated = check_and_update()
     
     if code_was_updated:
-        print("Code was updated! Restarting...")
-        # Restart by running the exe again (not Python directly)
+        print("Code was updated! Reloading modules...")
+        # No need to restart - just clear module cache and continue
+        # The updated files are already in .toa and will be imported below
         import time
-        time.sleep(1)  # Brief pause to ensure files are released
-        
-        if getattr(sys, 'frozen', False):
-            # Running as exe - restart the exe
-            exe_path = sys.executable
-            os.execv(exe_path, [exe_path] + sys.argv[1:])
-        else:
-            # Running as script - restart Python
-            python = sys.executable
-            os.execv(python, [python] + sys.argv)
+        time.sleep(0.5)  # Brief pause to ensure files are released
     
     # CRITICAL: Remove any cached/bundled modules before importing
     # This ensures we load the downloaded files, not bundled ones
