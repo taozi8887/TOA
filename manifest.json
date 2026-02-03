@@ -1,5 +1,5 @@
 {
-  "version": "0.6.21",
+  "version": "0.6.22",
   "release_date": "2026-02-02",
   "manifest_version": 1,
   "files": {
@@ -91,8 +91,8 @@
     },
     "code": {
       "main.py": {
-        "hash": "cf69922a279202c59e3fd7e5668261ef460f874cb9ec4399f126b73c95aab74b",
-        "size": 110928
+        "hash": "50fc70c104ab482051ebd88fbe2a4b0bb131f67ae86580bf2e4366f824759bc7",
+        "size": 110920
       },
       "osu_to_level.py": {
         "hash": "a93d4370e3ea9d6d0f49c79e3b4d5c8bc347574500464d2680185d4695645d00",
@@ -103,8 +103,8 @@
         "size": 1426
       },
       "auto_updater.py": {
-        "hash": "b88ae952b40dbe53412505d83173b81b24977cb7aca80770cdc634f7126276e3",
-        "size": 33667
+        "hash": "4e2676c18caa5f8af170a56133fac73b5804ca12bd1c321e160fc556b33cc32e",
+        "size": 33666
       },
       "batch_process_osz.py": {
         "hash": "ea91cd87e57ddfa1d9481b450e15a55658f8942203e89637e41760f02caf373d",
@@ -117,8 +117,8 @@
     }
   },
   "patches": {
-    "from_0.6.20": {
-      "description": "Patch from 0.6.20 to 0.6.21",
+    "from_0.6.21": {
+      "description": "Patch from 0.6.21 to 0.6.22",
       "changed_files": [
         "main.py",
         "auto_updater.py"
@@ -127,7 +127,7 @@
     }
   },
   "rollback": {
-    "previous_version": "0.6.20",
+    "previous_version": "0.6.21",
     "can_rollback": true
   }
 }
