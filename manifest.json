@@ -103,8 +103,8 @@
         "size": 1426
       },
       "auto_updater.py": {
-        "hash": "70cd1333865662ee2d746848456e46ba274a8dd837ed78b612e1ec72fdb68110",
-        "size": 32215
+        "hash": "5bbbb2bc3fe064b5a4d556889faea6dfcf755f1c16d3572fa8523fb4cb81ee1b",
+        "size": 32675
       },
       "batch_process_osz.py": {
         "hash": "ea91cd87e57ddfa1d9481b450e15a55658f8942203e89637e41760f02caf373d",
@@ -117,16 +117,16 @@
     }
   },
   "patches": {
-    "from_0.6.2": {
-      "description": "Patch from 0.6.2 to 0.6.3",
+    "from_0.6.3": {
+      "description": "Patch from 0.6.3 to 0.6.3",
       "changed_files": [
-        "main.py"
+        "auto_updater.py"
       ],
       "removed_files": []
     }
   },
   "rollback": {
-    "previous_version": "0.6.2",
+    "previous_version": "0.6.3",
     "can_rollback": true
   }
 }
