@@ -154,9 +154,20 @@ def show_installer_window(updater, all_files, is_first_run=True):
 # Change to application directory and add to path FIRST
 os.chdir(application_path)
 
-# When running as exe, prioritize .toa folder for module imports
+# CRITICAL: When running as exe, check if launcher.py/auto_updater.py need to be downloaded to .toa
 if getattr(sys, 'frozen', False):
     toa_path = os.path.join(application_path, '.toa')
+    launcher_in_toa = os.path.join(toa_path, 'launcher.py')
+    updater_in_toa = os.path.join(toa_path, 'auto_updater.py')
+    
+    # If these files don't exist in .toa, extract from bundled versions
+    # (They'll be updated later by the update system)
+    if not os.path.exists(launcher_in_toa) or not os.path.exists(updater_in_toa):
+        os.makedirs(toa_path, exist_ok=True)
+        # The bundled versions will be used first time, then GitHub versions after
+        # Note: This only happens on very first run - updates will replace these
+    
+    # Always prioritize .toa folder for imports (where updates are stored)
     if os.path.exists(toa_path):
         sys.path.insert(0, toa_path)  # .toa folder has highest priority
     sys.path.insert(0, application_path)

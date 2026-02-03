@@ -2,11 +2,26 @@
 
 
 a = Analysis(
-    ['launcher.py'],
+    ['bootstrap.py'],
     pathex=[],
     binaries=[],
-    datas=[('update_config.json', '.')],
-    hiddenimports=['requests', 'pygame'],
+    datas=[
+        ('update_config.json', '.'),
+        ('launcher.py', '.'),
+        ('auto_updater.py', '.')
+    ],
+    hiddenimports=[
+        'requests',
+        'requests.adapters',
+        'requests.auth',
+        'requests.cookies',
+        'requests.models',
+        'requests.sessions',
+        'requests.structures',
+        'urllib3',
+        'pygame',
+        'pygame.gfxdraw'
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
