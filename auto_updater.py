@@ -170,6 +170,18 @@ class AutoUpdater:
                     if remote_hash != local_hash:
                         changed_files.append(file_path)
             
+            # Calculate total size of changed files
+            total_size = 0
+            for file_path in changed_files:
+                if '/' in file_path:
+                    dir_name, file_name = file_path.split('/', 1)
+                    file_info = remote_files.get(dir_name, {}).get(file_name, {})
+                else:
+                    file_info = remote_files.get('code', {}).get(file_path, {})
+                
+                if isinstance(file_info, dict):
+                    total_size += file_info.get('size', 0)
+            
             # Get patch info if available
             update_info = {
                 'from_version': local_version,
@@ -177,7 +189,8 @@ class AutoUpdater:
                 'can_patch': False,
                 'patch_info': None,
                 'release_date': remote_manifest.get('release_date', ''),
-                'total_size': 0
+                'total_size': total_size
+            }
             }
             
             # Check if delta patch is available
