@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.26] - 2026-02-02
+
+### Fixed
+- **Critical Threading Bug** - Fixed duplicate download thread spawning (hundreds of concurrent downloads)
+  - Added `download_started` flag to prevent multiple thread creation
+  - Each update now spawns exactly ONE download thread instead of 100+
+  - Eliminated file access conflicts from concurrent downloads
+- **Update Size Display** - Now calculates actual update size from manifest instead of showing 0 MB
+- **Missing _log Method** - Added logging method to AutoUpdater class (was causing AttributeError crashes)
+
+### Changed
+- Unified update window state machine now uses boolean flag for thread control
+- Improved thread safety with immediate flag setting on download start
+- Update confirmation screen now shows accurate download size in MB
+
+### Technical
+- Threading fix prevents race condition where `downloaded[0] == 0` remained true for multiple frames
+- Size calculation now sums file sizes from manifest's `file_info` dictionaries
+- AutoUpdater.__init__ now creates `self.log_file` and `_log()` method for debug logging
+
 ## [0.5.0] - 2026-02-02
 
 ### Added

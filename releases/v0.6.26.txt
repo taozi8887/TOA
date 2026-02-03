@@ -1,0 +1,64 @@
+## 🐛 TOA v0.6.26 - Critical Threading Bugfix
+
+### 🚨 Critical Fixes
+
+**Threading Bug Fixed**
+- 🔧 Fixed duplicate download thread spawning (was creating 100+ concurrent threads)
+- ✅ Now spawns exactly ONE download thread per update
+- 🛡️ Eliminated file access conflicts from concurrent downloads
+- 🚫 Prevents [WinError 32] "process cannot access file" errors
+- 📝 Added `download_started` flag to prevent race conditions
+
+**Update Size Display Fixed**
+- 📊 Update confirmation screen now shows accurate download size
+- ✅ Calculates actual size by summing file sizes from manifest
+- ❌ Previously showed "0 MB" for all updates
+- 💡 Provides accurate bandwidth estimate before downloading
+
+**Missing _log Method Fixed**
+- 🔧 Added logging method to AutoUpdater class
+- ❌ Previously caused AttributeError: 'AutoUpdater' object has no attribute '_log'
+- 📝 Proper logging infrastructure now in place
+- 📂 Log file location: .toa/update_debug.log
+
+### 📊 Technical Details
+
+**Root Cause of Threading Bug**
+- The condition `if downloaded[0] == 0 and current_file_info['name'] == ''` remained true for multiple frames (at 60 FPS)
+- Download thread couldn't update these values fast enough before next frame
+- Result: Thread spawn code executed 100+ times in rapid succession
+
+**Solution**
+- Replaced with `if not download_started:` boolean flag
+- Flag set IMMEDIATELY upon entering download spawn block
+- Prevents any duplicate thread creation
+
+**Impact**
+- Before: 100+ threads → file conflicts → update failures
+- After: 1 thread → clean downloads → reliable updates
+
+**Size Calculation Implementation**
+- Iterates through changed_files list from manifest
+- Extracts file_info dictionary for each changed file
+- Sums the 'size' field to calculate total_size
+- Displays as MB on update confirmation screen
+
+### 📁 Files Changed
+
+- `launcher.py`: Added download_started flag, replaced spawn condition
+- `auto_updater.py`: Added _log method, implemented size calculation
+- `main.py`: Version bump to 0.6.26
+
+### ⚠️ Important Note
+
+The threading fix applies to FUTURE updates. The v0.6.24 → v0.6.26 update 
+may still show duplicate threads in the log because the OLD launcher was 
+used to download the fix. All subsequent updates will be clean with only 
+one download thread.
+
+───────────────────────────────────────────────────────────────────
+
+**This is a critical update.** If you experienced update failures, file 
+access errors, or saw "0 MB" update sizes, please update immediately.
+
+Updates will happen automatically on next launch.
