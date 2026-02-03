@@ -249,11 +249,12 @@ def check_and_update():
 
 def main():
     """Main launcher function"""
-    # CRITICAL: Pre-load pygame FIRST before anything else when running as exe
+    # CRITICAL: Pre-load pygame AND all its submodules FIRST before anything else when running as exe
     # This must happen before check_and_update() to avoid DLL path issues
     if getattr(sys, 'frozen', False):
         try:
             import pygame
+            import pygame.gfxdraw  # CRITICAL: Import submodule so it's available
             # Keep pygame in sys.modules so main.py can use it
             print(f"Pre-loaded pygame from bundled location")
         except Exception as e:
