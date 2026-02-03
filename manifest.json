@@ -1,5 +1,5 @@
 {
-  "version": "0.6.16",
+  "version": "0.6.17",
   "release_date": "2026-02-02",
   "manifest_version": 1,
   "files": {
@@ -91,8 +91,8 @@
     },
     "code": {
       "main.py": {
-        "hash": "bc1c7c24d30bbd5ec6dac129f7f4261f5dcf46561661a92a3fd7bac9a4f81ab3",
-        "size": 110928
+        "hash": "ae7e35a57812eb1b51b0d3a08ac3c85eb4591d35b40095200bb9fdb828ee1bf1",
+        "size": 110920
       },
       "osu_to_level.py": {
         "hash": "a93d4370e3ea9d6d0f49c79e3b4d5c8bc347574500464d2680185d4695645d00",
@@ -117,8 +117,8 @@
     }
   },
   "patches": {
-    "from_0.6.15": {
-      "description": "Patch from 0.6.15 to 0.6.16",
+    "from_0.6.16": {
+      "description": "Patch from 0.6.16 to 0.6.17",
       "changed_files": [
         "main.py"
       ],
@@ -126,7 +126,7 @@
     }
   },
   "rollback": {
-    "previous_version": "0.6.15",
+    "previous_version": "0.6.16",
     "can_rollback": true
   }
 }
