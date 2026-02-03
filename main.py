@@ -425,7 +425,7 @@ def show_loading_screen():
                 for i, code_file in enumerate(code_files):
                     # Update screen with progress
                     screen.fill(BLACK)
-                    title_text = font_title.render("TOA TESTING", True, WHITE)
+                    title_text = font_title.render("TOA", True, WHITE)
                     title_rect = title_text.get_rect(center=(window_width // 2, window_height // 2 - 100))
                     screen.blit(title_text, title_rect)
                     
