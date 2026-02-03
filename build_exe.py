@@ -29,7 +29,7 @@ def build_exe():
     """Build the executable using PyInstaller"""
     
     exe_name = "TOA"
-    release_folder = f"releases"
+    release_folder = f"exes"
     
     # Use the TOA.spec file which has all the proper configuration
     print(f"\nBuilding {exe_name}.exe...")
