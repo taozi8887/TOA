@@ -17,7 +17,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.5.3"
+__version__ = "0.5.4"
 
 # Settings management
 class Settings:
@@ -389,7 +389,7 @@ def show_loading_screen():
     if game_settings.get('fade_effects', True):
         for alpha in range(255, 0, -25):
             screen.fill(BLACK)
-            title_text = font_title.render("TOA", True, WHITE)
+            title_text = font_title.render("TOA TESTING", True, WHITE)
             title_rect = title_text.get_rect(center=(window_width // 2, window_height // 2 - 100))
             screen.blit(title_text, title_rect)
 
