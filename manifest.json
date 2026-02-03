@@ -111,8 +111,8 @@
         "size": 5350
       },
       "launcher.py": {
-        "hash": "306177d3df0d78ddcbd246f9e7a362a8316b4bb2aaa9555964b9f845e40a0334",
-        "size": 13685
+        "hash": "ba763392bdded6d3ffd03a1bd4f0582cd204b1161733351d8b442c8c02a4d2dc",
+        "size": 13933
       }
     }
   },
@@ -120,8 +120,6 @@
     "from_0.5.4": {
       "description": "Patch from 0.5.4 to 0.5.4",
       "changed_files": [
-        "main.py",
-        "auto_updater.py",
         "launcher.py"
       ],
       "removed_files": []
