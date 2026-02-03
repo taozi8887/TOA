@@ -967,6 +967,12 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
         esc_rect = esc_text.get_rect(center=(window_width // 2, window_height - 60))
         screen.blit(esc_text, esc_rect)
 
+        # Draw UPDATE TEST in center over everything
+        font_update_test = pygame.font.Font(None, 120)
+        update_test_text = font_update_test.render("UPDATE TEST", True, (255, 0, 0))
+        update_test_rect = update_test_text.get_rect(center=(window_width // 2, window_height // 2))
+        screen.blit(update_test_text, update_test_rect)
+
         # Fade in on first frame
         if first_frame:
             first_frame = False
