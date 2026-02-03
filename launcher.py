@@ -257,6 +257,7 @@ def check_and_update():
             downloaded = [0]
             total_files = len(files_to_update)
             current_file_info = {'name': '', 'downloaded': 0, 'total': 0, 'start_time': 0}
+            download_started = False  # Flag to prevent multiple thread spawns
             
             def progress_callback(current, total, filename, file_downloaded, file_total):
                 downloaded[0] = current
@@ -322,7 +323,8 @@ def check_and_update():
                 
                 elif state == 'installing':
                     # Start download if not started
-                    if downloaded[0] == 0 and current_file_info['name'] == '':
+                    if not download_started:
+                        download_started = True  # Set flag IMMEDIATELY to prevent duplicate threads
                         # Trigger download in background
                         import threading
                         
