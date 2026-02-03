@@ -325,14 +325,28 @@ def check_and_update():
                     if downloaded[0] == 0 and current_file_info['name'] == '':
                         # Trigger download in background
                         import threading
+                        
+                        class DownloadState:
+                            def __init__(self):
+                                self.success = False
+                                self.done = False
+                        
+                        download_state = DownloadState()
+                        
                         def do_download():
-                            nonlocal success
-                            success = updater.download_updates(files_to_update, progress_callback=progress_callback, is_initial_download=False)
-                            nonlocal state
-                            state = 'complete'
+                            download_state.success = updater.download_updates(files_to_update, progress_callback=progress_callback, is_initial_download=False)
+                            download_state.done = True
                         
                         download_thread = threading.Thread(target=do_download, daemon=True)
                         download_thread.start()
+                        
+                        # Store state object so we can check it later
+                        current_file_info['download_state'] = download_state
+                    
+                    # Check if download is complete
+                    if 'download_state' in current_file_info and current_file_info['download_state'].done:
+                        state = 'complete'
+                        success = current_file_info['download_state'].success
                     
                     # Progress screen
                     title = font_title.render("Installing Update...", True, (100, 200, 255))
