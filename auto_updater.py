@@ -196,6 +196,14 @@ class AutoUpdater:
         Returns:
             True if successful, False otherwise
         """
+        # Debug logging
+        log_file = os.path.join('.toa', 'update_debug.log') if os.path.exists('.toa') else 'update_debug.log'
+        def log(msg):
+            with open(log_file, 'a', encoding='utf-8') as f:
+                f.write(f"[{time.strftime('%H:%M:%S')}] {msg}\n")
+        
+        log(f"=== Download started: {len(files_to_download)} files ===")
+        
         try:
             data_folder = '.toa'
             os.makedirs(data_folder, exist_ok=True)
@@ -217,10 +225,13 @@ class AutoUpdater:
             total_files = len(files_to_download)
             failed_files = []
             remote_manifest = self._get_remote_manifest()
+            log(f"Remote manifest fetched, version: {remote_manifest.get('version', 'unknown') if remote_manifest else 'FAILED'}")
             
             for idx, file_path in enumerate(files_to_download):
+                log(f"Downloading {idx+1}/{total_files}: {file_path}")
                 # Get expected hash from manifest
                 expected_hash = self._get_file_hash_from_manifest(remote_manifest, file_path)
+                log(f"  Expected hash: {expected_hash[:16]}...")
                 
                 # Download with chunked streaming and hash verification
                 success = self._download_file_chunked(
@@ -231,20 +242,25 @@ class AutoUpdater:
                 )
                 
                 if not success:
+                    log(f"  FAILED to download: {file_path}")
                     print(f"FAILED to download: {file_path}")
                     failed_files.append(file_path)
                 else:
+                    log(f"  ✓ Successfully downloaded: {file_path}")
                     print(f"✓ Downloaded: {file_path}")
                 
                 time.sleep(0.1)
             
             # Only update manifest if ALL files downloaded successfully
             if len(failed_files) == 0:
+                log("All files downloaded successfully, updating manifest...")
                 self._update_local_manifest(remote_manifest)
                 print("✓ Updated local manifest")
+                log("✓ Manifest updated")
                 
                 # Download config files if initial install
                 if is_initial_download:
+                    log("Initial download, fetching config files...")
                     for config_file in ['update_config.json', 'toa_settings.json']:
                         try:
                             url = f"{self.raw_url}/{config_file}"
@@ -252,19 +268,26 @@ class AutoUpdater:
                             if response.status_code == 200:
                                 with open(os.path.join(data_folder, config_file), 'wb') as f:
                                     f.write(response.content)
-                        except:
-                            pass
+                                log(f"  ✓ Downloaded {config_file}")
+                        except Exception as e:
+                            log(f"  Failed to download {config_file}: {e}")
+            else:
+                log(f"Download incomplete: {len(failed_files)} files failed")
             
             if failed_files:
+                log(f"WARNING: {len(failed_files)} files failed: {failed_files}")
                 print(f"\nWarning: {len(failed_files)} files failed to download")
                 return len(failed_files) < total_files * 0.5
             
+            log("=== Download completed successfully ===")
             return True
         
         except Exception as e:
+            log(f"ERROR in download_updates: {e}")
             print(f"Error downloading updates: {e}")
             # Rollback if backup exists
             if create_backup and not is_initial_download:
+                log("Attempting rollback...")
                 self._rollback_from_backup()
             return False
     
