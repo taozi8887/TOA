@@ -272,11 +272,18 @@ def main():
     
     if code_was_updated:
         print("Code was updated! Restarting...")
-        # Restart the launcher to use new code (replaces current process)
+        # Restart by running the exe again (not Python directly)
         import time
         time.sleep(1)  # Brief pause to ensure files are released
-        python = sys.executable
-        os.execv(python, [python] + sys.argv)
+        
+        if getattr(sys, 'frozen', False):
+            # Running as exe - restart the exe
+            exe_path = sys.executable
+            os.execv(exe_path, [exe_path] + sys.argv[1:])
+        else:
+            # Running as script - restart Python
+            python = sys.executable
+            os.execv(python, [python] + sys.argv)
     
     # CRITICAL: Remove any cached/bundled modules before importing
     # This ensures we load the downloaded files, not bundled ones
