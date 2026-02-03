@@ -289,8 +289,14 @@ def main():
             toa_main_path = os.path.join('.toa', 'main.py')
             if os.path.exists(toa_main_path):
                 import importlib.util
+                import pygame  # Import pygame here so it's available
+                
                 spec = importlib.util.spec_from_file_location("main", os.path.abspath(toa_main_path))
                 game_main = importlib.util.module_from_spec(spec)
+                
+                # Inject bundled pygame into main's namespace before executing
+                game_main.pygame = pygame
+                
                 sys.modules['main'] = game_main
                 spec.loader.exec_module(game_main)
                 print(f"Force-loaded main.py from: {os.path.abspath(toa_main_path)}")
