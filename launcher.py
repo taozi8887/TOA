@@ -272,11 +272,39 @@ def main():
     code_was_updated = check_and_update()
     
     if code_was_updated:
-        print("Code was updated! Reloading modules...")
-        # No need to restart - just clear module cache and continue
-        # The updated files are already in .toa and will be imported below
-        import time
-        time.sleep(0.5)  # Brief pause to ensure files are released
+        print("Updates installed successfully!")
+        print("Please restart the game to apply updates.")
+        # Show a message box and exit
+        if getattr(sys, 'frozen', False):
+            import pygame
+            pygame.init()
+            screen = pygame.display.set_mode((500, 200))
+            pygame.display.set_caption("Update Complete")
+            font = pygame.font.SysFont("Arial", 24)
+            clock = pygame.time.Clock()
+            
+            running = True
+            while running:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        running = False
+                    if event.type == pygame.KEYDOWN:
+                        running = False
+                
+                screen.fill((40, 40, 50))
+                title = font.render("Update Complete!", True, (100, 255, 100))
+                msg = font.render("Please restart the game.", True, (255, 255, 255))
+                hint = font.render("Press any key to exit...", True, (150, 150, 150))
+                
+                screen.blit(title, (150, 50))
+                screen.blit(msg, (120, 90))
+                screen.blit(hint, (110, 140))
+                
+                pygame.display.flip()
+                clock.tick(30)
+            
+            pygame.quit()
+        sys.exit(0)
     
     # CRITICAL: Remove any cached/bundled modules before importing
     # This ensures we load the downloaded files, not bundled ones
