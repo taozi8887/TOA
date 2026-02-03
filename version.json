@@ -1,5 +1,5 @@
 {
-  "version": "0.5.4",
+  "version": "0.5.5",
   "files": {
     "assets": {
       "box.jpg": "40ed857c173a25d0d9ed4b3f6dffb6ac38641bb729b7dcd52bf5a32196871095",
@@ -25,7 +25,7 @@
       "osz/warriors.osz": "acbe4d220dfaf490fcb2ad5ca075e9c814667dea58fe90b97e4cd5e83bd07bd2"
     },
     "code": {
-      "main.py": "7eae9c2b3d329e2b6cdfca65a4c59f8297a591e454fdb21f92550aff7736f4aa",
+      "main.py": "8fd7960c749519798d1a4fcf5aa21f3d1784d7ab7bcfd6a981eacce3fde90534",
       "osu_to_level.py": "a93d4370e3ea9d6d0f49c79e3b4d5c8bc347574500464d2680185d4695645d00",
       "unzip.py": "5ad3dc665f5f2000c269d3912586558be08bed2ba12459ae4106dd47c339e609",
       "auto_updater.py": "4a3e3b52c8826aee4c5a4ab994a6e209076410b32800e2362a76ab5cf676509e",
