@@ -28,9 +28,9 @@
       "main.py": "8fd7960c749519798d1a4fcf5aa21f3d1784d7ab7bcfd6a981eacce3fde90534",
       "osu_to_level.py": "a93d4370e3ea9d6d0f49c79e3b4d5c8bc347574500464d2680185d4695645d00",
       "unzip.py": "5ad3dc665f5f2000c269d3912586558be08bed2ba12459ae4106dd47c339e609",
-      "auto_updater.py": "4a3e3b52c8826aee4c5a4ab994a6e209076410b32800e2362a76ab5cf676509e",
+      "auto_updater.py": "e4a8791ca99be510d2d85b19478a4632f73b260d35c3b23826b24b1a7d52ad14",
       "batch_process_osz.py": "ea91cd87e57ddfa1d9481b450e15a55658f8942203e89637e41760f02caf373d",
-      "launcher.py": "b91c064737c37eaf926cc98a14df0332bc27e27486bcc859f0062cb0f60ce7af"
+      "launcher.py": "3be67fdc390b4d885d3a5780a165be9b845c08a735fb7eeb1cd5b22516b15a77"
     }
   }
 }
