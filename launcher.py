@@ -234,7 +234,9 @@ def check_and_update():
         if has_updates and len(files_to_update) > 0:
             # Show unified update window with confirmation, progress, and completion
             remote_version = update_info.get('to_version', 'unknown')
+            update_size_mb = update_info.get('total_size', 0) / (1024 * 1024)
             print(f"\nUpdate available: v{remote_version}")
+            print(f"Size: {update_size_mb:.1f} MB")
             
             import pygame
             import time
@@ -295,10 +297,14 @@ def check_and_update():
                 if state == 'confirm':
                     # Confirmation screen
                     title = font_title.render(f"Update v{remote_version} found", True, (100, 200, 255))
-                    screen.blit(title, (600//2 - title.get_width()//2, 60))
+                    screen.blit(title, (600//2 - title.get_width()//2, 50))
+                    
+                    # Show size
+                    size_text = font_small.render(f"Size: {update_size_mb:.1f} MB", True, (200, 200, 200))
+                    screen.blit(size_text, (600//2 - size_text.get_width()//2, 100))
                     
                     msg = font_text.render("Install this update?", True, (255, 255, 255))
-                    screen.blit(msg, (600//2 - msg.get_width()//2, 140))
+                    screen.blit(msg, (600//2 - msg.get_width()//2, 150))
                     
                     # Buttons
                     yes_button = pygame.Rect(150, 260, 120, 50)
