@@ -1,0 +1,100 @@
+## 🎮 TOA v0.6.29 - UX & Quality of Life Improvements
+
+### ✨ New Features
+
+**Visual Input Feedback**
+- 👁️ Boxes now flash when you click (red for left click, blue for right click)
+- ✅ Shows visual feedback even when you miss or don't hit any notes
+- 🎯 Only triggers on mouse clicks, not WASD movement keys
+- 💫 Adds satisfying visual confirmation of your inputs
+
+**Autoplay Debug Toggle**
+- ⌨️ Press Ctrl+A+P during gameplay to toggle autoplay mode
+- 🚫 Removed the annoying autoplay confirmation popup
+- 🐛 Autoplay is now a debug feature accessible via hotkey
+- 💾 Setting persists between game sessions
+
+### 🐛 Bug Fixes
+
+**Keybind Swapping Logic Fixed**
+- 🔄 Keybind changes now swap conflicting binds instead of blocking
+- ✅ Setting Top to B when Bottom is B will swap them (Top=B, Bottom=None)
+- 🎮 Works intuitively like most games handle keybind conflicts
+- ❌ No more "This key is already in use" dead-ends
+
+**Cross-Type Binding Conflicts Fixed**
+- 🖱️⌨️ Mouse binds and keyboard binds now properly detect conflicts
+- 🔧 Setting a mouse bind to 'S' clears any keyboard bind using 'S'
+- 🔧 Setting a keyboard bind to mouse button 1 clears mouse bind using button 1
+- 🛡️ Prevents impossible configurations where same input controls multiple actions
+
+**None Keybind Crash Fixed**
+- 🔧 Fixed TypeError when keybind is set to None
+- 📝 Now displays "NONE" in settings menu for unbound keys
+- ✅ Prevents crash when rendering keybind labels
+
+**Quit Dialog Context Fixed**
+- 💬 "Quit to Menu" now shows correct prompt text
+- ❌ Previously showed "Quit Game?" for both quit actions
+- ✅ Now shows "Quit to Menu?" when returning to level select
+- ✅ Shows "Quit Game?" when closing the application
+
+**Level Selector Drag Scrolling Improved**
+- 🖱️ Mouse release after drag no longer selects the level under cursor
+- 📍 Drag only works when initial click is inside the level list area
+- ❌ Prevents accidental level selection when scrolling
+- 🎯 More precise and intentional level selection
+
+**Hover Effects Fixed**
+- 👆 Hover effects only show on fully visible level items
+- ❌ Partially clipped items at top/bottom of list no longer highlight
+- 🚫 Hover disabled while dragging to prevent visual glitches
+
+### 🔧 Technical Improvements
+
+**Level Selector Refinements**
+- Reduced drag threshold from 10 pixels to 5 pixels for more responsive scrolling
+- Added viewport_rect boundary check for initial mouse down
+- Added item_dragging flag to prevent selection on drag release
+- Full visibility check: `item_y >= list_start_y and item_y + item_height <= list_end_y`
+
+**Input Flash System**
+- Flash data stored as `{box_idx: (time, color)}` dictionary
+- Time-based fade effect with 500ms duration
+- Flash color determined by mouse button: 'red' or 'blue'
+- Integrated with existing visual feedback system
+
+**Settings Menu Keybind Logic**
+- Comprehensive conflict detection across both keybinds and mouse_binds
+- Automatic clearing of conflicting binds to None with immediate save
+- Added None handling in `get_key_name()` and `get_mouse_name()` helpers
+- Cross-dictionary conflict checking prevents impossible states
+
+**Quit Confirmation Dialog**
+- Added `is_quit_to_menu` parameter (default: False)
+- Title text changes based on context: "Quit to Menu?" vs "Quit Game?"
+- Called with appropriate context from game pause and level selector
+
+### 📁 Files Changed
+
+- `main.py`: All UX improvements, bug fixes, and feature additions
+- `toa_settings.json`: Added 'autoplay_enabled' setting field
+
+### 🎯 Impact
+
+**User Experience**
+- More intuitive keybind configuration
+- Better visual feedback during gameplay
+- Cleaner autoplay workflow without popup interruptions
+- Smoother level selection with refined drag behavior
+- Context-aware quit dialogs reduce confusion
+
+**Stability**
+- Eliminated TypeError crash from None keybinds
+- Prevented invalid keybind configurations
+- Fixed visual glitches with hover effects
+
+**Polish**
+- Visual input feedback makes the game feel more responsive
+- Drag scrolling behaves like modern UIs
+- Settings menu handles edge cases gracefully

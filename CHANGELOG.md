@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.29] - 2026-02-03
+
+### Added
+- **Input Visual Feedback** - Boxes now flash when you click (red for left click, blue for right click)
+  - Shows visual feedback even when you miss/don't hit any notes
+  - Only triggers on mouse clicks, not WASD movement
+  - Adds satisfying visual confirmation of your inputs
+- **Autoplay Toggle Hotkey** - Press Ctrl+A+P during gameplay to toggle autoplay mode
+  - Removed the autoplay confirmation popup (was annoying)
+  - Autoplay is now a debug feature accessible via hotkey
+  - Setting persists between sessions
+
+### Fixed
+- **Keybind Swapping** - Keybind changes now swap conflicting binds instead of blocking
+  - Setting Top to B when Bottom is B will now swap them (Top=B, Bottom=None)
+  - Works intuitively like most games handle keybind conflicts
+  - No more "This key is already in use" dead-ends
+- **Cross-Type Binding Conflicts** - Mouse binds and keyboard binds now properly conflict
+  - Setting a mouse bind to 'S' now clears keyboard bind using 'S'
+  - Setting a keyboard bind to mouse button 1 now clears mouse bind using button 1
+  - Prevents impossible configurations where same input controls multiple actions
+- **None Keybind Crash** - Fixed TypeError when keybind is set to None
+  - Now displays "NONE" in settings menu for unbound keys
+  - Prevents crash when rendering keybind labels
+- **Quit Dialog Text** - "Quit to Menu" now shows correct prompt text
+  - Previously showed "Quit Game?" for both quit actions
+  - Now shows "Quit to Menu?" when returning to level select
+  - Shows "Quit Game?" when closing the application
+- **Level Selector Drag Scrolling** - Improved drag behavior
+  - Mouse release after drag no longer selects the level under cursor
+  - Drag only works when initial click is inside the level list area
+  - Prevents accidental level selection when scrolling
+- **Hover Effects** - Fixed hover highlighting on partially visible items
+  - Hover effects only show on fully visible level items
+  - Partially clipped items at top/bottom of list no longer highlight
+  - Hover disabled while dragging to prevent visual glitches
+
+### Changed
+- Reduced drag threshold from 10 pixels to 5 pixels for more responsive scrolling
+- Level selector now checks viewport bounds for initial mouse down
+- Input flash system uses time-based fade effect (500ms duration)
+
 ## [0.6.26] - 2026-02-02
 
 ### Fixed

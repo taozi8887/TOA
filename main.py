@@ -16,7 +16,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.6.28"
+__version__ = "0.6.29"
 
 # Settings management
 class Settings:
@@ -28,6 +28,7 @@ class Settings:
         'hitsounds_enabled': True,
         'scroll_speed': 75,
         'fade_effects': True,
+        'autoplay_enabled': False,  # Debug feature - toggle with Ctrl+A+P
         'keybinds': {
             'top': pygame.K_w,
             'right': pygame.K_d,
@@ -683,6 +684,11 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
     scrollbar_dragging = False
     drag_start_y = 0
     drag_start_scroll = 0
+    
+    # Track mouse down position for drag scrolling
+    mouse_down_pos = None
+    mouse_down_y = 0
+    item_dragging = False
 
     # Hover animation tracking
     hover_animations = {}  # {index: animation_progress (0.0 to 1.0)}
@@ -737,20 +743,37 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
                         drag_start_y = mouse_y
                         drag_start_scroll = scroll_offset
                         continue
-
-                # Check if clicked on a level item
-                for i in range(len(level_metadata)):
-                    item_y = list_start_y + (i * item_height) - scroll_offset
-                    # Only check items that are visible in the viewport
-                    if item_y + item_height < list_start_y or item_y > list_end_y:
-                        continue
-                    item_rect = pygame.Rect(50, item_y, window_width - 100, item_height - 5)
-                    if item_rect.collidepoint(mouse_pos):
-                        selected_level = resource_path(os.path.join(levels_dir, level_metadata[i][0]))
-                        break
+                
+                # Track mouse down position for drag detection (only if inside level selector area)
+                viewport_rect = pygame.Rect(0, list_start_y, window_width, list_end_y - list_start_y)
+                if viewport_rect.collidepoint(mouse_pos):
+                    mouse_down_pos = mouse_pos
+                    mouse_down_y = mouse_y
+                    item_dragging = False
+                else:
+                    mouse_down_pos = None
 
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 scrollbar_dragging = False
+                
+                # Only select level if mouse hasn't moved much (not a drag) AND didn't drag at all
+                if mouse_down_pos is not None and not item_dragging:
+                    drag_distance = abs(mouse_y - mouse_down_y)
+                    if drag_distance < 5:  # Tighter threshold - must be almost no movement
+                        # Check if clicked on a level item
+                        for i in range(len(level_metadata)):
+                            item_y = list_start_y + (i * item_height) - scroll_offset
+                            # Only check items that are visible in the viewport
+                            if item_y + item_height < list_start_y or item_y > list_end_y:
+                                continue
+                            item_rect = pygame.Rect(50, item_y, window_width - 100, item_height - 5)
+                            if item_rect.collidepoint(mouse_pos):
+                                selected_level = resource_path(os.path.join(levels_dir, level_metadata[i][0]))
+                                break
+                
+                # Reset drag state
+                mouse_down_pos = None
+                item_dragging = False
 
         # Handle continuous arrow key scrolling (when held down)
         keys = pygame.key.get_pressed()
@@ -766,6 +789,14 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
             drag_delta_y = mouse_y - drag_start_y
             scroll_delta = (drag_delta_y / (scrollbar_track_height - thumb_height)) * max_scroll if max_scroll > 0 else 0
             scroll_offset = max(0, min(max_scroll, drag_start_scroll + scroll_delta))
+        
+        # Handle item drag scrolling
+        if mouse_down_pos is not None and not scrollbar_dragging:
+            drag_delta_y = mouse_y - mouse_down_y
+            if abs(drag_delta_y) > 5:  # Started dragging
+                item_dragging = True
+                scroll_offset = max(0, min(max_scroll, scroll_offset - drag_delta_y * 2))  # 2x sensitivity
+                mouse_down_y = mouse_y  # Update for continuous drag
 
         # Rendering
         screen.fill(WHITE)
@@ -787,10 +818,13 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
                 continue
             item_rect = pygame.Rect(50, item_y, window_width - 100, item_height - 5)
 
-            # Check if mouse is hovering
-            is_hovered = item_rect.collidepoint(mouse_pos)
-            if is_hovered:
-                hovered_index = i
+            # Check if mouse is hovering (but not during drag)
+            is_hovered = False
+            if not item_dragging and item_rect.collidepoint(mouse_pos):
+                # Only allow hover if item is fully visible in viewport
+                if item_y >= list_start_y and item_y + item_height <= list_end_y:
+                    is_hovered = True
+                    hovered_index = i
 
             # Update hover animation for this item
             if i not in hover_animations:
@@ -803,8 +837,8 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
                 # Fade out quickly
                 hover_animations[i] = max(0.0, hover_animations[i] - hover_speed * 2)
 
-        # Set cursor based on whether hovering over any item
-        if hovered_index is not None:
+        # Set cursor based on whether hovering over any item (not during drag)
+        if hovered_index is not None and not item_dragging:
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
         else:
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
@@ -999,8 +1033,11 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
         fade_out(screen, duration=0.5)
     return selected_level
 
-def show_quit_confirmation():
+def show_quit_confirmation(is_quit_to_menu=False):
     """Show yes/no confirmation for quitting game
+    
+    Args:
+        is_quit_to_menu: If True, shows "Quit to Menu?" instead of "Quit Game?"
     
     Returns:
         True if user confirms quit, False otherwise
@@ -1064,7 +1101,8 @@ def show_quit_confirmation():
         pygame.draw.rect(screen, BLACK, box_rect, 3, border_radius=15)
         
         # Draw text
-        title_text = font_large.render("Quit Game?", True, BLACK)
+        title_text_str = "Quit to Menu?" if is_quit_to_menu else "Quit Game?"
+        title_text = font_large.render(title_text_str, True, BLACK)
         title_rect = title_text.get_rect(center=(window_width // 2, box_y + 60))
         screen.blit(title_text, title_rect)
         
@@ -1131,7 +1169,6 @@ def show_settings_menu(from_game=False, from_selector=False):
     hitsound_volume = game_settings.get('hitsound_volume')
     hitsounds_enabled = game_settings.get('hitsounds_enabled')
     scroll_speed = game_settings.get('scroll_speed')
-    fade_effects = game_settings.get('fade_effects', True)
     fade_effects = game_settings.get('fade_effects', True)
     
     # Keybind remapping state
@@ -1210,10 +1247,14 @@ def show_settings_menu(from_game=False, from_selector=False):
     
     def get_key_name(key_code):
         """Get readable name for pygame key code"""
+        if key_code is None:
+            return "NONE"
         return pygame.key.name(key_code).upper()
     
     def get_mouse_name(button):
         """Get readable name for mouse button or key"""
+        if button is None:
+            return "NONE"
         if isinstance(button, int) and button > 10:  # Keyboard keys have higher values than mouse buttons (1-5)
             return get_key_name(button)
         names = {1: "Left Click", 2: "Middle Click", 3: "Right Click", 4: "Scroll Up", 5: "Scroll Down"}
@@ -1230,45 +1271,65 @@ def show_settings_menu(from_game=False, from_selector=False):
                 
             if event.type == pygame.KEYDOWN:
                 if waiting_for_key:
-                    # Check if key is already bound
+                    # Check if key is already bound and swap if necessary
                     keybinds = game_settings.get('keybinds')
                     mouse_binds = game_settings.get('mouse_binds')
                     
-                    # Check against other keybinds (excluding the one being remapped)
-                    is_duplicate = False
+                    # Check if this key is bound to another keybind
+                    conflicting_bind = None
                     for bind_name, bind_key in keybinds.items():
                         if bind_name != waiting_for_key and bind_key == event.key:
-                            is_duplicate = True
+                            conflicting_bind = bind_name
                             break
                     
-                    # Check against mouse binds
-                    if event.key in mouse_binds.values():
-                        is_duplicate = True
+                    # Check if this key is bound to a mouse bind (cross-type conflict)
+                    conflicting_mouse = None
+                    for bind_name, bind_val in mouse_binds.items():
+                        if bind_val == event.key:
+                            conflicting_mouse = bind_name
+                            break
                     
-                    if not is_duplicate:
-                        keybinds[waiting_for_key] = event.key
-                        game_settings.set('keybinds', keybinds)
-                        waiting_for_key = None
+                    # Clear conflicts
+                    if conflicting_bind:
+                        keybinds[conflicting_bind] = None
+                    if conflicting_mouse:
+                        mouse_binds[conflicting_mouse] = None
+                        game_settings.set('mouse_binds', mouse_binds)
+                    
+                    # Set the new binding
+                    keybinds[waiting_for_key] = event.key
+                    game_settings.set('keybinds', keybinds)
+                    waiting_for_key = None
                 elif waiting_for_mouse:
-                    # Check if key/button is already bound
+                    # Check if key/button is already bound and swap if necessary
                     keybinds = game_settings.get('keybinds')
                     mouse_binds = game_settings.get('mouse_binds')
                     
-                    is_duplicate = False
-                    # Check against keybinds
-                    if event.key in keybinds.values():
-                        is_duplicate = True
-                    
-                    # Check against other mouse binds (excluding the one being remapped)
-                    for bind_name, bind_val in mouse_binds.items():
-                        if bind_name != waiting_for_mouse and bind_val == event.key:
-                            is_duplicate = True
+                    # Check if this key is bound to a keybind (cross-type conflict)
+                    conflicting_keybind = None
+                    for bind_name, bind_key in keybinds.items():
+                        if bind_key == event.key:
+                            conflicting_keybind = bind_name
                             break
                     
-                    if not is_duplicate:
-                        mouse_binds[waiting_for_mouse] = event.key
-                        game_settings.set('mouse_binds', mouse_binds)
-                        waiting_for_mouse = None
+                    # Check if this key is bound to another mouse bind
+                    conflicting_mouse = None
+                    for bind_name, bind_val in mouse_binds.items():
+                        if bind_name != waiting_for_mouse and bind_val == event.key:
+                            conflicting_mouse = bind_name
+                            break
+                    
+                    # Clear conflicts
+                    if conflicting_keybind:
+                        keybinds[conflicting_keybind] = None
+                        game_settings.set('keybinds', keybinds)
+                    if conflicting_mouse:
+                        mouse_binds[conflicting_mouse] = None
+                    
+                    # Set the new binding
+                    mouse_binds[waiting_for_mouse] = event.key
+                    game_settings.set('mouse_binds', mouse_binds)
+                    waiting_for_mouse = None
                 elif event.key == pygame.K_ESCAPE:
                     if from_game:
                         result = 'BACK'
@@ -1280,25 +1341,35 @@ def show_settings_menu(from_game=False, from_selector=False):
                     
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if waiting_for_mouse:
-                    # Check if button is already bound
+                    # Check if button is already bound and swap if necessary
                     keybinds = game_settings.get('keybinds')
                     mouse_binds = game_settings.get('mouse_binds')
                     
-                    is_duplicate = False
-                    # Check against keybinds
-                    if event.button in keybinds.values():
-                        is_duplicate = True
-                    
-                    # Check against other mouse binds (excluding the one being remapped)
-                    for bind_name, bind_val in mouse_binds.items():
-                        if bind_name != waiting_for_mouse and bind_val == event.button:
-                            is_duplicate = True
+                    # Check if this button is bound to a keybind (cross-type conflict)
+                    conflicting_keybind = None
+                    for bind_name, bind_key in keybinds.items():
+                        if bind_key == event.button:
+                            conflicting_keybind = bind_name
                             break
                     
-                    if not is_duplicate:
-                        mouse_binds[waiting_for_mouse] = event.button
-                        game_settings.set('mouse_binds', mouse_binds)
-                        waiting_for_mouse = None
+                    # Check if this button is bound to another mouse bind
+                    conflicting_mouse = None
+                    for bind_name, bind_val in mouse_binds.items():
+                        if bind_name != waiting_for_mouse and bind_val == event.button:
+                            conflicting_mouse = bind_name
+                            break
+                    
+                    # Clear conflicts
+                    if conflicting_keybind:
+                        keybinds[conflicting_keybind] = None
+                        game_settings.set('keybinds', keybinds)
+                    if conflicting_mouse:
+                        mouse_binds[conflicting_mouse] = None
+                    
+                    # Set the new binding
+                    mouse_binds[waiting_for_mouse] = event.button
+                    game_settings.set('mouse_binds', mouse_binds)
+                    waiting_for_mouse = None
                 else:
                     # Check slider clicks
                     if music_slider_rect.collidepoint(mouse_pos):
@@ -1315,12 +1386,12 @@ def show_settings_menu(from_game=False, from_selector=False):
                         game_settings.set('fade_effects', fade_effects)
                     elif quit_menu_rect and quit_menu_rect.collidepoint(mouse_pos):
                         # Show confirmation for quit to menu
-                        if show_quit_confirmation():
+                        if show_quit_confirmation(is_quit_to_menu=True):
                             result = 'QUIT_MENU'
                             running = False
                     elif quit_game_rect and quit_game_rect.collidepoint(mouse_pos):
                         # Show confirmation for quit game
-                        if show_quit_confirmation():
+                        if show_quit_confirmation(is_quit_to_menu=False):
                             result = 'QUIT'
                             running = False
                     # Check keybind buttons
@@ -1622,13 +1693,8 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         beatmap_name = level_filename.replace('.json', '').split('_')[0]
         audio_dir = f"beatmaps/{beatmap_name}"
 
-    autoplay_enabled = show_autoplay_popup()
-
-    if autoplay_enabled == 'BACK':
-        screen = pygame.display.get_surface()
-        if game_settings.get('fade_effects', True):
-            fade_out(screen, duration=0.7)
-        return 'RESTART'
+    # Autoplay is now a debug feature controlled by Ctrl+A+P
+    autoplay_enabled = game_settings.get('autoplay_enabled', False)
 
     screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
     pygame.display.set_caption(f"TOA")
@@ -1659,6 +1725,10 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     shake_time = 0
     shake_intensity = 0
     shake_box = None
+    
+    # Track input flashes for each box (shows taps even when nothing is hit)
+    # Format: {box_idx: (time, color)}
+    input_flashes = {}
 
     game_start_time = time.time()
     current_event_index = 0
@@ -2082,6 +2152,14 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                 running = False
 
             if event.type == pygame.KEYDOWN:
+                # Check for Ctrl+A, then P sequence to toggle autoplay (debug feature)
+                # We'll use a simpler approach: just Ctrl+P to toggle
+                keys_pressed = pygame.key.get_pressed()
+                if event.key == pygame.K_p and (keys_pressed[pygame.K_LCTRL] or keys_pressed[pygame.K_RCTRL]) and keys_pressed[pygame.K_a]:
+                    autoplay_enabled = not autoplay_enabled
+                    game_settings.set('autoplay_enabled', autoplay_enabled)
+                    print(f"Autoplay {'enabled' if autoplay_enabled else 'disabled'}")
+                
                 if event.key == pygame.K_ESCAPE:
                     # Pause and show settings menu
                     paused = True
@@ -2119,31 +2197,60 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                         sys.exit()
 
                 if not paused:
-                    # Check if any keybind was pressed
+                    # Check if any keybind was pressed and track input flash
+                    box_pressed = None
                     if event.key == keybinds['top']:
                         active_key = keybinds['top']
+                        box_pressed = 0
                     elif event.key == keybinds['right']:
                         active_key = keybinds['right']
+                        box_pressed = 1
                     elif event.key == keybinds['bottom']:
                         active_key = keybinds['bottom']
+                        box_pressed = 2
                     elif event.key == keybinds['left']:
                         active_key = keybinds['left']
+                        box_pressed = 3
                     
                     # Check if red/blue are mapped to keyboard keys
                     if display_time >= 3.0 and current_event_index < len(level):
                         if event.key == mouse_binds['red']:
                             handle_click(mouse_binds['red'], elapsed_time, current_event_index)
+                            # Add input flash with red color (only for clicks, not WASD)
+                            if box_pressed is not None:
+                                input_flashes[box_pressed] = (time.time(), 'red')
                         elif event.key == mouse_binds['blue']:
                             handle_click(mouse_binds['blue'], elapsed_time, current_event_index)
+                            # Add input flash with blue color (only for clicks, not WASD)
+                            if box_pressed is not None:
+                                input_flashes[box_pressed] = (time.time(), 'blue')
 
             if event.type == pygame.MOUSEBUTTONDOWN and not paused:
                 if display_time < 3.0:
                     continue
+                
+                # Determine which box corresponds to active_key and add input flash
+                box_for_click = None
+                if active_key == keybinds['top']:
+                    box_for_click = 0
+                elif active_key == keybinds['right']:
+                    box_for_click = 1
+                elif active_key == keybinds['bottom']:
+                    box_for_click = 2
+                elif active_key == keybinds['left']:
+                    box_for_click = 3
+                
                 if current_event_index < len(level):
                     if event.button == mouse_binds['red']:
                         handle_click(mouse_binds['red'], elapsed_time, current_event_index)
+                        # Add input flash with red color
+                        if box_for_click is not None:
+                            input_flashes[box_for_click] = (time.time(), 'red')
                     elif event.button == mouse_binds['blue']:
                         handle_click(mouse_binds['blue'], elapsed_time, current_event_index)
+                        # Add input flash with blue color
+                        if box_for_click is not None:
+                            input_flashes[box_for_click] = (time.time(), 'blue')
 
         # Auto-miss past window
         if not paused:
@@ -2297,6 +2404,43 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                     by += shake_y
 
                 screen.blit(overlay_surface, (bx, by))
+
+        # ===== Input flash overlay (shows taps even when nothing is hit) =====
+        input_flash_duration = 0.25
+        current_time = time.time()
+        
+        # Clean up old input flashes and render active ones
+        expired_boxes = []
+        for box_idx, (flash_time, flash_color) in input_flashes.items():
+            dt = current_time - flash_time
+            if dt > input_flash_duration:
+                expired_boxes.append(box_idx)
+            else:
+                # Calculate fade alpha
+                if dt <= 0.05:  # Quick bright flash
+                    alpha = 255
+                else:
+                    # Fade out
+                    fade_t = (dt - 0.05) / (input_flash_duration - 0.05)
+                    alpha = max(0, int(255 * (1 - fade_t)))
+                
+                if alpha > 0:
+                    overlay_img = box_red_rounded if flash_color == 'red' else box_blue_rounded
+                    overlay_surface = overlay_img.copy()
+                    overlay_surface.set_alpha(alpha)
+                    
+                    bx, by = big_box_positions[box_idx]
+                    
+                    # Apply shake if this is the currently-shaken box
+                    if shake_box == box_idx:
+                        bx += shake_x
+                        by += shake_y
+                    
+                    screen.blit(overlay_surface, (bx, by))
+        
+        # Remove expired flashes
+        for box_idx in expired_boxes:
+            del input_flashes[box_idx]
 
 
         # Edge flash indicators
