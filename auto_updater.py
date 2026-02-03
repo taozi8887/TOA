@@ -425,6 +425,7 @@ class AutoUpdater:
         url_path = file_path.replace('\\', '/')
         url = f"{self.raw_url}/{url_path}"
         local_path = os.path.join(data_folder, file_path)
+        temp_path = None  # Initialize to prevent UnboundLocalError in exception handler
         
         for attempt in range(3):
             try:
@@ -480,9 +481,13 @@ class AutoUpdater:
                     # Remove read-only attribute if present (so we can delete/replace)
                     try:
                         os.chmod(local_path, stat.S_IWRITE | stat.S_IREAD)
-                    except:
-                        pass
-                    os.remove(local_path)
+                    except Exception as chmod_err:
+                        self._log(f"  Warning: Could not change permissions: {chmod_err}")
+                    try:
+                        os.remove(local_path)
+                    except Exception as remove_err:
+                        self._log(f"  ERROR: Could not remove existing file: {remove_err}")
+                        raise
                 os.rename(temp_path, local_path)
                 
                 # Make Python code files read-only for protection
@@ -495,7 +500,8 @@ class AutoUpdater:
                 return True
             
             except Exception as e:
-                if os.path.exists(temp_path):
+                self._log(f"  Exception during download: {e}")
+                if temp_path and os.path.exists(temp_path):
                     try:
                         os.remove(temp_path)
                     except:
