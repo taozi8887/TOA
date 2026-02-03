@@ -231,9 +231,11 @@ class AutoUpdater:
                 
                 time.sleep(0.1)
             
-            # Update manifest after successful download
+            # Update manifest IMMEDIATELY after successful download (before verification)
+            # This prevents verification from failing on newly updated files
             if len(failed_files) < total_files * 0.5:
                 self._update_local_manifest(remote_manifest)
+                print("✓ Updated local manifest")
                 
                 # Download config files if initial install
                 if is_initial_download:
@@ -261,10 +263,14 @@ class AutoUpdater:
             return False
     
     def _get_remote_version(self) -> Optional[Dict]:
-        """Get version info from remote repository"""
+        """Get version info from remote repository with cache-busting"""
         try:
             url = f"{self.raw_url}/{self.remote_version_file}"
-            response = requests.get(url, timeout=10)
+            headers = {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            }
+            response = requests.get(url, headers=headers, timeout=10)
             
             if response.status_code == 200:
                 return json.loads(response.content)
@@ -318,10 +324,15 @@ class AutoUpdater:
         return self._get_local_version()
     
     def _get_remote_manifest(self) -> Optional[Dict]:
-        """Get remote manifest from GitHub"""
+        """Get remote manifest from GitHub with cache-busting"""
         try:
             url = f"{self.raw_url}/{self.remote_manifest_file}"
-            response = requests.get(url, timeout=10)
+            # Add cache-busting headers to get fresh data from GitHub
+            headers = {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            }
+            response = requests.get(url, headers=headers, timeout=10)
             if response.status_code == 200:
                 return json.loads(response.content)
         except:

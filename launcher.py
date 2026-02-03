@@ -141,7 +141,7 @@ def show_installer_window(updater, all_files, is_first_run=True):
         complete_rect = complete_text.get_rect(center=(300, 180))
         screen.blit(complete_text, complete_rect)
         
-        status_text = font_medium.render("Starting game...", True, BLACK)
+        status_text = font_medium.render("Restarting game...", True, BLACK)
         status_rect = status_text.get_rect(center=(300, 240))
         screen.blit(status_text, status_rect)
         
@@ -149,6 +149,13 @@ def show_installer_window(updater, all_files, is_first_run=True):
         pygame.time.wait(1000)
     
     pygame.quit()
+    
+    # RESTART the executable to load new files
+    if success and getattr(sys, 'frozen', False):
+        import subprocess
+        subprocess.Popen([sys.executable])  # Start new instance
+        sys.exit(0)  # Exit current instance
+    
     return success
 
 # Change to application directory and add to path FIRST
@@ -190,24 +197,6 @@ def check_and_update():
             config.get('repository_name', ''),
             config.get('branch', 'main')
         )
-        
-        # Verify integrity of code files (protect against tampering)
-        if not updater.is_first_run():
-            print("Verifying file integrity...")
-            code_files = ['main.py', 'osu_to_level.py', 'unzip.py', 'auto_updater.py', 'batch_process_osz.py', 'launcher.py']
-            corrupted_files = []
-            
-            for code_file in code_files:
-                if not updater.verify_file_integrity(code_file):
-                    print(f"⚠️  {code_file} was modified or corrupted")
-                    corrupted_files.append(code_file)
-            
-            # Auto-repair corrupted files
-            if corrupted_files:
-                print(f"Repairing {len(corrupted_files)} file(s)...")
-                for file in corrupted_files:
-                    updater.repair_file(file)
-                print("File integrity restored.")
         
         # Check if this is first run (no files downloaded yet)
         if updater.is_first_run():

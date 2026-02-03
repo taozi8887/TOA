@@ -28,7 +28,7 @@ Creates: `manifest.json` + `version.json`
 ### 3. Push to GitHub
 ```bash
 git add manifest.json version.json main.py assets/
-git commit -m "Release v0.6.0"
+git commit -m "Release v0.5.4"
 git push
 ```
 

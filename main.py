@@ -373,6 +373,7 @@ def show_loading_screen():
 
     font_title = pygame.font.Font(None, 72)
     font_status = pygame.font.Font(None, 36)
+    font_small = pygame.font.Font(None, 28)
 
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
@@ -401,6 +402,81 @@ def show_loading_screen():
             screen.blit(fade_surface, (0, 0))
             pygame.display.flip()
             clock.tick(60)
+
+    # Verify file integrity (protect against tampering) with visual feedback
+    if AUTO_UPDATE_AVAILABLE and getattr(sys, 'frozen', False):
+        try:
+            # Load update config
+            config_path = os.path.join('.toa', 'update_config.json')
+            with open(config_path, 'r') as f:
+                config = json.load(f).get('auto_update', {})
+            
+            updater = AutoUpdater(
+                config.get('github_username', ''),
+                config.get('repository_name', ''),
+                config.get('branch', 'main')
+            )
+            
+            # Only verify if not first run
+            if not updater.is_first_run():
+                code_files = ['main.py', 'osu_to_level.py', 'unzip.py', 'auto_updater.py', 'batch_process_osz.py', 'launcher.py']
+                corrupted_files = []
+                
+                for i, code_file in enumerate(code_files):
+                    # Update screen with progress
+                    screen.fill(BLACK)
+                    title_text = font_title.render("TOA TESTING", True, WHITE)
+                    title_rect = title_text.get_rect(center=(window_width // 2, window_height // 2 - 100))
+                    screen.blit(title_text, title_rect)
+                    
+                    status_text = font_status.render("Verifying game files...", True, WHITE)
+                    status_rect = status_text.get_rect(center=(window_width // 2, window_height // 2 + 20))
+                    screen.blit(status_text, status_rect)
+                    
+                    progress_text = font_small.render(f"({i+1}/{len(code_files)}) {code_file}", True, BLUE)
+                    progress_rect = progress_text.get_rect(center=(window_width // 2, window_height // 2 + 60))
+                    screen.blit(progress_text, progress_rect)
+                    
+                    pygame.display.flip()
+                    
+                    # Verify file
+                    if not updater.verify_file_integrity(code_file):
+                        corrupted_files.append(code_file)
+                
+                # Auto-repair if needed
+                if corrupted_files:
+                    for i, file in enumerate(corrupted_files):
+                        screen.fill(BLACK)
+                        title_text = font_title.render("TOA TESTING", True, WHITE)
+                        title_rect = title_text.get_rect(center=(window_width // 2, window_height // 2 - 100))
+                        screen.blit(title_text, title_rect)
+                        
+                        status_text = font_status.render("Repairing files...", True, WHITE)
+                        status_rect = status_text.get_rect(center=(window_width // 2, window_height // 2 + 20))
+                        screen.blit(status_text, status_rect)
+                        
+                        progress_text = font_small.render(f"({i+1}/{len(corrupted_files)}) {file}", True, GREEN)
+                        progress_rect = progress_text.get_rect(center=(window_width // 2, window_height // 2 + 60))
+                        screen.blit(progress_text, progress_rect)
+                        
+                        pygame.display.flip()
+                        
+                        updater.repair_file(file)
+                    
+                    # Show completion
+                    screen.fill(BLACK)
+                    title_text = font_title.render("TOA TESTING", True, WHITE)
+                    title_rect = title_text.get_rect(center=(window_width // 2, window_height // 2 - 100))
+                    screen.blit(title_text, title_rect)
+                    
+                    status_text = font_status.render("Files restored!", True, GREEN)
+                    status_rect = status_text.get_rect(center=(window_width // 2, window_height // 2 + 20))
+                    screen.blit(status_text, status_rect)
+                    
+                    pygame.display.flip()
+                    pygame.time.wait(1000)
+        except Exception as e:
+            print(f"Verification error (non-critical): {e}")
 
     # Launcher already handles updates, so skip redundant check in main.py
 
