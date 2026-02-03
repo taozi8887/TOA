@@ -91,8 +91,8 @@
     },
     "code": {
       "main.py": {
-        "hash": "76df634f45fc871e5de6959a32516ac8716fce0aeb068bebbb611b7d3a3a2618",
-        "size": 110594
+        "hash": "7eae9c2b3d329e2b6cdfca65a4c59f8297a591e454fdb21f92550aff7736f4aa",
+        "size": 110586
       },
       "osu_to_level.py": {
         "hash": "a93d4370e3ea9d6d0f49c79e3b4d5c8bc347574500464d2680185d4695645d00",
@@ -120,7 +120,7 @@
     "from_0.5.4": {
       "description": "Patch from 0.5.4 to 0.5.4",
       "changed_files": [
-        "launcher.py"
+        "main.py"
       ],
       "removed_files": []
     }
