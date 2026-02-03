@@ -150,8 +150,8 @@ def show_installer_window(updater, all_files, is_first_run=True):
     
     pygame.quit()
     
-    # RESTART the executable to load new files
-    if success and getattr(sys, 'frozen', False):
+    # RESTART the executable ONLY if this was an update (not initial install)
+    if success and not is_first_run and getattr(sys, 'frozen', False):
         import subprocess
         subprocess.Popen([sys.executable])  # Start new instance
         sys.exit(0)  # Exit current instance
@@ -223,11 +223,11 @@ def check_and_update():
         directories = config.get('directories_to_sync', ['levels', 'beatmaps'])
         has_updates, files_to_update, update_info = updater.check_for_updates(directories, include_code=True)
         
-        print(f"Update check result: has_updates={has_updates}")
+        print(f"Update check result: has_updates={has_updates}, files_count={len(files_to_update)}")
         if update_info:
             print(f"Local: v{update_info.get('from_version', 'unknown')} -> Remote: v{update_info.get('to_version', 'unknown')}")
         
-        if has_updates:
+        if has_updates and len(files_to_update) > 0:
             # Print update info
             print(f"\nUpdate available: v{update_info.get('to_version', 'unknown')}")
             if update_info.get('release_date'):
@@ -236,7 +236,8 @@ def check_and_update():
             
             # Show GUI for updates
             success = show_installer_window(updater, files_to_update, is_first_run=False)
-            return False  # Don't restart - just continue to load updated code
+            # Restart handled by show_installer_window
+            return False
         else:
             return False
     

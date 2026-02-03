@@ -129,8 +129,12 @@ class AutoUpdater:
             local_version = local_manifest.get('version', '0.0.0')
             remote_version = remote_manifest.get('version', '0.0.0')
             
-            # Compare versions
-            if self._version_compare(remote_version, local_version) <= 0:
+            # Compare versions - if same version, no updates needed
+            if local_version == remote_version:
+                return False, [], {}
+            
+            # If remote is older, no updates
+            if self._version_compare(remote_version, local_version) < 0:
                 return False, [], {}
             
             # Find changed/new files
