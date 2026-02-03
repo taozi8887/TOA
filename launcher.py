@@ -249,6 +249,19 @@ def check_and_update():
 
 def main():
     """Main launcher function"""
+    # CRITICAL: Pre-load pygame FIRST before anything else when running as exe
+    # This must happen before check_and_update() to avoid DLL path issues
+    if getattr(sys, 'frozen', False):
+        try:
+            import pygame
+            import sys
+            # Keep pygame in sys.modules so main.py can use it
+            print(f"Pre-loaded pygame from bundled location")
+        except Exception as e:
+            print(f"Warning: Could not pre-load pygame: {e}")
+            import traceback
+            traceback.print_exc()
+    
     # Check for updates
     code_was_updated = check_and_update()
     
@@ -257,14 +270,6 @@ def main():
         # Restart the launcher to use new code
         python = sys.executable
         os.execl(python, python, *sys.argv)
-    
-    # CRITICAL: Pre-load pygame BEFORE clearing cache to keep DLLs loaded
-    if getattr(sys, 'frozen', False):
-        try:
-            import pygame
-            print(f"Pre-loaded pygame from bundled location")
-        except Exception as e:
-            print(f"Warning: Could not pre-load pygame: {e}")
     
     # CRITICAL: Remove any cached/bundled modules before importing
     # This ensures we load the downloaded files, not bundled ones
@@ -289,14 +294,9 @@ def main():
             toa_main_path = os.path.join('.toa', 'main.py')
             if os.path.exists(toa_main_path):
                 import importlib.util
-                import pygame  # Import pygame here so it's available
                 
                 spec = importlib.util.spec_from_file_location("main", os.path.abspath(toa_main_path))
                 game_main = importlib.util.module_from_spec(spec)
-                
-                # Inject bundled pygame into main's namespace before executing
-                game_main.pygame = pygame
-                
                 sys.modules['main'] = game_main
                 spec.loader.exec_module(game_main)
                 print(f"Force-loaded main.py from: {os.path.abspath(toa_main_path)}")
