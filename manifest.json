@@ -111,22 +111,22 @@
         "size": 5350
       },
       "launcher.py": {
-        "hash": "bd0fe7eadf7505a949f342bfc5bf1872ce66da22ec64e8d8b1216123df509a2a",
-        "size": 15428
+        "hash": "ca088600c4cc490725317dbbaab252c494b9b254294c756bc9e494353a735974",
+        "size": 15164
       }
     }
   },
   "patches": {
-    "from_0.6.6": {
-      "description": "Patch from 0.6.6 to 0.6.7",
+    "from_0.6.7": {
+      "description": "Patch from 0.6.7 to 0.6.7",
       "changed_files": [
-        "main.py"
+        "launcher.py"
       ],
       "removed_files": []
     }
   },
   "rollback": {
-    "previous_version": "0.6.6",
+    "previous_version": "0.6.7",
     "can_rollback": true
   }
 }
