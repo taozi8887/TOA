@@ -477,6 +477,11 @@ class AutoUpdater:
                 
                 # Move temp file to final location
                 if os.path.exists(local_path):
+                    # Remove read-only attribute if present (so we can delete/replace)
+                    try:
+                        os.chmod(local_path, stat.S_IWRITE | stat.S_IREAD)
+                    except:
+                        pass
                     os.remove(local_path)
                 os.rename(temp_path, local_path)
                 
