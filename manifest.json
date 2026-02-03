@@ -1,5 +1,5 @@
 {
-  "version": "0.6.22",
+  "version": "0.6.23",
   "release_date": "2026-02-02",
   "manifest_version": 1,
   "files": {
@@ -91,7 +91,7 @@
     },
     "code": {
       "main.py": {
-        "hash": "942abcf61195da608e6b44e7bea75e022b6fa7ccc5812debfaea9419d95c2c46",
+        "hash": "2c658d41ecedf143a49d7a00c196be6050002b0ac75b35bf36d60abde3baebe6",
         "size": 110928
       },
       "osu_to_level.py": {
@@ -118,7 +118,7 @@
   },
   "patches": {
     "from_0.6.22": {
-      "description": "Patch from 0.6.22 to 0.6.22",
+      "description": "Patch from 0.6.22 to 0.6.23",
       "changed_files": [
         "main.py"
       ],
