@@ -232,16 +232,117 @@ def check_and_update():
             print(f"Local: v{update_info.get('from_version', 'unknown')} -> Remote: v{update_info.get('to_version', 'unknown')}")
         
         if has_updates and len(files_to_update) > 0:
-            # Print update info
-            print(f"\nUpdate available: v{update_info.get('to_version', 'unknown')}")
+            # Show confirmation dialog
+            remote_version = update_info.get('to_version', 'unknown')
+            print(f"\nUpdate available: v{remote_version}")
+            
+            # Show confirmation dialog with pygame
+            import pygame
+            pygame.init()
+            screen = pygame.display.set_mode((600, 250))
+            pygame.display.set_caption("Update Available")
+            font_title = pygame.font.SysFont("Arial", 32)
+            font_text = pygame.font.SysFont("Arial", 24)
+            font_button = pygame.font.SysFont("Arial", 28)
+            clock = pygame.time.Clock()
+            
+            # Button rectangles
+            yes_button = pygame.Rect(150, 160, 120, 50)
+            no_button = pygame.Rect(330, 160, 120, 50)
+            
+            waiting_for_input = True
+            user_confirmed = False
+            
+            while waiting_for_input:
+                mouse_pos = pygame.mouse.get_pos()
+                
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        waiting_for_input = False
+                        user_confirmed = False
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if yes_button.collidepoint(mouse_pos):
+                            waiting_for_input = False
+                            user_confirmed = True
+                        elif no_button.collidepoint(mouse_pos):
+                            waiting_for_input = False
+                            user_confirmed = False
+                
+                screen.fill((40, 40, 50))
+                
+                # Title
+                title = font_title.render(f"Update v{remote_version} found", True, (100, 200, 255))
+                screen.blit(title, (600//2 - title.get_width()//2, 30))
+                
+                # Message
+                msg = font_text.render("Install this update?", True, (255, 255, 255))
+                screen.blit(msg, (600//2 - msg.get_width()//2, 90))
+                
+                # Buttons
+                yes_hover = yes_button.collidepoint(mouse_pos)
+                no_hover = no_button.collidepoint(mouse_pos)
+                
+                pygame.draw.rect(screen, (50, 200, 50) if yes_hover else (40, 150, 40), yes_button)
+                pygame.draw.rect(screen, (200, 50, 50) if no_hover else (150, 40, 40), no_button)
+                
+                yes_text = font_button.render("Yes", True, (255, 255, 255))
+                no_text = font_button.render("No", True, (255, 255, 255))
+                screen.blit(yes_text, (yes_button.centerx - yes_text.get_width()//2, yes_button.centery - yes_text.get_height()//2))
+                screen.blit(no_text, (no_button.centerx - no_text.get_width()//2, no_button.centery - no_text.get_height()//2))
+                
+                pygame.display.flip()
+                clock.tick(30)
+            
+            pygame.quit()
+            
+            if not user_confirmed:
+                print("Update declined by user. Exiting...")
+                sys.exit(0)
+            
+            # User confirmed - proceed with update
+            print(f"Installing update v{remote_version}...")
             if update_info.get('release_date'):
                 print(f"Released: {update_info['release_date']}")
             print(f"Files to update: {len(files_to_update)}")
             
             # Show GUI for updates
             success = show_installer_window(updater, files_to_update, is_first_run=False)
-            # Return True if update was successful so main() can restart
-            return success
+            
+            if success:
+                # Show completion message
+                pygame.init()
+                screen = pygame.display.set_mode((600, 250))
+                pygame.display.set_caption("Update Complete")
+                font_title = pygame.font.SysFont("Arial", 32)
+                font_text = pygame.font.SysFont("Arial", 22)
+                clock = pygame.time.Clock()
+                
+                waiting = True
+                while waiting:
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT or event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                            waiting = False
+                    
+                    screen.fill((40, 40, 50))
+                    
+                    title = font_title.render("Install Complete!", True, (100, 255, 100))
+                    msg1 = font_text.render("Exit this window and rerun the exe", True, (255, 255, 255))
+                    msg2 = font_text.render("to start the game with the update.", True, (255, 255, 255))
+                    hint = font_text.render("(Click anywhere to exit)", True, (150, 150, 150))
+                    
+                    screen.blit(title, (600//2 - title.get_width()//2, 40))
+                    screen.blit(msg1, (600//2 - msg1.get_width()//2, 100))
+                    screen.blit(msg2, (600//2 - msg2.get_width()//2, 130))
+                    screen.blit(hint, (600//2 - hint.get_width()//2, 180))
+                    
+                    pygame.display.flip()
+                    clock.tick(30)
+                
+                pygame.quit()
+                sys.exit(0)
+            else:
+                print("Update failed. Exiting...")
+                sys.exit(1)
         else:
             return False
     
@@ -268,43 +369,10 @@ def main():
             import traceback
             traceback.print_exc()
     
-    # Check for updates
-    code_was_updated = check_and_update()
+    # Check for updates (will exit if update is found and installed)
+    check_and_update()
     
-    if code_was_updated:
-        print("Updates installed successfully!")
-        print("Please restart the game to apply updates.")
-        # Show a message box and exit
-        if getattr(sys, 'frozen', False):
-            import pygame
-            pygame.init()
-            screen = pygame.display.set_mode((500, 200))
-            pygame.display.set_caption("Update Complete")
-            font = pygame.font.SysFont("Arial", 24)
-            clock = pygame.time.Clock()
-            
-            running = True
-            while running:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        running = False
-                    if event.type == pygame.KEYDOWN:
-                        running = False
-                
-                screen.fill((40, 40, 50))
-                title = font.render("Update Complete!", True, (100, 255, 100))
-                msg = font.render("Please restart the game.", True, (255, 255, 255))
-                hint = font.render("Press any key to exit...", True, (150, 150, 150))
-                
-                screen.blit(title, (150, 50))
-                screen.blit(msg, (120, 90))
-                screen.blit(hint, (110, 140))
-                
-                pygame.display.flip()
-                clock.tick(30)
-            
-            pygame.quit()
-        sys.exit(0)
+    # If we reach here, no updates or first run - continue to game
     
     # CRITICAL: Remove any cached/bundled modules before importing
     # This ensures we load the downloaded files, not bundled ones

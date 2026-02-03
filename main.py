@@ -16,7 +16,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.6.11"
+__version__ = "0.6.12"
 
 # Settings management
 class Settings:
@@ -370,9 +370,9 @@ def show_loading_screen():
     window_width, window_height = screen.get_size()
     clock = pygame.time.Clock()
 
-    font_title = pygame.font.SysFont("Arial", 72)
-    font_status = pygame.font.SysFont("Arial", 36)
-    font_small = pygame.font.SysFont("Arial", 28)
+    font_title = pygame.font.Font(None, 72)
+    font_status = pygame.font.Font(None, 36)
+    font_small = pygame.font.Font(None, 28)
 
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
@@ -658,10 +658,10 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
     window_width, window_height = screen.get_size()
     clock = pygame.time.Clock()
 
-    font_title = pygame.font.SysFont("Arial", 48)
-    font_item_title = pygame.font.SysFont("Arial", 32)
-    font_item_version = pygame.font.SysFont("Arial", 22)
-    font_hint = pygame.font.SysFont("Arial", 24)
+    font_title = pygame.font.Font(None, 48)
+    font_item_title = pygame.font.Font(None, 32)
+    font_item_version = pygame.font.Font(None, 22)
+    font_hint = pygame.font.Font(None, 24)
 
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
@@ -961,7 +961,7 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
         screen.blit(esc_text, esc_rect)
 
         # Draw UPDATE TEST in center over everything
-        font_update_test = pygame.font.SysFont("Arial", 120)
+        font_update_test = pygame.font.Font(None, 120)
         update_test_text = font_update_test.render("UPDATE TEST", True, (255, 105, 180))
         update_test_rect = update_test_text.get_rect(center=(window_width // 2, window_height // 2))
         screen.blit(update_test_text, update_test_rect)
@@ -1012,8 +1012,8 @@ def show_quit_confirmation():
     # Save current screen
     saved_screen = screen.copy()
     
-    font_large = pygame.font.SysFont("Arial", 64)
-    font_button = pygame.font.SysFont("Arial", 48)
+    font_large = pygame.font.Font(None, 64)
+    font_button = pygame.font.Font(None, 48)
     
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
@@ -1108,10 +1108,10 @@ def show_settings_menu(from_game=False, from_selector=False):
     window_width, window_height = screen.get_size()
     clock = pygame.time.Clock()
     
-    font_title = pygame.font.SysFont("Arial", 64)
-    font_label = pygame.font.SysFont("Arial", 36)
-    font_small = pygame.font.SysFont("Arial", 28)
-    font_button = pygame.font.SysFont("Arial", 32)
+    font_title = pygame.font.Font(None, 64)
+    font_label = pygame.font.Font(None, 36)
+    font_small = pygame.font.Font(None, 28)
+    font_button = pygame.font.Font(None, 32)
     
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
@@ -1547,8 +1547,8 @@ def show_autoplay_popup():
     window_width, window_height = screen.get_size()
     clock = pygame.time.Clock()
 
-    font_large = pygame.font.SysFont("Arial", 72)
-    font_small = pygame.font.SysFont("Arial", 48)
+    font_large = pygame.font.Font(None, 72)
+    font_small = pygame.font.Font(None, 48)
 
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
@@ -1873,11 +1873,11 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
 
     dot_positions = get_dot_positions(center_x, center_y, square_size, spacing)
 
-    font_countdown = pygame.font.SysFont("Arial", 120)
-    font_judgment = pygame.font.SysFont("Arial", 36)
-    font_stats = pygame.font.SysFont("Arial", 32)
-    font_metadata = pygame.font.SysFont("Arial", 24)
-    font_combo = pygame.font.SysFont("Arial", 92)
+    font_countdown = pygame.font.Font(None, 120)
+    font_judgment = pygame.font.Font(None, 36)
+    font_stats = pygame.font.Font(None, 32)
+    font_metadata = pygame.font.Font(None, 24)
+    font_combo = pygame.font.Font(None, 92)
 
     count_300 = 0
     count_100 = 0
@@ -2583,4 +2583,5 @@ if __name__ == "__main__":
         pygame.display.quit()
         pygame.quit()
         sys.exit()
+
 
