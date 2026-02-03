@@ -1,5 +1,5 @@
 {
-  "version": "0.5.2",
+  "version": "0.5.3",
   "release_date": "2026-02-02",
   "manifest_version": 1,
   "files": {
@@ -91,8 +91,8 @@
     },
     "code": {
       "main.py": {
-        "hash": "2a120f4898f94d536f8bf6b6d85bc2335d677c61323cf3d27ff0ad0ee4d7ea4e",
-        "size": 106380
+        "hash": "4b91b1757e453e97fbc86f780829657fc7cc662fb3d31e71136c6780a4318667",
+        "size": 106372
       },
       "osu_to_level.py": {
         "hash": "a93d4370e3ea9d6d0f49c79e3b4d5c8bc347574500464d2680185d4695645d00",
@@ -103,31 +103,32 @@
         "size": 1426
       },
       "auto_updater.py": {
-        "hash": "7e9b51fbae74911af80499146f9d0e2b6578195064c0b43d3e7333ff4a41c3bc",
-        "size": 26643
+        "hash": "2001088336808bf47d8534dbc85ee02878c38fbfbafa1117847255925365a88a",
+        "size": 29394
       },
       "batch_process_osz.py": {
         "hash": "ea91cd87e57ddfa1d9481b450e15a55658f8942203e89637e41760f02caf373d",
         "size": 5350
       },
       "launcher.py": {
-        "hash": "c13904173a6f9a7b3fda08ad5044993d49cb6e748faeb5a4fb36888c9c9cd3d3",
-        "size": 13394
+        "hash": "e114f4aa25d06bf35b1f04d77615ed0e8baefe8a859fb21f2760aaf0e45ed995",
+        "size": 14323
       }
     }
   },
   "patches": {
-    "from_0.5.1": {
-      "description": "Patch from 0.5.1 to 0.5.2",
+    "from_0.5.2": {
+      "description": "Patch from 0.5.2 to 0.5.3",
       "changed_files": [
         "main.py",
+        "auto_updater.py",
         "launcher.py"
       ],
       "removed_files": []
     }
   },
   "rollback": {
-    "previous_version": "0.5.1",
+    "previous_version": "0.5.2",
     "can_rollback": true
   }
 }
