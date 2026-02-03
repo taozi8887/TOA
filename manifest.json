@@ -1,5 +1,5 @@
 {
-  "version": "0.5.8",
+  "version": "0.5.9",
   "release_date": "2026-02-02",
   "manifest_version": 1,
   "files": {
@@ -91,7 +91,7 @@
     },
     "code": {
       "main.py": {
-        "hash": "1e4a8c8fee4a3366a734b7711b2f810d063028d1b4f7d26ecd0c4328d0caee00",
+        "hash": "9495e2674f189748ccaa23701f2807f4d501185f863b5d0817dccc1da27c7778",
         "size": 110935
       },
       "osu_to_level.py": {
@@ -103,8 +103,8 @@
         "size": 1426
       },
       "auto_updater.py": {
-        "hash": "e0da0b5a7b0a0aee7cd54d87a2da4cc8d51345f24a48fbfc0a96afa0440a6e4f",
-        "size": 30513
+        "hash": "04877e84b2f98f507af7d84a504e96dafa86416660940cf0434db5634d38a611",
+        "size": 31966
       },
       "batch_process_osz.py": {
         "hash": "ea91cd87e57ddfa1d9481b450e15a55658f8942203e89637e41760f02caf373d",
@@ -118,8 +118,9 @@
   },
   "patches": {
     "from_0.5.8": {
-      "description": "Patch from 0.5.8 to 0.5.8",
+      "description": "Patch from 0.5.8 to 0.5.9",
       "changed_files": [
+        "main.py",
         "auto_updater.py"
       ],
       "removed_files": []
