@@ -1,5 +1,5 @@
 {
-  "version": "0.6.13",
+  "version": "0.6.14",
   "files": {
     "assets": {
       "box.jpg": "40ed857c173a25d0d9ed4b3f6dffb6ac38641bb729b7dcd52bf5a32196871095",
@@ -25,12 +25,12 @@
       "osz/warriors.osz": "acbe4d220dfaf490fcb2ad5ca075e9c814667dea58fe90b97e4cd5e83bd07bd2"
     },
     "code": {
-      "main.py": "7eefcef71b9b7b52064bafba6ad48f408b33cc033391065870c033cba10b6a63",
+      "main.py": "caeda431ba1a88cb1babd074a13f1c99e909271bb322b4af427f8b1f53a8f51f",
       "osu_to_level.py": "a93d4370e3ea9d6d0f49c79e3b4d5c8bc347574500464d2680185d4695645d00",
       "unzip.py": "5ad3dc665f5f2000c269d3912586558be08bed2ba12459ae4106dd47c339e609",
       "auto_updater.py": "5bbbb2bc3fe064b5a4d556889faea6dfcf755f1c16d3572fa8523fb4cb81ee1b",
       "batch_process_osz.py": "ea91cd87e57ddfa1d9481b450e15a55658f8942203e89637e41760f02caf373d",
-      "launcher.py": "8a7b774405753fb7e07ae1c883acb37036bd2f5e95fa93f5970d50796c119b77"
+      "launcher.py": "13cd6d20641abae9821e88bbffe01951b573d53ef255cd97aaaf15373c158ded"
     }
   }
 }
