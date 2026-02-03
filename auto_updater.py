@@ -269,10 +269,13 @@ class AutoUpdater:
     def _get_remote_version(self) -> Optional[Dict]:
         """Get version info from remote repository with cache-busting"""
         try:
-            url = f"{self.raw_url}/{self.remote_version_file}"
+            # Add timestamp to URL to bypass CDN cache completely
+            import time
+            url = f"{self.raw_url}/{self.remote_version_file}?t={int(time.time())}"
             headers = {
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache'
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
             }
             response = requests.get(url, headers=headers, timeout=10)
             
@@ -330,11 +333,14 @@ class AutoUpdater:
     def _get_remote_manifest(self) -> Optional[Dict]:
         """Get remote manifest from GitHub with cache-busting"""
         try:
-            url = f"{self.raw_url}/{self.remote_manifest_file}"
+            # Add timestamp to URL to bypass CDN cache completely
+            import time
+            url = f"{self.raw_url}/{self.remote_manifest_file}?t={int(time.time())}"
             # Add cache-busting headers to get fresh data from GitHub
             headers = {
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache'
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
             }
             response = requests.get(url, headers=headers, timeout=10)
             if response.status_code == 200:

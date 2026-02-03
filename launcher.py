@@ -149,13 +149,6 @@ def show_installer_window(updater, all_files, is_first_run=True):
         pygame.time.wait(1000)
     
     pygame.quit()
-    
-    # RESTART the executable ONLY if this was an update (not initial install)
-    if success and not is_first_run and getattr(sys, 'frozen', False):
-        import subprocess
-        subprocess.Popen([sys.executable])  # Start new instance
-        sys.exit(0)  # Exit current instance
-    
     return success
 
 # Change to application directory and add to path FIRST
@@ -236,8 +229,8 @@ def check_and_update():
             
             # Show GUI for updates
             success = show_installer_window(updater, files_to_update, is_first_run=False)
-            # Restart handled by show_installer_window
-            return False
+            # Return True if update was successful so main() can restart
+            return success
         else:
             return False
     
@@ -268,9 +261,11 @@ def main():
     
     if code_was_updated:
         print("Code was updated! Restarting...")
-        # Restart the launcher to use new code
+        # Restart the launcher to use new code (replaces current process)
+        import time
+        time.sleep(1)  # Brief pause to ensure files are released
         python = sys.executable
-        os.execl(python, python, *sys.argv)
+        os.execv(python, [python] + sys.argv)
     
     # CRITICAL: Remove any cached/bundled modules before importing
     # This ensures we load the downloaded files, not bundled ones
