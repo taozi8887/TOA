@@ -172,13 +172,16 @@ def check_and_update():
         # Load configuration
         try:
             config_path = os.path.join('.toa', 'update_config.json') if getattr(sys, 'frozen', False) else 'update_config.json'
+            print(f"Looking for config at: {config_path}")
             with open(config_path, 'r') as f:
                 config = json.load(f).get('auto_update', {})
-        except:
-            print("Could not load update config, skipping auto-update")
+            print(f"Config loaded. Enabled: {config.get('enabled', False)}")
+        except Exception as e:
+            print(f"Could not load update config: {e}")
             return False
         
         if not config.get('enabled', False):
+            print("Auto-update is disabled in config")
             return False
         
         # Initialize updater
@@ -209,15 +212,20 @@ def check_and_update():
             return False  # Don't restart - this was initial download, not an update
         
         # Normal update check
+        print("Checking for updates...")
         directories = config.get('directories_to_sync', ['levels', 'beatmaps'])
         has_updates, files_to_update, update_info = updater.check_for_updates(directories, include_code=True)
         
+        print(f"Update check result: has_updates={has_updates}")
+        if update_info:
+            print(f"Local: v{update_info.get('from_version', 'unknown')} -> Remote: v{update_info.get('to_version', 'unknown')}")
+        
         if has_updates:
             # Print update info
-            if update_info:
-                print(f"Update available: v{update_info.get('to_version', 'unknown')}")
-                if update_info.get('release_date'):
-                    print(f"Released: {update_info['release_date']}")
+            print(f"\nUpdate available: v{update_info.get('to_version', 'unknown')}")
+            if update_info.get('release_date'):
+                print(f"Released: {update_info['release_date']}")
+            print(f"Files to update: {len(files_to_update)}")
             
             # Show GUI for updates
             success = show_installer_window(updater, files_to_update, is_first_run=False)
