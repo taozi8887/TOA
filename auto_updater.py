@@ -43,6 +43,16 @@ class AutoUpdater:
         # Chunk size for downloads (1MB)
         self.chunk_size = 1024 * 1024
         self._lock_file = None
+        # Debug log file
+        self.log_file = os.path.join('.toa', 'update_debug.log') if os.path.exists('.toa') else 'update_debug.log'
+    
+    def _log(self, msg: str):
+        """Write debug message to log file"""
+        try:
+            with open(self.log_file, 'a', encoding='utf-8') as f:
+                f.write(f"[{time.strftime('%H:%M:%S')}] {msg}\n")
+        except:
+            pass
         
     def is_first_run(self) -> bool:
         """
