@@ -231,13 +231,15 @@ class AutoUpdater:
                 )
                 
                 if not success:
+                    print(f"FAILED to download: {file_path}")
                     failed_files.append(file_path)
+                else:
+                    print(f"✓ Downloaded: {file_path}")
                 
                 time.sleep(0.1)
             
-            # Update manifest IMMEDIATELY after successful download (before verification)
-            # This prevents verification from failing on newly updated files
-            if len(failed_files) < total_files * 0.5:
+            # Only update manifest if ALL files downloaded successfully
+            if len(failed_files) == 0:
                 self._update_local_manifest(remote_manifest)
                 print("✓ Updated local manifest")
                 
