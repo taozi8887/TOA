@@ -254,7 +254,6 @@ def main():
     if getattr(sys, 'frozen', False):
         try:
             import pygame
-            import sys
             # Keep pygame in sys.modules so main.py can use it
             print(f"Pre-loaded pygame from bundled location")
         except Exception as e:
