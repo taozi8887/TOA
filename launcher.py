@@ -294,8 +294,18 @@ def main():
             if os.path.exists(toa_main_path):
                 import importlib.util
                 
+                # Read the main.py file content
+                with open(toa_main_path, 'r', encoding='utf-8') as f:
+                    main_code = f.read()
+                
+                # Create the module and inject bundled pygame before execution
                 spec = importlib.util.spec_from_file_location("main", os.path.abspath(toa_main_path))
                 game_main = importlib.util.module_from_spec(spec)
+                
+                # CRITICAL: Inject bundled pygame into main's namespace BEFORE executing
+                # This ensures main.py uses the bundled pygame, not try to import a new one
+                game_main.pygame = pygame
+                
                 sys.modules['main'] = game_main
                 spec.loader.exec_module(game_main)
                 print(f"Force-loaded main.py from: {os.path.abspath(toa_main_path)}")
