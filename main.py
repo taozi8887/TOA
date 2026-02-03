@@ -17,7 +17,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.5.5"
+__version__ = "0.5.6"
 
 # Settings management
 class Settings:
@@ -770,6 +770,12 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
 
         # Rendering
         screen.fill(WHITE)
+
+        # Draw UPDATE TEST text in big red letters at the top
+        font_update_test = pygame.font.Font(None, 96)
+        update_test_text = font_update_test.render("UPDATE TEST", True, (255, 0, 0))
+        update_test_rect = update_test_text.get_rect(center=(window_width // 2, 30))
+        screen.blit(update_test_text, update_test_rect)
 
         # Draw title
         title_text = font_title.render("Select a Level", True, BLACK)
