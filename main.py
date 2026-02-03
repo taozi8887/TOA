@@ -1,5 +1,4 @@
 import pygame
-import pygame.gfxdraw
 import sys
 import os
 import time
