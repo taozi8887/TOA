@@ -1,5 +1,5 @@
 {
-  "version": "0.6.11",
+  "version": "0.6.12",
   "release_date": "2026-02-02",
   "manifest_version": 1,
   "files": {
@@ -91,8 +91,8 @@
     },
     "code": {
       "main.py": {
-        "hash": "37712ee3adcd3550412297e4b10d41f29f2f867d19f86869a7d3487afd5892e0",
-        "size": 111045
+        "hash": "6e468cd23df69ae7d52fec7e8d4c3767ef1883249a294fc93520e3c9ce1c0c8e",
+        "size": 110921
       },
       "osu_to_level.py": {
         "hash": "a93d4370e3ea9d6d0f49c79e3b4d5c8bc347574500464d2680185d4695645d00",
@@ -111,14 +111,14 @@
         "size": 5350
       },
       "launcher.py": {
-        "hash": "791a1813eac6ab5f272d1bee9a268249a1f9752de45ff009317d2cbceb4c2a66",
-        "size": 16388
+        "hash": "8a7b774405753fb7e07ae1c883acb37036bd2f5e95fa93f5970d50796c119b77",
+        "size": 19962
       }
     }
   },
   "patches": {
-    "from_0.6.10": {
-      "description": "Patch from 0.6.10 to 0.6.11",
+    "from_0.6.11": {
+      "description": "Patch from 0.6.11 to 0.6.12",
       "changed_files": [
         "main.py",
         "launcher.py"
@@ -127,7 +127,7 @@
     }
   },
   "rollback": {
-    "previous_version": "0.6.10",
+    "previous_version": "0.6.11",
     "can_rollback": true
   }
 }
