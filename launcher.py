@@ -260,8 +260,9 @@ def main():
         try:
             import pygame
             import pygame.gfxdraw  # CRITICAL: Import submodule so it's available
+            pygame.init()  # Initialize pygame (including font system) while we have access to bundled resources
             # Keep pygame in sys.modules so main.py can use it
-            print(f"Pre-loaded pygame from bundled location")
+            print(f"Pre-loaded and initialized pygame from bundled location")
         except Exception as e:
             print(f"Warning: Could not pre-load pygame: {e}")
             import traceback
