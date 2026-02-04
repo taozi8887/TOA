@@ -16,7 +16,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.6.30"
+__version__ = "0.6.31"
 
 # Settings management
 class Settings:
@@ -2856,7 +2856,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         elif current_active_dot is None:
             last_active_dot = None
         
-        # Draw dots with pulse animation on switch
+        # Draw dots FIRST (underneath everything)
         for i, (dot_x, dot_y) in enumerate(dot_positions):
             is_active = False
             if i == 0 and active_key == keybinds['top']:
@@ -2869,8 +2869,20 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                 is_active = True
 
             current_dot = dot2_image if is_active else dot_image
+            screen.blit(current_dot, (int(dot_x - dot_size // 2), int(dot_y - dot_size // 2)))
+        
+        # Render pulse animation on top of dots
+        for i, (dot_x, dot_y) in enumerate(dot_positions):
+            is_active = False
+            if i == 0 and active_key == keybinds['top']:
+                is_active = True
+            elif i == 1 and active_key == keybinds['right']:
+                is_active = True
+            elif i == 2 and active_key == keybinds['bottom']:
+                is_active = True
+            elif i == 3 and active_key == keybinds['left']:
+                is_active = True
             
-            # Apply pulse animation on switch
             if is_active and i == last_active_dot:
                 switch_age = current_time - dot_switch_time
                 pulse_duration = 0.2
@@ -2879,15 +2891,16 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                     # Ease-out cubic for smooth deceleration
                     ease = 1 - pow(1 - pulse_progress, 3)
                     scale = 1.0 + (0.3 * (1 - ease))
-                    scaled_size = int(dot_size * scale)
-                    scaled_dot = pygame.transform.scale(current_dot, (scaled_size, scaled_size))
-                    screen.blit(scaled_dot, (int(dot_x - scaled_size // 2), int(dot_y - scaled_size // 2)))
-                else:
-                    screen.blit(current_dot, (int(dot_x - dot_size // 2), int(dot_y - dot_size // 2)))
-            else:
-                screen.blit(current_dot, (int(dot_x - dot_size // 2), int(dot_y - dot_size // 2)))
+                    # Draw a transparent glow circle for pulse effect
+                    pulse_radius = int(dot_size // 2 * scale)
+                    pulse_alpha = int(150 * (1 - ease))
+                    if pulse_alpha > 0:
+                        pulse_surface = pygame.Surface((pulse_radius * 2, pulse_radius * 2), pygame.SRCALPHA)
+                        pygame.draw.circle(pulse_surface, (255, 100, 100, pulse_alpha), 
+                                         (pulse_radius, pulse_radius), pulse_radius)
+                        screen.blit(pulse_surface, (int(dot_x - pulse_radius), int(dot_y - pulse_radius)))
         
-        # Render dot switch ripples (ON TOP of dots)
+        # Render dot switch ripples (ON TOP of everything)
         ripple_duration = 0.3
         active_ripples = []
         for ripple_idx, ripple_start_time in dot_switch_ripples:
