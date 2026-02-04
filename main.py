@@ -16,7 +16,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.6.29"
+__version__ = "0.6.30"
 
 # Settings management
 class Settings:
@@ -28,7 +28,7 @@ class Settings:
         'hitsounds_enabled': True,
         'scroll_speed': 75,
         'fade_effects': True,
-        'autoplay_enabled': False,  # Debug feature - toggle with Ctrl+A+P
+        'autoplay_enabled': False,  # Debug feature - toggle with Ctrl+P
         'keybinds': {
             'top': pygame.K_w,
             'right': pygame.K_d,
@@ -1693,7 +1693,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         beatmap_name = level_filename.replace('.json', '').split('_')[0]
         audio_dir = f"beatmaps/{beatmap_name}"
 
-    # Autoplay is now a debug feature controlled by Ctrl+A+P
+    # Autoplay is now a debug feature controlled by Ctrl+P
     autoplay_enabled = game_settings.get('autoplay_enabled', False)
 
     screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
@@ -1729,6 +1729,24 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     # Track input flashes for each box (shows taps even when nothing is hit)
     # Format: {box_idx: (time, color)}
     input_flashes = {}
+
+    # ===== Particle system for hit effects =====
+    particles = []  # [(x, y, vx, vy, color, size, birth_time)]
+    
+    # Hit glow effects
+    hit_glows = []  # [(box_idx, start_time, intensity)]
+    
+    # Impact waves (expanding circles)
+    impact_waves = []  # [(x, y, start_time, color)]
+    
+    # Screen flash for perfect hits
+    screen_flash_time = 0
+    screen_flash_alpha = 0
+
+    # Dot switch animation
+    last_active_dot = None
+    dot_switch_time = 0
+    dot_switch_ripples = []  # [(dot_idx, start_time)]
 
     game_start_time = time.time()
     current_event_index = 0
@@ -2040,6 +2058,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     def resolve_hit(evt_idx, hit_box_idx, timing_error):
         nonlocal score, total_hits, total_notes, combo, combo_pop_time, current_event_index
         nonlocal count_300, count_100, count_50
+        nonlocal particles, hit_glows, impact_waves, screen_flash_time, screen_flash_alpha
         judgment, text = judgment_from_error(timing_error)
         if judgment is None:
             resolve_miss(evt_idx, hit_box_idx)
@@ -2062,6 +2081,45 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         trigger_box_shake(hit_box_idx, intensity=9)
         if game_settings.get('hitsounds_enabled', True):
             hitsounds['normal'].play()
+
+        # ===== ADD FLASHY EFFECTS =====
+        # Get box center for effects
+        box_centers = box_centers_display()
+        hit_x, hit_y = box_centers[hit_box_idx]
+        current_time = time.time()
+        
+        # Determine effect color based on judgment
+        if judgment == 300:
+            # Perfect hit - gold particles and bright effects
+            particle_color = (255, 215, 0)  # Gold
+            particle_count = 25
+            glow_intensity = 1.5
+        elif judgment == 100:
+            # Good hit - white particles
+            particle_color = (255, 255, 255)  # White
+            particle_count = 15
+            glow_intensity = 1.0
+        else:
+            # OK hit - light blue particles
+            particle_color = (180, 220, 255)
+            particle_count = 10
+            glow_intensity = 0.7
+        
+        # Create particle burst
+        import random
+        for _ in range(particle_count):
+            angle = random.uniform(0, 2 * math.pi)
+            speed = random.uniform(100, 300)
+            vx = math.cos(angle) * speed
+            vy = math.sin(angle) * speed
+            size = random.uniform(3, 7)
+            particles.append((hit_x, hit_y, vx, vy, particle_color, size, current_time))
+        
+        # Add hit glow effect
+        hit_glows.append((hit_box_idx, current_time, glow_intensity))
+        
+        # Add impact wave
+        impact_waves.append((hit_x, hit_y, current_time, particle_color))
 
         resolved_events.add(evt_idx)
         current_event_index += 1
@@ -2087,8 +2145,8 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         expected_button = button_for_color(evt_color)
 
         if button_name != expected_button or active_key != expected_key:
-            resolve_miss(evt_idx, evt_box)
-            return True
+            # This note doesn't match our input - skip it and keep searching
+            return False
 
         resolve_hit(evt_idx, evt_box, timing_error)
         return True
@@ -2145,6 +2203,40 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                 # Play hitsounds during autoplay
                 if game_settings.get('hitsounds_enabled', True):
                     hitsounds['normal'].play()
+                
+                # ===== ADD FANCY EFFECTS TO AUTOPLAY =====
+                # Get box center for effects
+                box_centers = box_centers_display()
+                hit_x, hit_y = box_centers[target_box]
+                current_time = time.time()
+                
+                # Perfect autoplay always gets gold effects
+                particle_color = (255, 215, 0)  # Gold
+                particle_count = 25
+                glow_intensity = 1.5
+                
+                # Create particle burst
+                import random
+                for _ in range(particle_count):
+                    angle = random.uniform(0, 2 * math.pi)
+                    speed = random.uniform(100, 300)
+                    vx = math.cos(angle) * speed
+                    vy = math.sin(angle) * speed
+                    size = random.uniform(3, 7)
+                    particles.append((hit_x, hit_y, vx, vy, particle_color, size, current_time))
+                
+                # Add hit glow effect
+                hit_glows.append((target_box, current_time, glow_intensity))
+                
+                # Add impact wave
+                impact_waves.append((hit_x, hit_y, current_time, particle_color))
+                
+                # Trigger dot switch animation
+                if target_box != last_active_dot:
+                    last_active_dot = target_box
+                    dot_switch_time = current_time
+                    dot_switch_ripples.append((target_box, dot_switch_time))
+                
                 current_event_index += 1
 
         for event in pygame.event.get():
@@ -2152,10 +2244,9 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                 running = False
 
             if event.type == pygame.KEYDOWN:
-                # Check for Ctrl+A, then P sequence to toggle autoplay (debug feature)
-                # We'll use a simpler approach: just Ctrl+P to toggle
+                # Check for Ctrl+P to toggle autoplay (debug feature)
                 keys_pressed = pygame.key.get_pressed()
-                if event.key == pygame.K_p and (keys_pressed[pygame.K_LCTRL] or keys_pressed[pygame.K_RCTRL]) and keys_pressed[pygame.K_a]:
+                if event.key == pygame.K_p and (keys_pressed[pygame.K_LCTRL] or keys_pressed[pygame.K_RCTRL]):
                     autoplay_enabled = not autoplay_enabled
                     game_settings.set('autoplay_enabled', autoplay_enabled)
                     print(f"Autoplay {'enabled' if autoplay_enabled else 'disabled'}")
@@ -2213,14 +2304,22 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                         box_pressed = 3
                     
                     # Check if red/blue are mapped to keyboard keys
-                    if display_time >= 3.0 and current_event_index < len(level):
+                    if display_time >= 3.0:
                         if event.key == mouse_binds['red']:
-                            handle_click(mouse_binds['red'], elapsed_time, current_event_index)
+                            # Check all unhit notes within timing window
+                            for check_idx in range(current_event_index, len(level)):
+                                if check_idx not in resolved_events:
+                                    if handle_click(mouse_binds['red'], elapsed_time, check_idx):
+                                        break
                             # Add input flash with red color (only for clicks, not WASD)
                             if box_pressed is not None:
                                 input_flashes[box_pressed] = (time.time(), 'red')
                         elif event.key == mouse_binds['blue']:
-                            handle_click(mouse_binds['blue'], elapsed_time, current_event_index)
+                            # Check all unhit notes within timing window
+                            for check_idx in range(current_event_index, len(level)):
+                                if check_idx not in resolved_events:
+                                    if handle_click(mouse_binds['blue'], elapsed_time, check_idx):
+                                        break
                             # Add input flash with blue color (only for clicks, not WASD)
                             if box_pressed is not None:
                                 input_flashes[box_pressed] = (time.time(), 'blue')
@@ -2240,17 +2339,23 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                 elif active_key == keybinds['left']:
                     box_for_click = 3
                 
-                if current_event_index < len(level):
-                    if event.button == mouse_binds['red']:
-                        handle_click(mouse_binds['red'], elapsed_time, current_event_index)
-                        # Add input flash with red color
-                        if box_for_click is not None:
-                            input_flashes[box_for_click] = (time.time(), 'red')
-                    elif event.button == mouse_binds['blue']:
-                        handle_click(mouse_binds['blue'], elapsed_time, current_event_index)
-                        # Add input flash with blue color
-                        if box_for_click is not None:
-                            input_flashes[box_for_click] = (time.time(), 'blue')
+                # Check all unhit notes within timing window
+                if event.button == mouse_binds['red']:
+                    for check_idx in range(current_event_index, len(level)):
+                        if check_idx not in resolved_events:
+                            if handle_click(mouse_binds['red'], elapsed_time, check_idx):
+                                break
+                    # Add input flash with red color
+                    if box_for_click is not None:
+                        input_flashes[box_for_click] = (time.time(), 'red')
+                elif event.button == mouse_binds['blue']:
+                    for check_idx in range(current_event_index, len(level)):
+                        if check_idx not in resolved_events:
+                            if handle_click(mouse_binds['blue'], elapsed_time, check_idx):
+                                break
+                    # Add input flash with blue color
+                    if box_for_click is not None:
+                        input_flashes[box_for_click] = (time.time(), 'blue')
 
         # Auto-miss past window
         if not paused:
@@ -2540,8 +2645,89 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
             pygame.draw.rect(indicator_surface, (*indicator_color, alpha), (0, 0, indicator_size, indicator_size), 0, 8)
             screen.blit(indicator_surface, (int(current_x - indicator_size // 2), int(current_y - indicator_size // 2)))
 
-        # Judgments
+        # ===== RENDER PARTICLE EFFECTS (drawn on top of boxes) =====
         current_time = time.time()
+        particle_lifetime = 0.6
+        
+        # Update and render particles
+        active_particles = []
+        for px, py, vx, vy, color, size, birth_time in particles:
+            age = current_time - birth_time
+            if age < particle_lifetime:
+                # Update position
+                new_px = px + vx * age
+                new_py = py + vy * age + 200 * age * age  # Gravity
+                
+                # Calculate alpha fade
+                alpha = int(255 * (1 - age / particle_lifetime))
+                
+                # Draw particle
+                if alpha > 0:
+                    particle_surface = pygame.Surface((int(size * 2), int(size * 2)), pygame.SRCALPHA)
+                    pygame.draw.circle(particle_surface, (*color, alpha), (int(size), int(size)), int(size))
+                    screen.blit(particle_surface, (int(new_px - size), int(new_py - size)))
+                    active_particles.append((px, py, vx, vy, color, size, birth_time))
+        particles = active_particles
+        
+        # ===== RENDER HIT GLOW EFFECTS =====
+        glow_duration = 0.35
+        active_glows = []
+        for glow_box_idx, glow_start_time, intensity in hit_glows:
+            glow_age = current_time - glow_start_time
+            if glow_age < glow_duration:
+                # Calculate glow properties
+                progress = glow_age / glow_duration
+                max_radius = 80 * intensity
+                current_radius = max_radius * progress
+                alpha = int(180 * (1 - progress) * intensity)
+                
+                if alpha > 0:
+                    # Get box center
+                    box_centers = [
+                        (center_x, center_y - square_size // 2 - spacing),
+                        (center_x + square_size // 2 + spacing, center_y),
+                        (center_x, center_y + square_size // 2 + spacing),
+                        (center_x - square_size // 2 - spacing, center_y),
+                    ]
+                    glow_x, glow_y = box_centers[glow_box_idx]
+                    
+                    # Apply shake offset if this box is shaking
+                    if shake_box == glow_box_idx:
+                        glow_x += shake_x
+                        glow_y += shake_y
+                    
+                    # Draw radial glow (multiple circles for soft glow effect)
+                    for i in range(3):
+                        radius = int(current_radius - i * 10)
+                        if radius > 0:
+                            glow_surface = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
+                            layer_alpha = max(0, min(255, int(alpha / (i + 1))))
+                            pygame.draw.circle(glow_surface, (255, 255, 255, layer_alpha), (radius, radius), radius)
+                            screen.blit(glow_surface, (int(glow_x - radius), int(glow_y - radius)))
+                    
+                    active_glows.append((glow_box_idx, glow_start_time, intensity))
+        hit_glows = active_glows
+        
+        # ===== RENDER IMPACT WAVES =====
+        wave_duration = 0.4
+        active_waves = []
+        for wave_x, wave_y, wave_start_time, wave_color in impact_waves:
+            wave_age = current_time - wave_start_time
+            if wave_age < wave_duration:
+                progress = wave_age / wave_duration
+                wave_radius = int(50 + progress * 70)
+                wave_alpha = int(200 * (1 - progress))
+                wave_thickness = max(1, int(4 * (1 - progress)))
+                
+                if wave_alpha > 0:
+                    wave_surface = pygame.Surface((wave_radius * 2 + 10, wave_radius * 2 + 10), pygame.SRCALPHA)
+                    pygame.draw.circle(wave_surface, (*wave_color, wave_alpha), 
+                                     (wave_radius + 5, wave_radius + 5), wave_radius, wave_thickness)
+                    screen.blit(wave_surface, (int(wave_x - wave_radius - 5), int(wave_y - wave_radius - 5)))
+                    active_waves.append((wave_x, wave_y, wave_start_time, wave_color))
+        impact_waves = active_waves
+
+        # Judgments
         active_judgments = []
         for judgment_text, jx, jy, start_time, box_idx, side in judgment_displays:
             time_elapsed = current_time - start_time
@@ -2650,6 +2836,27 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
 
         # Dots
         dot_size = 50
+        
+        # Determine current active dot
+        current_active_dot = None
+        if active_key == keybinds['top']:
+            current_active_dot = 0
+        elif active_key == keybinds['right']:
+            current_active_dot = 1
+        elif active_key == keybinds['bottom']:
+            current_active_dot = 2
+        elif active_key == keybinds['left']:
+            current_active_dot = 3
+        
+        # Detect dot switch and trigger animation
+        if current_active_dot is not None and current_active_dot != last_active_dot:
+            last_active_dot = current_active_dot
+            dot_switch_time = time.time()
+            dot_switch_ripples.append((current_active_dot, dot_switch_time))
+        elif current_active_dot is None:
+            last_active_dot = None
+        
+        # Draw dots with pulse animation on switch
         for i, (dot_x, dot_y) in enumerate(dot_positions):
             is_active = False
             if i == 0 and active_key == keybinds['top']:
@@ -2662,7 +2869,42 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                 is_active = True
 
             current_dot = dot2_image if is_active else dot_image
-            screen.blit(current_dot, (int(dot_x - dot_size // 2), int(dot_y - dot_size // 2)))
+            
+            # Apply pulse animation on switch
+            if is_active and i == last_active_dot:
+                switch_age = current_time - dot_switch_time
+                pulse_duration = 0.2
+                if switch_age < pulse_duration:
+                    pulse_progress = switch_age / pulse_duration
+                    # Ease-out cubic for smooth deceleration
+                    ease = 1 - pow(1 - pulse_progress, 3)
+                    scale = 1.0 + (0.3 * (1 - ease))
+                    scaled_size = int(dot_size * scale)
+                    scaled_dot = pygame.transform.scale(current_dot, (scaled_size, scaled_size))
+                    screen.blit(scaled_dot, (int(dot_x - scaled_size // 2), int(dot_y - scaled_size // 2)))
+                else:
+                    screen.blit(current_dot, (int(dot_x - dot_size // 2), int(dot_y - dot_size // 2)))
+            else:
+                screen.blit(current_dot, (int(dot_x - dot_size // 2), int(dot_y - dot_size // 2)))
+        
+        # Render dot switch ripples (ON TOP of dots)
+        ripple_duration = 0.3
+        active_ripples = []
+        for ripple_idx, ripple_start_time in dot_switch_ripples:
+            ripple_age = current_time - ripple_start_time
+            if ripple_age < ripple_duration:
+                progress = ripple_age / ripple_duration
+                ripple_radius = int(15 + progress * 20)
+                ripple_alpha = int(180 * (1 - progress))
+                
+                if ripple_alpha > 0:
+                    ripple_x, ripple_y = dot_positions[ripple_idx]
+                    ripple_surface = pygame.Surface((ripple_radius * 2 + 10, ripple_radius * 2 + 10), pygame.SRCALPHA)
+                    pygame.draw.circle(ripple_surface, (255, 50, 50, ripple_alpha),
+                                     (ripple_radius + 5, ripple_radius + 5), ripple_radius, 3)
+                    screen.blit(ripple_surface, (int(ripple_x - ripple_radius - 5), int(ripple_y - ripple_radius - 5)))
+                    active_ripples.append((ripple_idx, ripple_start_time))
+        dot_switch_ripples = active_ripples
 
         # Countdown
         if display_time < 3.0:
@@ -2690,6 +2932,19 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
             fade_overlay.fill((0, 0, 0))
             fade_overlay.set_alpha(fade_in_alpha)
             screen.blit(fade_overlay, (0, 0))
+
+        # ===== RENDER SCREEN FLASH (for perfect hits) - render last so it's on top =====
+        if screen_flash_alpha > 0:
+            flash_age = current_time - screen_flash_time
+            flash_duration = 0.15
+            if flash_age < flash_duration:
+                current_flash_alpha = int(screen_flash_alpha * (1 - flash_age / flash_duration))
+                if current_flash_alpha > 0:
+                    flash_surface = pygame.Surface((screen_width, screen_height), pygame.SRCALPHA)
+                    flash_surface.fill((255, 255, 255, current_flash_alpha))
+                    screen.blit(flash_surface, (0, 0))
+            else:
+                screen_flash_alpha = 0
 
         pygame.display.flip()
         clock.tick(60)
