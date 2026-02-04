@@ -5,6 +5,52 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.30] - 2026-02-04
+
+### Added
+- **Particle Burst System** - Explosive particle effects on successful hits
+  - 300 (Perfect): 25 gold particles with maximum intensity
+  - 100 (Good): 15 white particles with medium intensity
+  - 50 (OK): 10 light blue particles with lower intensity
+  - Particles have physics with gravity and fade out over 0.6 seconds
+- **Hit Glow Effects** - Radial glow that expands from hit boxes
+  - Intensity scales based on judgment quality
+  - Multiple layered circles for soft, natural glow effect
+  - Respects box shake animations for cohesive visuals
+- **Impact Wave Rings** - Expanding circular ripples on hits
+  - Color matches judgment quality (gold/white/blue)
+  - Fades as it expands outward over 0.4 seconds
+  - Adds satisfying feedback for successful hits
+- **Dot Switch Animation** - Visual effects when changing indicators
+  - Pulse animation: Active dot briefly scales up (1.3x) with smooth ease-out
+  - Red ripple rings expand from dot position when switching
+  - Ripples duration: 0.3 seconds with tighter 35px max radius
+  - Multiple ripples can overlap for rapid switching
+- **Autoplay Visual Effects** - Autoplay now triggers all fancy effects
+  - Shows particle bursts, hit glows, impact waves, and dot animations
+  - Makes autoplay mode visually impressive and useful for demonstrations
+  - Perfect for showcasing all visual effects at once
+
+### Fixed
+- **Critical Hit Detection Bug** - Notes on different boxes can now be hit independently
+  - Previously: If one note auto-missed, notes on other boxes became unhittable
+  - Now: Checks all unresolved notes within timing window, not just sequential index
+  - Fixes issue where sitting on one indicator could miss valid hits
+- **Wrong Input Handling** - Incorrect box/color no longer causes cascading misses
+  - Previously: Wrong input would miss the note and stop checking other notes
+  - Now: Wrong input skips to next note, allowing correct note to be found
+  - Significantly improves hit detection accuracy in multi-note scenarios
+
+### Changed
+- **Autoplay Keybind** - Changed from Ctrl+A+P to just Ctrl+P
+  - Much easier and more intuitive to toggle
+  - Removed awkward three-key combination
+  - Setting still persists between sessions
+- Particle effects render after boxes (ensures visibility)
+- Hit glows render with proper alpha blending
+- Impact waves use proper color matching for each judgment tier
+- Dot switch effects render on top of dot sprites
+
 ## [0.6.29] - 2026-02-03
 
 ### Added

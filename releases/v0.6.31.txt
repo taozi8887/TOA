@@ -1,0 +1,129 @@
+## 🎮 TOA v0.6.31 - Visual Effects & Hit Detection Overhaul
+
+### ✨ New Features
+
+**Particle Burst System**
+- 🎆 Explosive particle effects on every successful hit
+- 🥇 300 (Perfect): 25 gold particles with maximum intensity
+- 🥈 100 (Good): 15 white particles with medium intensity  
+- 🥉 50 (OK): 10 light blue particles with lower intensity
+- 🌠 Particles have realistic physics with gravity and smooth fade-out over 0.6s
+- ✨ Color-coded particles instantly communicate hit quality
+
+**Hit Glow Effects**
+- 💫 Radial glow expands from hit boxes on successful hits
+- 📊 Intensity scales based on judgment quality (300 = brightest)
+- 🎨 Multi-layered circles create soft, professional glow effect
+- 🤝 Integrates perfectly with existing box shake animations
+- ⏱️ Smooth expansion and fade over 0.35s duration
+
+**Impact Wave Rings**
+- 🌊 Circular ripples emanate from successful hits
+- 🎨 Colors match judgment quality (gold for 300, white for 100, blue for 50)
+- 📏 Expands from 50px to 120px radius over 0.4s
+- 👁️ Adds satisfying tactile feedback to gameplay
+- 💨 Smooth fade-out as wave expands
+
+**Dot Switch Animation**
+- 💠 Active indicator now pulses when switching (scales to 1.3x)
+- 🔴 Red ripple rings expand from dot position when changing lanes
+- ⚡ Quick 0.3s duration with tight 35px max radius
+- 🔄 Multiple ripples can overlap for rapid lane switching
+- 🎯 Visual clarity for lane changes during complex patterns
+
+**Autoplay Visual Effects**
+- 🤖 Autoplay mode now triggers ALL fancy visual effects
+- 🎆 Shows particle bursts, hit glows, impact waves, and dot animations
+- 🎬 Perfect for demonstrating the game or watching full visual spectacle
+- 🎮 Makes autoplay mode actually enjoyable to watch
+
+### 🐛 Bug Fixes
+
+**Critical Hit Detection Overhaul**
+- 🎯 Notes on different boxes can now be hit independently
+- ✅ Fixed cascading miss bug where auto-missed notes blocked other notes
+- 🔍 System now checks ALL unresolved notes within timing window
+- 📋 No longer relies on sequential event index only
+- 🎮 Drastically improved hit detection accuracy in multi-note scenarios
+
+**The Big Problem (Now Fixed):**
+If you were sitting on one indicator trying to hit tiles for that box, some tiles wouldn't register even though you hit them correctly. This was because the game checked notes sequentially - if a note on a different box passed its window and auto-missed, it would advance the index and your note would never get checked. This is now completely resolved by scanning all unhit notes!
+
+**Wrong Input Handling Fixed**
+- ❌ Incorrect box/color input no longer causes cascading misses
+- 🔄 Wrong input now skips to next note instead of resolving miss
+- ✅ Allows correct matching note to be found and hit
+- 🎯 Significantly improves accuracy when multiple notes are active
+
+### 🔧 Changes
+
+**Autoplay Keybind Simplified**
+- ⌨️ Changed from Ctrl+A+P to just Ctrl+P (much easier!)
+- 👍 Removed awkward three-key combination
+- 💾 Setting still persists between sessions
+- 🐛 Remains a debug feature, not primary gameplay mode
+
+**Visual Rendering Order**
+- 📐 Particle effects now render after boxes (ensures visibility)
+- 🎨 Hit glows render with proper alpha blending and layer stacking
+- 🌊 Impact waves use color matching for each judgment tier
+- 💠 Dot switch effects render on top of dot sprites for clarity
+
+### 🔧 Technical Details
+
+**Particle System Architecture**
+- Physics simulation: velocity vectors + gravity acceleration (200px/s²)
+- Particle lifetime: 0.6s with linear alpha fade
+- Random angle distribution: 0 to 2π radians
+- Speed variance: 100-300 pixels/second
+- Size variance: 3-7 pixels radius
+
+**Hit Glow Implementation**
+- Three-layer concentric circles for soft appearance
+- Each layer has progressively lower alpha (divided by i+1)
+- Maximum radius: 80px × intensity multiplier
+- Expansion rate: linear progression over duration
+- Shake-aware positioning
+
+**Hit Detection Algorithm**
+```python
+# Old (buggy): Only check current_event_index
+handle_click(button, time, current_event_index)
+
+# New (fixed): Check all unhit notes in window
+for check_idx in range(current_event_index, len(level)):
+    if check_idx not in resolved_events:
+        if handle_click(button, time, check_idx):
+            break  # Found matching note, stop searching
+```
+
+**Dot Switch Detection**
+- Tracks `last_active_dot` to detect transitions
+- Triggers on state change: `current != last`
+- Resets to None when no key active
+- Ripple list stores (dot_idx, start_time) tuples
+- Automatic cleanup of expired ripples
+
+### 📁 Files Changed
+
+- `main.py`: All visual effects, hit detection fixes, and autoplay improvements
+
+### 🎯 Impact
+
+**Gameplay**
+- Hit detection is now reliable and accurate in all scenarios
+- Visual feedback makes hits feel incredibly satisfying
+- Lane switches are clear and responsive
+- Game feels much more polished and professional
+
+**Visual Polish**
+- Effects are tuned to enhance without distracting
+- Animations use professional easing curves
+- Color coordination improves readability
+- All effects GPU-optimized for stable 60fps
+
+**User Experience**  
+- Autoplay is now visually impressive (great for demos)
+- Keybind is more accessible (Ctrl+P vs Ctrl+A+P)
+- Particle effects provide instant feedback on performance
+- Dot animations make lane tracking effortless
