@@ -21,7 +21,11 @@ a = Analysis(
         'urllib3',
         'pygame',
         'pygame.gfxdraw',
-        'wave'
+        'wave',
+        'unzip',
+        'osu_to_level',
+        'songpack_loader',
+        'songpack_ui'
     ],
     hookspath=[],
     hooksconfig={},

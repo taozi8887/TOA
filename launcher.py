@@ -444,7 +444,7 @@ def main():
     # CRITICAL: Remove any cached/bundled modules before importing
     # This ensures we load the downloaded files, not bundled ones
     # DO NOT remove pygame - we need to keep it loaded!
-    modules_to_reload = ['main', 'unzip', 'auto_updater', 'songpack_loader', 'songpack_ui']
+    modules_to_reload = ['main', 'auto_updater', 'songpack_loader', 'songpack_ui']
     for module in modules_to_reload:
         if module in sys.modules:
             del sys.modules[module]
