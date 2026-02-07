@@ -764,8 +764,8 @@ def show_pack_levels_selector(screen, pack_info, game_settings, resource_path_fu
             for file in all_level_files:
                 if file.lower().endswith('.json'):
                     json_name_base = os.path.splitext(file)[0]
-                    # Check if safe_pattern is in the filename
-                    if safe_pattern.lower() in json_name_base.lower():
+                    # Check if filename starts with safe_pattern (exact match for level)
+                    if json_name_base.lower().startswith(safe_pattern.lower() + '_'):
                         full_path = os.path.join(levels_dir, file)
                         if full_path not in seen_jsons:  # Only add if not seen
                             existing_jsons.append(full_path)
