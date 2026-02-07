@@ -1,5 +1,5 @@
 {
-  "version": "0.7.6",
+  "version": "0.7.7",
   "files": {
     "assets": {
       "box.jpg": "40ed857c173a25d0d9ed4b3f6dffb6ac38641bb729b7dcd52bf5a32196871095",
@@ -14,11 +14,11 @@
       "songpacks/Xiao's Solo Beginner Pack II.zip": "d29a7343a3b520cc62290c219c1c797f70a8327b8da289dccf562b46a761777c"
     },
     "code": {
-      "main.py": "dbb3850f9809bdf2870156bd1df2313c331092fa837e450d57a28fabd14f10fc",
+      "main.py": "d68147fb6310c64dd39c0c1ee83b6288e0e37dfa3e34159595a3dcc535a320f2",
       "auto_updater.py": "71dcf17c5100b62bc73e4472fb5ddcaa724835714fcecc4ca6341577c4ea1b61",
       "launcher.py": "2015b865f6351cf7c7f0f6f115e6708fbdad4f18e2a8ed1abaa2788b2dccc9d9",
       "songpack_loader.py": "b7dadfabc8df11ab5875e5a595784ed45f23e1adbb688bbea493f885586d6523",
-      "songpack_ui.py": "23d50c669e2f45c4a4f1e193aed94355ed507ff13b8ad50018897a222033e65a"
+      "songpack_ui.py": "1991d206255a5a782f6a5e2e334b121d07d2ae8d86d5aaa9f6e77e96c377e8fa"
     }
   }
 }
