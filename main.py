@@ -40,7 +40,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.7.2"
+__version__ = "0.7.3"
 
 # Settings management
 class Settings:
@@ -475,7 +475,10 @@ def show_loading_screen():
     update_loading_screen("Scanning song packs...")
     
     from songpack_loader import scan_and_load_songpacks, convert_level_to_json
-    packs = scan_and_load_songpacks()
+    
+    # Songpacks are in assets/songpacks/ (or .toa/assets/songpacks/ when running from exe)
+    songpacks_path = os.path.join('.toa', 'assets', 'songpacks') if os.path.exists('.toa') else os.path.join('assets', 'songpacks')
+    packs = scan_and_load_songpacks(songpacks_path)
     
     # Cache for level metadata
     level_metadata_cache = {}
