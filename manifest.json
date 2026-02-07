@@ -68,18 +68,9 @@
       }
     }
   },
-  "patches": {
-    "from_0.7.29": {
-      "description": "Patch from 0.7.29 to 0.7.30",
-      "changed_files": [
-        "main.py",
-        "songpack_ui.py"
-      ],
-      "removed_files": []
-    }
-  },
+  "patches": {},
   "rollback": {
-    "previous_version": "0.7.29",
+    "previous_version": "0.7.30",
     "can_rollback": true
   }
 }
