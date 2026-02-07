@@ -134,6 +134,10 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
     
     # Pre-load FULL metadata cache for all packs for instant navigation
     levels_dir = os.path.join('.toa', 'levels') if os.path.exists('.toa') else 'levels'
+    
+    # Track all valid level patterns from all packs
+    valid_level_patterns = set()
+    
     for pack in packs:
         print(f"Pre-loading metadata for {pack['pack_name']}...")
         
@@ -146,6 +150,7 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
         for level_info in pack['levels']:
             folder_name = level_info['name']
             safe_pattern = re.sub(r'[^\w\s-]', '', folder_name).strip().replace(' ', '_')
+            valid_level_patterns.add(safe_pattern.lower())
             
             # Check if JSONs exist for this level
             existing = False
@@ -206,6 +211,38 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
         
         # Keep simple list for backward compatibility
         pack['level_metadata'] = []
+        for json_path, meta in pack['metadata_cache'].items():
+            pack['level_metadata'].append({
+                'title': meta['title'],
+                'artist': meta['artist'],
+                'version': meta['version'],
+                'json_path': json_path
+            })
+    
+    # Clean up old/orphaned JSONs that don't belong to any current pack
+    if os.path.exists(levels_dir):
+        all_jsons = [f for f in os.listdir(levels_dir) if f.lower().endswith('.json')]
+        deleted_count = 0
+        for json_file in all_jsons:
+            json_name_base = os.path.splitext(json_file)[0]
+            # Check if this JSON matches any valid level pattern
+            is_valid = False
+            for pattern in valid_level_patterns:
+                if json_name_base.lower().startswith(pattern + '_'):
+                    is_valid = True
+                    break
+            
+            if not is_valid:
+                # This JSON doesn't belong to any current level, delete it
+                json_path = os.path.join(levels_dir, json_file)
+                try:
+                    os.remove(json_path)
+                    deleted_count += 1
+                except:
+                    pass
+        
+        if deleted_count > 0:
+            print(f"Cleaned up {deleted_count} old level file(s)")
         for json_path, meta in pack['metadata_cache'].items():
             pack['level_metadata'].append({
                 'title': meta['title'],

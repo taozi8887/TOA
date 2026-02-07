@@ -40,7 +40,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.7.16"
+__version__ = "0.7.17"
 
 # Settings management
 class Settings:
@@ -3583,6 +3583,7 @@ if __name__ == "__main__":
     pygame.display.quit()
     pygame.quit()
     sys.exit()
+
 
 
 
