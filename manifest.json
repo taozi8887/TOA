@@ -1,5 +1,5 @@
 {
-  "version": "0.7.23",
+  "version": "0.7.24",
   "release_date": "2026-02-07",
   "manifest_version": 1,
   "files": {
@@ -47,8 +47,8 @@
     },
     "code": {
       "main.py": {
-        "hash": "87515addc69fc1b8a1088fdd852f3208d4817c6f219a17a6602ccde02a8b02e6",
-        "size": 157760
+        "hash": "e5eb96e785c003a7c75f2fc33ee924d13185bcaba38febe291923b72f8be9505",
+        "size": 159502
       },
       "auto_updater.py": {
         "hash": "3a1ee33ef885cd5a8b80d9a330c6b0778bb5ac1ba53da278f449ab12121a3937",
@@ -59,27 +59,28 @@
         "size": 24296
       },
       "songpack_loader.py": {
-        "hash": "f3e57ee4d8c4499b630a2b2664363609407fef729b15c75f6e7ad954c8c364a3",
-        "size": 38917
+        "hash": "fa1b38bb6d1a49f7ee2d699eaffd50fa35034779171a651795fc2d4cb8155dc4",
+        "size": 39410
       },
       "songpack_ui.py": {
-        "hash": "e1cb4ce55e797fdd370e3d05bdbf3131a929e57ca8989c707334dbc68f8b4dac",
-        "size": 63044
+        "hash": "f6c851fdc81dbd0f34612c3bf262eaed6724f186a177b9fc445d3dc390d561c8",
+        "size": 69142
       }
     }
   },
   "patches": {
-    "from_0.7.22": {
-      "description": "Patch from 0.7.22 to 0.7.23",
+    "from_0.7.23": {
+      "description": "Patch from 0.7.23 to 0.7.24",
       "changed_files": [
         "main.py",
+        "songpack_loader.py",
         "songpack_ui.py"
       ],
       "removed_files": []
     }
   },
   "rollback": {
-    "previous_version": "0.7.22",
+    "previous_version": "0.7.23",
     "can_rollback": true
   }
 }
