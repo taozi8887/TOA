@@ -729,7 +729,7 @@ def create_version_file(directories: List[str] = None, include_code: bool = True
     # Track Python code files
     if include_code:
         version_data['files']['code'] = {}
-        code_files = ['main.py', 'osu_to_level.py', 'unzip.py', 'auto_updater.py', 'batch_process_osz.py']
+        code_files = ['main.py', 'auto_updater.py', 'songpack_loader.py', 'songpack_ui.py']
         
         for code_file in code_files:
             if os.path.exists(code_file):

@@ -1,4 +1,3 @@
-import pygame
 import sys
 import os
 import time
@@ -6,8 +5,32 @@ import math
 import json
 import subprocess
 import threading
+import warnings
+
+# Redirect stderr at OS level to suppress libpng warnings from C library
+if os.name == 'nt':  # Windows
+    import msvcrt
+    import ctypes
+    # Redirect stderr file descriptor to NUL
+    sys.stderr.flush()
+    newstderr = os.open(os.devnull, os.O_WRONLY)
+    os.dup2(newstderr, 2)
+    os.close(newstderr)
+else:  # Unix/Linux/Mac
+    sys.stderr = open(os.devnull, 'w')
+
+# Suppress Python warnings
+warnings.filterwarnings('ignore')
+
+# Initialize pygame and suppress prompts
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
+os.environ['SDL_AUDIODRIVER'] = 'directsound'  # Suppress audio warnings
+
+import pygame
+
 from unzip import read_osz_file
 from osu_to_level import create_level_json
+
 try:
     import requests
     from auto_updater import AutoUpdater
@@ -16,7 +39,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.6.31"
+__version__ = "0.7.0"
 
 # Settings management
 class Settings:
@@ -30,14 +53,16 @@ class Settings:
         'fade_effects': True,
         'autoplay_enabled': False,  # Debug feature - toggle with Ctrl+P
         'keybinds': {
-            'top': pygame.K_w,
-            'right': pygame.K_d,
-            'bottom': pygame.K_s,
-            'left': pygame.K_a
-        },
-        'mouse_binds': {
-            'red': 1,  # Left click
-            'blue': 3  # Right click
+            # Red keys (WASD by default)
+            'red_top': pygame.K_w,
+            'red_right': pygame.K_d,
+            'red_bottom': pygame.K_s,
+            'red_left': pygame.K_a,
+            # Blue keys (Arrows by default)
+            'blue_top': pygame.K_UP,
+            'blue_right': pygame.K_RIGHT,
+            'blue_bottom': pygame.K_DOWN,
+            'blue_left': pygame.K_LEFT
         }
     }
     
@@ -371,9 +396,9 @@ def show_loading_screen():
     window_width, window_height = screen.get_size()
     clock = pygame.time.Clock()
 
-    font_title = pygame.font.Font(None, 72)
-    font_status = pygame.font.Font(None, 36)
-    font_small = pygame.font.Font(None, 28)
+    font_title = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 60)
+    font_status = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 30)
+    font_small = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 24)
 
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
@@ -383,6 +408,48 @@ def show_loading_screen():
     # Start with black screen
     screen.fill(BLACK)
     pygame.display.flip()
+
+    # Function to update loading screen with progress
+    def update_loading_screen(status_msg, progress=None):
+        screen.fill(BLACK)
+        title_text = font_title.render("TOA", True, WHITE)
+        title_rect = title_text.get_rect(center=(window_width // 2, window_height // 2 - 100))
+        screen.blit(title_text, title_rect)
+
+        status_text = font_status.render(status_msg, True, WHITE)
+        status_rect = status_text.get_rect(center=(window_width // 2, window_height // 2 + 50))
+        screen.blit(status_text, status_rect)
+        
+        if progress is not None:
+            # Draw progress bar with better styling
+            bar_width = 600
+            bar_height = 30
+            bar_x = (window_width - bar_width) // 2
+            bar_y = window_height // 2 + 100
+            
+            # Shadow/glow effect
+            glow_surface = pygame.Surface((bar_width + 20, bar_height + 20), pygame.SRCALPHA)
+            pygame.draw.rect(glow_surface, (0, 0, 0, 60), (0, 0, bar_width + 20, bar_height + 20), border_radius=20)
+            screen.blit(glow_surface, (bar_x - 10, bar_y - 10))
+            
+            # Background (rounded)
+            pygame.draw.rect(screen, (40, 40, 40), (bar_x, bar_y, bar_width, bar_height), border_radius=15)
+            
+            # Progress (rounded)
+            if progress > 0:
+                progress_width = max(30, int(bar_width * progress))  # Min width for rounded corners
+                pygame.draw.rect(screen, GREEN, (bar_x, bar_y, progress_width, bar_height), border_radius=15)
+            
+            # Border (rounded)
+            pygame.draw.rect(screen, (80, 80, 80), (bar_x, bar_y, bar_width, bar_height), 2, border_radius=15)
+            
+            # Percentage text
+            percent_text = font_small.render(f"{int(progress * 100)}%", True, WHITE)
+            percent_rect = percent_text.get_rect(center=(window_width // 2, bar_y + bar_height + 30))
+            screen.blit(percent_text, percent_rect)
+        
+        pygame.display.flip()
+        clock.tick(60)
 
     # Fade in the loading screen
     fade_surface = pygame.Surface((window_width, window_height))
@@ -402,9 +469,83 @@ def show_loading_screen():
             screen.blit(fade_surface, (0, 0))
             pygame.display.flip()
             clock.tick(60)
+    
+    # Preload all songpacks and convert levels
+    update_loading_screen("Scanning song packs...")
+    
+    from songpack_loader import scan_and_load_songpacks, convert_level_to_json
+    packs = scan_and_load_songpacks()
+    
+    # Cache for level metadata
+    level_metadata_cache = {}
+    
+    if packs:
+        total_levels = sum(len(pack['levels']) for pack in packs)
+        converted_count = 0
+        
+        for pack in packs:
+            pack_name = pack['pack_name']
+            for level_info in pack['levels']:
+                # Check if already converted
+                import re
+                safe_name = re.sub(r'[^\w\s-]', '', level_info['name']).strip().replace(' ', '_')
+                existing_jsons = []
+                if os.path.exists('levels'):
+                    for file in os.listdir('levels'):
+                        if file.startswith(safe_name) and file.endswith('.json'):
+                            existing_jsons.append(os.path.join('levels', file))
+                
+                # Convert if not already done
+                if not existing_jsons:
+                    progress = converted_count / total_levels if total_levels > 0 else 0
+                    update_loading_screen(f"Loading {pack_name}: {level_info['name']}", progress)
+                    try:
+                        created_jsons = convert_level_to_json(level_info)
+                        existing_jsons.extend(created_jsons)
+                    except Exception as e:
+                        print(f"Error converting {level_info['name']}: {e}")
+                
+                # Cache metadata for all JSONs
+                for json_path in existing_jsons:
+                    try:
+                        with open(json_path, 'r', encoding='utf-8') as f:
+                            data = json.load(f)
+                            meta = data.get('meta', {})
+                            level_notes = data.get('level', [])
+                            
+                            # Calculate NPS range
+                            notes_by_second = {}
+                            for note in level_notes:
+                                second = int(note.get('t', 0))
+                                notes_by_second[second] = notes_by_second.get(second, 0) + 1
+                            nps_min = min(notes_by_second.values()) if notes_by_second else None
+                            nps_max = max(notes_by_second.values()) if notes_by_second else None
+                            
+                            # Store lightweight metadata
+                            level_metadata_cache[json_path] = {
+                                'title': meta.get('title', 'Unknown'),
+                                'version': meta.get('version', 'Unknown'),
+                                'artist': meta.get('artist', 'Unknown'),
+                                'creator': meta.get('creator', 'Unknown'),
+                                'note_count': len(level_notes),
+                                'bpm_min': meta.get('bpm_min'),
+                                'bpm_max': meta.get('bpm_max'),
+                                'background_file': meta.get('background_file'),
+                                'length': meta.get('length'),
+                                'nps_min': nps_min,
+                                'nps_max': nps_max
+                            }
+                    except Exception as e:
+                        print(f"Error caching metadata for {json_path}: {e}")
+                
+                converted_count += 1
+        
+        update_loading_screen("Loading complete!", 1.0)
+        pygame.time.wait(500)  # Brief pause to show completion
 
     # Verify file integrity (protect against tampering) with visual feedback
     if AUTO_UPDATE_AVAILABLE and getattr(sys, 'frozen', False):
+        update_loading_screen("Checking for updates...")
         try:
             # Load update config
             config_path = os.path.join('.toa', 'update_config.json')
@@ -419,7 +560,7 @@ def show_loading_screen():
             
             # Only verify if not first run
             if not updater.is_first_run():
-                code_files = ['main.py', 'osu_to_level.py', 'unzip.py', 'auto_updater.py', 'batch_process_osz.py', 'launcher.py']
+                code_files = ['main.py', 'auto_updater.py', 'launcher.py', 'songpack_loader.py', 'songpack_ui.py']
                 corrupted_files = []
                 
                 for i, code_file in enumerate(code_files):
@@ -480,91 +621,7 @@ def show_loading_screen():
 
     # Launcher already handles updates, so skip redundant check in main.py
 
-    # Get available level files
-    levels_dir = "levels"
-    level_files = []
-    try:
-        levels_path = resource_path(levels_dir)
-        if os.path.exists(levels_path):
-            level_files = [f for f in os.listdir(levels_path) if f.endswith('.json')]
-            level_files.sort()
-    except Exception as e:
-        print(f"Error: Could not read levels directory: {levels_dir}")
-        print(f"Full error: {e}")
-        print(f"Tried path: {resource_path(levels_dir)}")
-        return None
-
-    if not level_files:
-        print("Error: No level files found!")
-        print(f"Checked directory: {resource_path(levels_dir)}")
-        print("Make sure .osz files are in assets/osz/ directory")
-        return None
-
-    # Load metadata and background images for each level with progress bar
-    level_metadata = []
-    total_files = len(level_files)
-
-    for idx, level_file in enumerate(level_files):
-        # Update progress
-        progress = (idx + 1) / total_files
-
-        # Draw loading screen with progress
-        screen.fill(BLACK)
-
-        title_text = font_title.render("TOA", True, WHITE)
-        title_rect = title_text.get_rect(center=(window_width // 2, window_height // 2 - 100))
-        screen.blit(title_text, title_rect)
-
-        status_text = font_status.render(f"Loading levels... {idx + 1}/{total_files}", True, WHITE)
-        status_rect = status_text.get_rect(center=(window_width // 2, window_height // 2 + 50))
-        screen.blit(status_text, status_rect)
-
-        # Draw progress bar
-        bar_width = 400
-        bar_height = 20
-        bar_x = window_width // 2 - bar_width // 2
-        bar_y = window_height // 2 + 100
-
-        # Background bar
-        pygame.draw.rect(screen, (50, 50, 50), (bar_x, bar_y, bar_width, bar_height), border_radius=10)
-        # Progress bar
-        filled_width = int(bar_width * progress)
-        if filled_width > 0:
-            pygame.draw.rect(screen, GREEN, (bar_x, bar_y, filled_width, bar_height), border_radius=10)
-
-        pygame.display.flip()
-        clock.tick(60)
-
-        # Load level metadata
-        try:
-            with open(resource_path(os.path.join(levels_dir, level_file)), 'r') as f:
-                data = json.load(f)
-                title = data.get('meta', {}).get('title', 'Unknown')
-                version = data.get('meta', {}).get('version', 'Unknown')
-                artist = data.get('meta', {}).get('artist', 'Unknown')
-                creator = data.get('meta', {}).get('creator', 'Unknown')
-
-                # Find background image from beatmap directory
-                beatmap_name = level_file.replace('.json', '').split('_')[0]
-                beatmap_dir = f"beatmaps/{beatmap_name}"
-                bg_image = None
-
-                try:
-                    # Look for image files in beatmap directory
-                    if os.path.exists(resource_path(beatmap_dir)):
-                        image_extensions = ['.jpg', '.jpeg', '.png', '.bmp']
-                        for file in os.listdir(resource_path(beatmap_dir)):
-                            if any(file.lower().endswith(ext) for ext in image_extensions):
-                                bg_path = os.path.join(beatmap_dir, file)
-                                bg_image = pygame.image.load(resource_path(bg_path))
-                                break
-                except:
-                    bg_image = None
-
-                level_metadata.append((level_file, title, version, artist, creator, bg_image))
-        except:
-            # If can't read metadata, use filename
-            level_metadata.append((level_file, level_file.replace('.json', ''), '', 'Unknown', 'Unknown', None))
+    # No longer pre-loading OSU levels - song packs are loaded on demand
 
     # Show complete message briefly
     screen.fill(BLACK)
@@ -576,25 +633,120 @@ def show_loading_screen():
     status_rect = status_text.get_rect(center=(window_width // 2, window_height // 2 + 50))
     screen.blit(status_text, status_rect)
 
-    # Draw full progress bar
-    bar_width = 400
-    bar_height = 20
-    bar_x = window_width // 2 - bar_width // 2
-    bar_y = window_height // 2 + 100
-    pygame.draw.rect(screen, GREEN, (bar_x, bar_y, bar_width, bar_height), border_radius=10)
-
     pygame.display.flip()
-    time.sleep(0.3)  # Brief pause to show completion
+    time.sleep(0.3)
 
     # Fade out loading screen
     if game_settings.get('fade_effects', True):
         fade_out(screen, duration=0.5)
 
-    # Keep screen black for transition to level selector
+    # Keep screen black for transition
     screen.fill((0, 0, 0))
     pygame.display.flip()
 
-    return level_metadata
+    return level_metadata_cache
+
+def show_main_menu(fade_in_start=False):
+    """
+    Show main menu with options for browsing levels or song packs.
+    Returns: 'LEVELS' or 'SONGPACKS' or None/QUIT
+    """
+    pygame.init()
+    screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
+    pygame.display.set_caption("TOA - Main Menu")
+    window_width, window_height = screen.get_size()
+    clock = pygame.time.Clock()
+    
+    font_title = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 60)
+    font_option = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 40)
+    font_hint = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 20)
+    
+    WHITE = (255, 255, 255)
+    BLACK = (0, 0, 0)
+    GRAY = (150, 150, 150)
+    GREEN = (112, 255, 148)
+    
+    # Menu options
+    options = [
+        ("Browse Levels", "LEVELS"),
+        ("Song Packs", "SONGPACKS")
+    ]
+    
+    hovered_index = None
+    selected = None
+    
+    # Fade in effect
+    fade_alpha = 0 if fade_in_start else 255
+    fade_surface = pygame.Surface((window_width, window_height))
+    fade_surface.fill(BLACK)
+    
+    while selected is None:
+        mouse_pos = pygame.mouse.get_pos()
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return "QUIT"
+            
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return None
+                elif event.key == pygame.K_1 or event.key == pygame.K_KP1:
+                    return "LEVELS"
+                elif event.key == pygame.K_2 or event.key == pygame.K_KP2:
+                    return "SONGPACKS"
+            
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if hovered_index is not None:
+                    selected = options[hovered_index][1]
+        
+        # Draw
+        screen.fill((0, 0, 0))  # Black background like level selector
+        
+        # Title
+        title_text = font_title.render("TOA", True, WHITE)
+        title_rect = title_text.get_rect(center=(window_width // 2, 150))
+        screen.blit(title_text, title_rect)
+        
+        # Options
+        hovered_index = None
+        start_y = 300
+        option_spacing = 100
+        
+        for idx, (label, value) in enumerate(options):
+            option_y = start_y + idx * option_spacing
+            
+            # Check hover
+            option_text = font_option.render(label, True, WHITE)
+            option_rect = option_text.get_rect(center=(window_width // 2, option_y))
+            
+            if option_rect.collidepoint(mouse_pos):
+                hovered_index = idx
+                # Draw hover background like level selector
+                hover_rect = pygame.Rect(option_rect.x - 20, option_rect.y - 10, 
+                                       option_rect.width + 40, option_rect.height + 20)
+                pygame.draw.rect(screen, (40, 40, 40), hover_rect, border_radius=5)
+                pygame.draw.rect(screen, GRAY, hover_rect, 2, border_radius=5)
+                # Draw selection indicator
+                indicator = font_option.render(">", True, GREEN)
+                screen.blit(indicator, (option_rect.left - 50, option_rect.top))
+            
+            screen.blit(option_text, option_rect)
+        
+        # Hints
+        hint_text = font_hint.render("ESC: Exit  |  1: Browse Levels  |  2: Song Packs", True, GRAY)
+        hint_rect = hint_text.get_rect(center=(window_width // 2, window_height - 50))
+        screen.blit(hint_text, hint_rect)
+        
+        # Fade in
+        if fade_in_start and fade_alpha > 0:
+            fade_alpha = max(0, fade_alpha - 10)
+            fade_surface.set_alpha(fade_alpha)
+            screen.blit(fade_surface, (0, 0))
+        
+        pygame.display.flip()
+        clock.tick(60)
+    
+    return selected
 
 def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
     """Show popup window to select a level
@@ -659,10 +811,10 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
     window_width, window_height = screen.get_size()
     clock = pygame.time.Clock()
 
-    font_title = pygame.font.Font(None, 48)
-    font_item_title = pygame.font.Font(None, 32)
-    font_item_version = pygame.font.Font(None, 22)
-    font_hint = pygame.font.Font(None, 24)
+    font_title = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 40)
+    font_item_title = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 28)
+    font_item_version = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 18)
+    font_hint = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 20)
 
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
@@ -670,8 +822,11 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
     BLUE = (100, 150, 255)
     GREEN = (112, 255, 148)
 
-    # Scrolling setup - pixel-based smooth scrolling
+    # Scrolling setup - momentum-based smooth scrolling (butter.js style)
     scroll_offset = 0.0  # Current scroll position in pixels
+    scroll_velocity = 0.0  # Current scroll velocity
+    scroll_friction = 0.92  # Friction coefficient (higher = longer momentum)
+    scroll_acceleration = 0.0  # Current acceleration
     item_height = 250
     list_start_y = 100
     list_end_y = window_height - 100  # Extended down more
@@ -720,12 +875,12 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
                     # Reload scroll speed in case it changed
                     scroll_speed = game_settings.get('scroll_speed', 75)
                 elif event.key == pygame.K_UP:
-                    scroll_offset = max(0, scroll_offset - scroll_speed)
+                    scroll_velocity -= scroll_speed * 2  # Add velocity in up direction
                 elif event.key == pygame.K_DOWN:
-                    scroll_offset = min(max_scroll, scroll_offset + scroll_speed)
+                    scroll_velocity += scroll_speed * 2  # Add velocity in down direction
 
             if event.type == pygame.MOUSEWHEEL:
-                scroll_offset = max(0, min(max_scroll, scroll_offset - event.y * scroll_speed))
+                scroll_velocity -= event.y * scroll_speed * 1.5  # Multiply for more momentum
 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 # Check if clicked on scrollbar thumb
@@ -778,31 +933,55 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
         # Handle continuous arrow key scrolling (when held down)
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP]:
-            scroll_offset = max(0, scroll_offset - scroll_speed / 6)  # Slower for held keys
+            scroll_velocity -= scroll_speed / 3  # Continuous velocity change
         if keys[pygame.K_DOWN]:
-            scroll_offset = min(max_scroll, scroll_offset + scroll_speed / 6)
+            scroll_velocity += scroll_speed / 3
 
-        # Handle scrollbar dragging
+        # Handle scrollbar dragging (direct manipulation, no momentum)
         if scrollbar_dragging and total_content_height > available_height:
             scrollbar_track_height = list_end_y - list_start_y
             thumb_height = max(30, int((available_height / total_content_height) * scrollbar_track_height))
             drag_delta_y = mouse_y - drag_start_y
             scroll_delta = (drag_delta_y / (scrollbar_track_height - thumb_height)) * max_scroll if max_scroll > 0 else 0
-            scroll_offset = max(0, min(max_scroll, drag_start_scroll + scroll_delta))
+            new_scroll = max(0, min(max_scroll, drag_start_scroll + scroll_delta))
+            scroll_offset = new_scroll
+            scroll_velocity = 0  # Cancel momentum during direct manipulation
         
-        # Handle item drag scrolling
-        if mouse_down_pos is not None and not scrollbar_dragging:
+        # Handle item drag scrolling (with momentum)
+        elif mouse_down_pos is not None:
             drag_delta_y = mouse_y - mouse_down_y
             if abs(drag_delta_y) > 5:  # Started dragging
                 item_dragging = True
-                scroll_offset = max(0, min(max_scroll, scroll_offset - drag_delta_y * 2))  # 2x sensitivity
+                scroll_velocity = -drag_delta_y * 3  # Convert drag to velocity
                 mouse_down_y = mouse_y  # Update for continuous drag
+        
+        # Apply velocity to scroll position
+        scroll_offset += scroll_velocity
+        
+        # Apply friction to velocity (momentum decay)
+        scroll_velocity *= scroll_friction
+        
+        # Stop velocity when it's very small (lower threshold for smoother stop)
+        if abs(scroll_velocity) < 0.01:
+            scroll_velocity = 0
+        
+        # Debug output
+        if abs(scroll_velocity) > 0.01 or abs(scroll_offset - int(scroll_offset)) > 0.01:
+            print(f"Scroll: offset={scroll_offset:.2f}, velocity={scroll_velocity:.2f}")
+        
+        # Clamp scroll offset and bounce back if out of bounds
+        if scroll_offset < 0:
+            scroll_offset = 0
+            scroll_velocity *= -0.3  # Bounce effect
+        elif scroll_offset > max_scroll:
+            scroll_offset = max_scroll
+            scroll_velocity *= -0.3  # Bounce effect
 
         # Rendering
-        screen.fill(WHITE)
+        screen.fill((0, 0, 0))
 
         # Draw title
-        title_text = font_title.render("Select a Level", True, BLACK)
+        title_text = font_title.render("Select a Level", True, WHITE)
         title_rect = title_text.get_rect(center=(window_width // 2, 55))
         screen.blit(title_text, title_rect)
 
@@ -855,7 +1034,13 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
             if item_y + item_height < list_start_y or item_y > list_end_y:
                 continue
 
-            item_rect = pygame.Rect(50, int(item_y), window_width - 100, item_height - 5)
+            # Keep float position for smooth rendering, create rect for collision only
+            item_x = 50
+            rect_width = window_width - 100
+            rect_height = item_height - 5
+            
+            # For collision detection, we need an int rect
+            item_rect = pygame.Rect(int(item_x), int(item_y), rect_width, rect_height)
 
             # Get hover animation progress with ease-in curve
             hover_progress = hover_animations.get(i, 0.0)
@@ -868,7 +1053,6 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
             if bg_image is not None:
                 # Calculate scaling to cover the rect while maintaining aspect ratio
                 bg_width, bg_height = bg_image.get_size()
-                rect_width, rect_height = item_rect.width, item_rect.height
 
                 scale_x = rect_width / bg_width
                 scale_y = rect_height / bg_height
@@ -894,7 +1078,7 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
                 pygame.draw.rect(mask_surface, (255, 255, 255, 255), (0, 0, rect_width, rect_height), border_radius=15)
                 bg_surface.blit(mask_surface, (0, 0), special_flags=pygame.BLEND_RGBA_MIN)
 
-                screen.blit(bg_surface, item_rect.topleft)
+                screen.blit(bg_surface, (item_x, item_y))
 
                 # Draw black to transparent gradient overlay (left to right)
                 gradient_surface = pygame.Surface((rect_width, rect_height), pygame.SRCALPHA)
@@ -903,14 +1087,14 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
                     alpha = int(200 * (1 - x / rect_width))  # 200 max opacity at left, 0 at right
                     pygame.draw.line(gradient_surface, (0, 0, 0, alpha), (x, 0), (x, rect_height))
 
-                screen.blit(gradient_surface, item_rect.topleft)
+                screen.blit(gradient_surface, (item_x, item_y))
 
                 # Draw hover overlay with animation (dark overlay)
                 if eased_progress > 0.0:
                     hover_alpha = int(100 * eased_progress)
                     hover_overlay = pygame.Surface((rect_width, rect_height), pygame.SRCALPHA)
                     pygame.draw.rect(hover_overlay, (0, 0, 0, hover_alpha), (0, 0, rect_width, rect_height), border_radius=15)
-                    screen.blit(hover_overlay, item_rect.topleft)
+                    screen.blit(hover_overlay, (item_x, item_y))
             else:
                 # No background image - draw solid color background with hover animation
                 GRAY = (200, 200, 200)
@@ -923,7 +1107,7 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
                     item_color = (r, g, b)
                 else:
                     item_color = GRAY
-                pygame.draw.rect(screen, item_color, item_rect, border_radius=15)
+                pygame.draw.rect(screen, item_color, (item_x, item_y, rect_width, rect_height), border_radius=15)
 
             # Draw title (larger)
             total_text_height = 40
@@ -934,31 +1118,27 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
             if creator and creator != 'Unknown':
                 total_text_height += 25
 
-            text_start_y = item_rect.top + (item_rect.height - total_text_height) // 2
+            text_start_y = item_y + (rect_height - total_text_height) // 2
 
             text_color = (255, 255, 255) if bg_image is not None else (0, 0, 0)
             title_text = font_item_title.render(title, True, text_color)
-            title_rect = title_text.get_rect(left=item_rect.left + 30, top=text_start_y)
-            screen.blit(title_text, title_rect)
+            screen.blit(title_text, (item_x + 30, text_start_y))
 
             current_y = text_start_y + 40
 
             if version:
                 version_text = font_item_version.render(f"[{version}]", True, text_color)
-                version_rect = version_text.get_rect(left=item_rect.left + 30, top=current_y)
-                screen.blit(version_text, version_rect)
+                screen.blit(version_text, (item_x + 30, current_y))
                 current_y += 30
 
             if artist and artist != 'Unknown':
                 artist_text = font_hint.render(f"Artist: {artist}", True, text_color)
-                artist_rect = artist_text.get_rect(left=item_rect.left + 30, top=current_y)
-                screen.blit(artist_text, artist_rect)
+                screen.blit(artist_text, (item_x + 30, current_y))
                 current_y += 25
 
             if creator and creator != 'Unknown':
                 creator_text = font_hint.render(f"Mapped by: {creator}", True, text_color)
-                creator_rect = creator_text.get_rect(left=item_rect.left + 30, top=current_y)
-                screen.blit(creator_text, creator_rect)
+                screen.blit(creator_text, (item_x + 30, current_y))
 
         # Remove clipping rect after drawing items
         screen.set_clip(None)
@@ -1049,8 +1229,8 @@ def show_quit_confirmation(is_quit_to_menu=False):
     # Save current screen
     saved_screen = screen.copy()
     
-    font_large = pygame.font.Font(None, 64)
-    font_button = pygame.font.Font(None, 48)
+    font_large = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 52)
+    font_button = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 40)
     
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
@@ -1146,15 +1326,15 @@ def show_settings_menu(from_game=False, from_selector=False):
     window_width, window_height = screen.get_size()
     clock = pygame.time.Clock()
     
-    font_title = pygame.font.Font(None, 64)
-    font_label = pygame.font.Font(None, 36)
-    font_small = pygame.font.Font(None, 28)
-    font_button = pygame.font.Font(None, 32)
+    font_title = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 52)
+    font_label = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 30)
+    font_small = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 24)
+    font_button = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 28)
     
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
     GRAY = (200, 200, 200)
-    DARK_GRAY = (100, 100, 100)
+    DARK_GRAY = (60, 60, 60)
     BLUE = (100, 150, 255)
     GREEN = (112, 255, 148)
     RED = (255, 100, 100)
@@ -1173,7 +1353,6 @@ def show_settings_menu(from_game=False, from_selector=False):
     
     # Keybind remapping state
     waiting_for_key = None  # Which keybind we're waiting to remap
-    waiting_for_mouse = None  # Which mouse button we're waiting to remap
     
     # Slider dragging state
     dragging_slider = None
@@ -1184,12 +1363,12 @@ def show_settings_menu(from_game=False, from_selector=False):
     def draw_slider(x, y, width, height, value, min_val, max_val, label):
         """Draw a horizontal slider"""
         # Label
-        label_surface = font_label.render(label, True, BLACK)
+        label_surface = font_label.render(label, True, WHITE)
         screen.blit(label_surface, (x, y - 35))
         
         # Track
         track_rect = pygame.Rect(x, y, width, height)
-        pygame.draw.rect(screen, GRAY, track_rect, border_radius=4)
+        pygame.draw.rect(screen, DARK_GRAY, track_rect, border_radius=4)
         
         # Filled portion
         filled_width = int((value - min_val) / (max_val - min_val) * width)
@@ -1200,13 +1379,13 @@ def show_settings_menu(from_game=False, from_selector=False):
         knob_x = x + filled_width
         knob_y = y + height // 2
         pygame.draw.circle(screen, WHITE, (knob_x, knob_y), knob_radius)
-        pygame.draw.circle(screen, BLACK, (knob_x, knob_y), knob_radius, 2)
+        pygame.draw.circle(screen, GRAY, (knob_x, knob_y), knob_radius, 2)
         
         # Value display
         value_text = f"{int(value * 100) if min_val == 0 and max_val == 1 else int(value)}"
         if min_val == 0 and max_val == 1:
             value_text += "%"
-        value_surface = font_small.render(value_text, True, BLACK)
+        value_surface = font_small.render(value_text, True, WHITE)
         screen.blit(value_surface, (x + width + 15, y - 8))
         
         return track_rect
@@ -1217,11 +1396,11 @@ def show_settings_menu(from_game=False, from_selector=False):
         toggle_height = 30
         
         # Label
-        label_surface = font_label.render(label, True, BLACK)
+        label_surface = font_label.render(label, True, WHITE)
         screen.blit(label_surface, (x, y - 35))
         
         # Toggle background
-        bg_color = GREEN if enabled else GRAY
+        bg_color = GREEN if enabled else DARK_GRAY
         toggle_rect = pygame.Rect(x, y, toggle_width, toggle_height)
         pygame.draw.rect(screen, bg_color, toggle_rect, border_radius=15)
         
@@ -1229,7 +1408,7 @@ def show_settings_menu(from_game=False, from_selector=False):
         knob_x = x + toggle_width - 18 if enabled else x + 18
         knob_y = y + toggle_height // 2
         pygame.draw.circle(screen, WHITE, (knob_x, knob_y), 12)
-        pygame.draw.circle(screen, BLACK, (knob_x, knob_y), 12, 2)
+        pygame.draw.circle(screen, GRAY, (knob_x, knob_y), 12, 2)
         
         return toggle_rect
     
@@ -1237,9 +1416,9 @@ def show_settings_menu(from_game=False, from_selector=False):
         """Draw a button and return its rect"""
         button_rect = pygame.Rect(x, y, width, height)
         pygame.draw.rect(screen, color, button_rect, border_radius=8)
-        pygame.draw.rect(screen, BLACK, button_rect, 2, border_radius=8)
+        pygame.draw.rect(screen, GRAY, button_rect, 2, border_radius=8)
         
-        text_surface = font_button.render(text, True, BLACK)
+        text_surface = font_button.render(text, True, WHITE)
         text_rect = text_surface.get_rect(center=button_rect.center)
         screen.blit(text_surface, text_rect)
         
@@ -1273,7 +1452,6 @@ def show_settings_menu(from_game=False, from_selector=False):
                 if waiting_for_key:
                     # Check if key is already bound and swap if necessary
                     keybinds = game_settings.get('keybinds')
-                    mouse_binds = game_settings.get('mouse_binds')
                     
                     # Check if this key is bound to another keybind
                     conflicting_bind = None
@@ -1282,54 +1460,14 @@ def show_settings_menu(from_game=False, from_selector=False):
                             conflicting_bind = bind_name
                             break
                     
-                    # Check if this key is bound to a mouse bind (cross-type conflict)
-                    conflicting_mouse = None
-                    for bind_name, bind_val in mouse_binds.items():
-                        if bind_val == event.key:
-                            conflicting_mouse = bind_name
-                            break
-                    
-                    # Clear conflicts
+                    # Clear conflict
                     if conflicting_bind:
                         keybinds[conflicting_bind] = None
-                    if conflicting_mouse:
-                        mouse_binds[conflicting_mouse] = None
-                        game_settings.set('mouse_binds', mouse_binds)
                     
                     # Set the new binding
                     keybinds[waiting_for_key] = event.key
                     game_settings.set('keybinds', keybinds)
                     waiting_for_key = None
-                elif waiting_for_mouse:
-                    # Check if key/button is already bound and swap if necessary
-                    keybinds = game_settings.get('keybinds')
-                    mouse_binds = game_settings.get('mouse_binds')
-                    
-                    # Check if this key is bound to a keybind (cross-type conflict)
-                    conflicting_keybind = None
-                    for bind_name, bind_key in keybinds.items():
-                        if bind_key == event.key:
-                            conflicting_keybind = bind_name
-                            break
-                    
-                    # Check if this key is bound to another mouse bind
-                    conflicting_mouse = None
-                    for bind_name, bind_val in mouse_binds.items():
-                        if bind_name != waiting_for_mouse and bind_val == event.key:
-                            conflicting_mouse = bind_name
-                            break
-                    
-                    # Clear conflicts
-                    if conflicting_keybind:
-                        keybinds[conflicting_keybind] = None
-                        game_settings.set('keybinds', keybinds)
-                    if conflicting_mouse:
-                        mouse_binds[conflicting_mouse] = None
-                    
-                    # Set the new binding
-                    mouse_binds[waiting_for_mouse] = event.key
-                    game_settings.set('mouse_binds', mouse_binds)
-                    waiting_for_mouse = None
                 elif event.key == pygame.K_ESCAPE:
                     if from_game:
                         result = 'BACK'
@@ -1340,87 +1478,63 @@ def show_settings_menu(from_game=False, from_selector=False):
                     running = False
                     
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if waiting_for_mouse:
-                    # Check if button is already bound and swap if necessary
-                    keybinds = game_settings.get('keybinds')
-                    mouse_binds = game_settings.get('mouse_binds')
-                    
-                    # Check if this button is bound to a keybind (cross-type conflict)
-                    conflicting_keybind = None
-                    for bind_name, bind_key in keybinds.items():
-                        if bind_key == event.button:
-                            conflicting_keybind = bind_name
-                            break
-                    
-                    # Check if this button is bound to another mouse bind
-                    conflicting_mouse = None
-                    for bind_name, bind_val in mouse_binds.items():
-                        if bind_name != waiting_for_mouse and bind_val == event.button:
-                            conflicting_mouse = bind_name
-                            break
-                    
-                    # Clear conflicts
-                    if conflicting_keybind:
-                        keybinds[conflicting_keybind] = None
-                        game_settings.set('keybinds', keybinds)
-                    if conflicting_mouse:
-                        mouse_binds[conflicting_mouse] = None
-                    
-                    # Set the new binding
-                    mouse_binds[waiting_for_mouse] = event.button
-                    game_settings.set('mouse_binds', mouse_binds)
-                    waiting_for_mouse = None
-                else:
-                    # Check slider clicks
-                    if music_slider_rect.collidepoint(mouse_pos):
-                        dragging_slider = 'music'
-                    elif hitsound_slider_rect.collidepoint(mouse_pos):
-                        dragging_slider = 'hitsound'
-                    elif scroll_slider_rect.collidepoint(mouse_pos):
-                        dragging_slider = 'scroll'
-                    elif hitsounds_toggle_rect.collidepoint(mouse_pos):
-                        hitsounds_enabled = not hitsounds_enabled
-                        game_settings.set('hitsounds_enabled', hitsounds_enabled)
-                    elif fade_toggle_rect.collidepoint(mouse_pos):
-                        fade_effects = not fade_effects
-                        game_settings.set('fade_effects', fade_effects)
-                    elif quit_menu_rect and quit_menu_rect.collidepoint(mouse_pos):
-                        # Show confirmation for quit to menu
-                        if show_quit_confirmation(is_quit_to_menu=True):
-                            result = 'QUIT_MENU'
-                            running = False
-                    elif quit_game_rect and quit_game_rect.collidepoint(mouse_pos):
-                        # Show confirmation for quit game
-                        if show_quit_confirmation(is_quit_to_menu=False):
-                            result = 'QUIT'
-                            running = False
-                    # Check keybind buttons
-                    elif keybind_top_rect.collidepoint(mouse_pos):
-                        waiting_for_key = 'top'
-                    elif keybind_right_rect.collidepoint(mouse_pos):
-                        waiting_for_key = 'right'
-                    elif keybind_bottom_rect.collidepoint(mouse_pos):
-                        waiting_for_key = 'bottom'
-                    elif keybind_left_rect.collidepoint(mouse_pos):
-                        waiting_for_key = 'left'
-                    elif mouse_red_rect.collidepoint(mouse_pos):
-                        waiting_for_mouse = 'red'
-                    elif mouse_blue_rect.collidepoint(mouse_pos):
-                        waiting_for_mouse = 'blue'
-                    elif reset_keybinds_rect.collidepoint(mouse_pos):
+                # Check slider clicks
+                if music_slider_rect.collidepoint(mouse_pos):
+                    dragging_slider = 'music'
+                elif hitsound_slider_rect.collidepoint(mouse_pos):
+                    dragging_slider = 'hitsound'
+                elif scroll_slider_rect.collidepoint(mouse_pos):
+                    dragging_slider = 'scroll'
+                elif hitsounds_toggle_rect.collidepoint(mouse_pos):
+                    hitsounds_enabled = not hitsounds_enabled
+                    game_settings.set('hitsounds_enabled', hitsounds_enabled)
+                elif fade_toggle_rect.collidepoint(mouse_pos):
+                    fade_effects = not fade_effects
+                    game_settings.set('fade_effects', fade_effects)
+                elif quit_menu_rect and quit_menu_rect.collidepoint(mouse_pos):
+                    # Show confirmation for quit to menu
+                    if show_quit_confirmation(is_quit_to_menu=True):
+                        result = 'QUIT_MENU'
+                        running = False
+                elif restart_rect and restart_rect.collidepoint(mouse_pos):
+                    # Restart level
+                    result = 'RESTART_LEVEL'
+                    running = False
+                elif quit_game_rect and quit_game_rect.collidepoint(mouse_pos):
+                    # Show confirmation for quit game
+                    if show_quit_confirmation(is_quit_to_menu=False):
+                        result = 'QUIT'
+                        running = False
+                # Check keybind buttons
+                elif keybind_red_top_rect.collidepoint(mouse_pos):
+                    waiting_for_key = 'red_top'
+                elif keybind_red_right_rect.collidepoint(mouse_pos):
+                    waiting_for_key = 'red_right'
+                elif keybind_red_bottom_rect.collidepoint(mouse_pos):
+                    waiting_for_key = 'red_bottom'
+                elif keybind_red_left_rect.collidepoint(mouse_pos):
+                    waiting_for_key = 'red_left'
+                elif keybind_blue_top_rect.collidepoint(mouse_pos):
+                    waiting_for_key = 'blue_top'
+                elif keybind_blue_right_rect.collidepoint(mouse_pos):
+                    waiting_for_key = 'blue_right'
+                elif keybind_blue_bottom_rect.collidepoint(mouse_pos):
+                    waiting_for_key = 'blue_bottom'
+                elif keybind_blue_left_rect.collidepoint(mouse_pos):
+                    waiting_for_key = 'blue_left'
+                elif reset_keybinds_rect.collidepoint(mouse_pos):
                         # Reset all keybinds to default
                         default_keybinds = {
-                            'top': pygame.K_w,
-                            'right': pygame.K_d,
-                            'bottom': pygame.K_s,
-                            'left': pygame.K_a
-                        }
-                        default_mouse_binds = {
-                            'red': 1,
-                            'blue': 3
+                            'red_top': pygame.K_w,
+                            'red_right': pygame.K_d,
+                            'red_bottom': pygame.K_s,
+                            'red_left': pygame.K_a,
+                            'blue_top': pygame.K_UP,
+                            'blue_right': pygame.K_RIGHT,
+                            'blue_bottom': pygame.K_DOWN,
+                            'blue_left': pygame.K_LEFT
                         }
                         game_settings.set('keybinds', default_keybinds)
-                        game_settings.set('mouse_binds', default_mouse_binds)
                         keybinds = default_keybinds
                         mouse_binds = default_mouse_binds
                         
@@ -1445,10 +1559,10 @@ def show_settings_menu(from_game=False, from_selector=False):
                 game_settings.set('scroll_speed', scroll_speed)
         
         # Drawing
-        screen.fill(WHITE)
+        screen.fill((0, 0, 0))
         
         # Title
-        title_text = font_title.render("Settings", True, BLACK)
+        title_text = font_title.render("Settings", True, WHITE)
         title_rect = title_text.get_rect(center=(window_width // 2, 50))
         screen.blit(title_text, title_rect)
         
@@ -1477,74 +1591,91 @@ def show_settings_menu(from_game=False, from_selector=False):
         
         # Keybinds (right column)
         keybinds = game_settings.get('keybinds')
-        mouse_binds = game_settings.get('mouse_binds')
         
         y_offset = 140
-        keybind_label = font_label.render("Keybinds", True, BLACK)
+        keybind_label = font_label.render("Red Keys (WASD)", True, RED)
         screen.blit(keybind_label, (right_col_x, y_offset - 35))
         
         button_width = 200
-        button_height = 40
-        button_spacing = 50
+        button_height = 35
+        button_spacing = 42
         
-        # Top key
-        if waiting_for_key == 'top':
+        # Red keys
+        if waiting_for_key == 'red_top':
             key_text = "Press a key..."
         else:
-            key_text = f"Top: {get_key_name(keybinds['top'])}"
-        color = BLUE if waiting_for_key == 'top' else GRAY
-        keybind_top_rect = draw_button(right_col_x, y_offset, button_width, button_height, 
+            key_text = f"Top: {get_key_name(keybinds['red_top'])}"
+        color = BLUE if waiting_for_key == 'red_top' else GRAY
+        keybind_red_top_rect = draw_button(right_col_x, y_offset, button_width, button_height, 
                                        key_text, color)
         
         y_offset += button_spacing
-        if waiting_for_key == 'right':
+        if waiting_for_key == 'red_right':
             key_text = "Press a key..."
         else:
-            key_text = f"Right: {get_key_name(keybinds['right'])}"
-        color = BLUE if waiting_for_key == 'right' else GRAY
-        keybind_right_rect = draw_button(right_col_x, y_offset, button_width, button_height,
+            key_text = f"Right: {get_key_name(keybinds['red_right'])}"
+        color = BLUE if waiting_for_key == 'red_right' else GRAY
+        keybind_red_right_rect = draw_button(right_col_x, y_offset, button_width, button_height,
                                          key_text, color)
         
         y_offset += button_spacing
-        if waiting_for_key == 'bottom':
+        if waiting_for_key == 'red_bottom':
             key_text = "Press a key..."
         else:
-            key_text = f"Bottom: {get_key_name(keybinds['bottom'])}"
-        color = BLUE if waiting_for_key == 'bottom' else GRAY
-        keybind_bottom_rect = draw_button(right_col_x, y_offset, button_width, button_height,
+            key_text = f"Bottom: {get_key_name(keybinds['red_bottom'])}"
+        color = BLUE if waiting_for_key == 'red_bottom' else GRAY
+        keybind_red_bottom_rect = draw_button(right_col_x, y_offset, button_width, button_height,
                                           key_text, color)
         
         y_offset += button_spacing
-        if waiting_for_key == 'left':
+        if waiting_for_key == 'red_left':
             key_text = "Press a key..."
         else:
-            key_text = f"Left: {get_key_name(keybinds['left'])}"
-        color = BLUE if waiting_for_key == 'left' else GRAY
-        keybind_left_rect = draw_button(right_col_x, y_offset, button_width, button_height,
+            key_text = f"Left: {get_key_name(keybinds['red_left'])}"
+        color = BLUE if waiting_for_key == 'red_left' else GRAY
+        keybind_red_left_rect = draw_button(right_col_x, y_offset, button_width, button_height,
                                         key_text, color)
         
-        # Mouse binds
+        # Blue keys
         y_offset += button_spacing + 20
-        mouse_label = font_label.render("Mouse Buttons", True, BLACK)
-        screen.blit(mouse_label, (right_col_x, y_offset - 15))
+        blue_label = font_label.render("Blue Keys (Arrows)", True, BLUE)
+        screen.blit(blue_label, (right_col_x, y_offset - 15))
         
         y_offset += 30
-        if waiting_for_mouse == 'red':
-            mouse_text = "Press key/click..."
+        if waiting_for_key == 'blue_top':
+            key_text = "Press a key..."
         else:
-            mouse_text = f"Red: {get_mouse_name(mouse_binds['red'])}"
-        color = RED if waiting_for_mouse == 'red' else GRAY
-        mouse_red_rect = draw_button(right_col_x, y_offset, button_width, button_height,
-                                     mouse_text, color)
+            key_text = f"Top: {get_key_name(keybinds['blue_top'])}"
+        color = BLUE if waiting_for_key == 'blue_top' else GRAY
+        keybind_blue_top_rect = draw_button(right_col_x, y_offset, button_width, button_height,
+                                     key_text, color)
         
         y_offset += button_spacing
-        if waiting_for_mouse == 'blue':
-            mouse_text = "Press key/click..."
+        if waiting_for_key == 'blue_right':
+            key_text = "Press a key..."
         else:
-            mouse_text = f"Blue: {get_mouse_name(mouse_binds['blue'])}"
-        color = BLUE if waiting_for_mouse == 'blue' else GRAY
-        mouse_blue_rect = draw_button(right_col_x, y_offset, button_width, button_height,
-                                      mouse_text, color)
+            key_text = f"Right: {get_key_name(keybinds['blue_right'])}"
+        color = BLUE if waiting_for_key == 'blue_right' else GRAY
+        keybind_blue_right_rect = draw_button(right_col_x, y_offset, button_width, button_height,
+                                      key_text, color)
+        
+        y_offset += button_spacing
+        if waiting_for_key == 'blue_bottom':
+            key_text = "Press a key..."
+        else:
+            key_text = f"Bottom: {get_key_name(keybinds['blue_bottom'])}"
+        color = BLUE if waiting_for_key == 'blue_bottom' else GRAY
+        keybind_blue_bottom_rect = draw_button(right_col_x, y_offset, button_width, button_height,
+                                          key_text, color)
+        
+        y_offset += button_spacing
+        if waiting_for_key == 'blue_left':
+            key_text = "Press a key..."
+        else:
+            key_text = f"Left: {get_key_name(keybinds['blue_left'])}"
+        color = BLUE if waiting_for_key == 'blue_left' else GRAY
+        keybind_blue_left_rect = draw_button(right_col_x, y_offset, button_width, button_height,
+                                        key_text, color)
         
         # Reset button
         y_offset += button_spacing + 10
@@ -1554,13 +1685,16 @@ def show_settings_menu(from_game=False, from_selector=False):
         # Bottom buttons
         button_y = window_height - 110
         if from_game:
-            quit_menu_rect = draw_button(window_width // 2 - 210, button_y, 200, 50, "Quit to Menu", RED)
-            quit_game_rect = draw_button(window_width // 2 + 10, button_y, 200, 50, "Quit Game", RED)
+            quit_menu_rect = draw_button(window_width // 2 - 320, button_y, 200, 50, "Quit to Menu", RED)
+            restart_rect = draw_button(window_width // 2 - 100, button_y, 200, 50, "Restart", BLUE)
+            quit_game_rect = draw_button(window_width // 2 + 120, button_y, 200, 50, "Quit Game", RED)
         elif from_selector:
             quit_menu_rect = None
+            restart_rect = None
             quit_game_rect = draw_button(window_width // 2 - 100, button_y, 200, 50, "Quit Game", RED)
         else:
             quit_menu_rect = None
+            restart_rect = None
             quit_game_rect = draw_button(window_width // 2 - 100, button_y, 200, 50, "Back", GRAY)
         
         # Hint text
@@ -1568,7 +1702,7 @@ def show_settings_menu(from_game=False, from_selector=False):
             hint_text = "Press ESC to go back"
         else:
             hint_text = "Press ESC to go back"
-        hint_surface = font_small.render(hint_text, True, DARK_GRAY)
+        hint_surface = font_small.render(hint_text, True, GRAY)
         hint_rect = hint_surface.get_rect(center=(window_width // 2, window_height - 30))
         screen.blit(hint_surface, hint_rect)
         
@@ -1581,17 +1715,21 @@ def show_settings_menu(from_game=False, from_selector=False):
             hovering_button = True
         elif reset_keybinds_rect and reset_keybinds_rect.collidepoint(mouse_pos):
             hovering_button = True
-        elif keybind_top_rect and keybind_top_rect.collidepoint(mouse_pos):
+        elif keybind_red_top_rect and keybind_red_top_rect.collidepoint(mouse_pos):
             hovering_button = True
-        elif keybind_right_rect and keybind_right_rect.collidepoint(mouse_pos):
+        elif keybind_red_right_rect and keybind_red_right_rect.collidepoint(mouse_pos):
             hovering_button = True
-        elif keybind_bottom_rect and keybind_bottom_rect.collidepoint(mouse_pos):
+        elif keybind_red_bottom_rect and keybind_red_bottom_rect.collidepoint(mouse_pos):
             hovering_button = True
-        elif keybind_left_rect and keybind_left_rect.collidepoint(mouse_pos):
+        elif keybind_red_left_rect and keybind_red_left_rect.collidepoint(mouse_pos):
             hovering_button = True
-        elif mouse_red_rect and mouse_red_rect.collidepoint(mouse_pos):
+        elif keybind_blue_top_rect and keybind_blue_top_rect.collidepoint(mouse_pos):
             hovering_button = True
-        elif mouse_blue_rect and mouse_blue_rect.collidepoint(mouse_pos):
+        elif keybind_blue_right_rect and keybind_blue_right_rect.collidepoint(mouse_pos):
+            hovering_button = True
+        elif keybind_blue_bottom_rect and keybind_blue_bottom_rect.collidepoint(mouse_pos):
+            hovering_button = True
+        elif keybind_blue_left_rect and keybind_blue_left_rect.collidepoint(mouse_pos):
             hovering_button = True
         elif hitsounds_toggle_rect and hitsounds_toggle_rect.collidepoint(mouse_pos):
             hovering_button = True
@@ -1618,23 +1756,23 @@ def show_autoplay_popup():
     window_width, window_height = screen.get_size()
     clock = pygame.time.Clock()
 
-    font_large = pygame.font.Font(None, 72)
-    font_small = pygame.font.Font(None, 48)
+    font_large = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 60)
+    font_small = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 40)
 
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
 
     def draw_autoplay_content(surf):
-        surf.fill(WHITE)
-        title_text = font_large.render("Enable Autoplay?", True, BLACK)
+        surf.fill((0, 0, 0))
+        title_text = font_large.render("Enable Autoplay?", True, WHITE)
         title_rect = title_text.get_rect(center=(window_width // 2, window_height // 2 - 100))
         surf.blit(title_text, title_rect)
 
-        yes_text = font_small.render("Press Y for Yes", True, BLACK)
+        yes_text = font_small.render("Press Y for Yes", True, WHITE)
         yes_rect = yes_text.get_rect(center=(window_width // 2, window_height // 2 + 20))
         surf.blit(yes_text, yes_rect)
 
-        no_text = font_small.render("Press N for No", True, BLACK)
+        no_text = font_small.render("Press N for No", True, WHITE)
         no_rect = no_text.get_rect(center=(window_width // 2, window_height // 2 + 80))
         surf.blit(no_text, no_rect)
 
@@ -1683,15 +1821,58 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         preloaded_metadata: Pre-loaded level metadata from loading screen
     """
     if level_json is None:
-        level_json = show_level_select_popup(fade_in_start=returning_from_game, preloaded_metadata=preloaded_metadata)
-        if level_json is None:
-            print("No level selected. Exiting...")
-            return
+        # Go straight to song packs
+        from songpack_ui import show_songpack_selector, show_pack_levels_selector, build_pack_metadata_cache
+        
+        # Initialize pygame if not already
+        if not pygame.get_init():
+            pygame.init()
+        
+        screen = pygame.display.get_surface()
+        if screen is None:
+            screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
+        
+        while True:
+            # Show song pack selector
+            selected_pack = show_songpack_selector(screen, game_settings, resource_path)
+            
+            if selected_pack == "QUIT" or selected_pack is None:
+                print("Exiting...")
+                return
+            
+            # Use pre-loaded metadata cache for instant loading
+            metadata_cache = selected_pack.get('metadata_cache', None)
+            
+            # Show levels in the pack (with pre-loaded metadata)
+            level_json = show_pack_levels_selector(screen, selected_pack, game_settings, resource_path, metadata_cache)
+            
+            if level_json == "QUIT":
+                return
+            elif level_json is not None:
+                # Level selected, break and continue to game
+                break
+            # else go back to song pack selector
 
     if audio_dir is None:
-        level_filename = os.path.basename(level_json)
-        beatmap_name = level_filename.replace('.json', '').split('_')[0]
-        audio_dir = f"beatmaps/{beatmap_name}"
+        # First check if the level JSON has audio_file metadata (from song packs)
+        try:
+            with open(level_json, 'r', encoding='utf-8') as f:
+                level_data = json.load(f)
+                audio_file_path = level_data.get('meta', {}).get('audio_file')
+                
+                if audio_file_path and os.path.exists(audio_file_path):
+                    # Use the directory containing the audio file
+                    audio_dir = os.path.dirname(audio_file_path)
+                else:
+                    # Fallback to traditional beatmap structure
+                    level_filename = os.path.basename(level_json)
+                    beatmap_name = level_filename.replace('.json', '').split('_')[0]
+                    audio_dir = f"beatmaps/{beatmap_name}"
+        except:
+            # Fallback to traditional beatmap structure
+            level_filename = os.path.basename(level_json)
+            beatmap_name = level_filename.replace('.json', '').split('_')[0]
+            audio_dir = f"beatmaps/{beatmap_name}"
 
     # Autoplay is now a debug feature controlled by Ctrl+P
     autoplay_enabled = game_settings.get('autoplay_enabled', False)
@@ -1713,12 +1894,10 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     screen_width, screen_height = screen.get_size()
     center_x, center_y = screen_width // 2, screen_height // 2
 
-    square_size = 100
-    spacing = 105
+    square_size = 70
+    spacing = 75
     border_width = 3
     radius = 10
-
-    active_key = None
 
     last_clicked_button = None
     click_time = 0
@@ -1744,8 +1923,8 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     screen_flash_alpha = 0
 
     # Dot switch animation
-    last_active_dot = None
-    dot_switch_time = 0
+    last_active_dots = set()  # Track previously active dots
+    dot_pulse_times = {}  # {dot_idx: start_time} for individual pulse animations
     dot_switch_ripples = []  # [(dot_idx, start_time)]
 
     game_start_time = time.time()
@@ -1767,8 +1946,62 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         }
         level.append((event["t"], event["box"], event["color"], hitsound_data))
 
-    # Offset all level timings by 3 seconds for music delay
-    level = [(t + 3.0, box, color, hs) for t, box, color, hs in level]
+    # Calculate optimal approach duration to prevent tile overlap
+    # Find minimum time gap between any consecutive notes
+    min_time_gap = float('inf')
+    if len(level) > 1:
+        for i in range(len(level) - 1):
+            time_gap = level[i + 1][0] - level[i][0]
+            if time_gap > 0 and time_gap < min_time_gap:
+                min_time_gap = time_gap
+    
+    # Calculate approach duration that ensures tiles never overlap
+    # tile_size = 65px, min_spacing = 10px, travel_distance = screen_width // 2
+    tile_size = 65
+    min_spacing = 10
+    min_distance_needed = tile_size + min_spacing
+    travel_distance = screen_width // 2
+    
+    # For tiles to not overlap: (travel_distance / approach_duration) * min_time_gap >= min_distance_needed
+    # So: approach_duration <= (travel_distance * min_time_gap) / min_distance_needed
+    if min_time_gap != float('inf'):
+        max_safe_approach_duration = (travel_distance * min_time_gap) / min_distance_needed
+        # Increase by 0.2s to make tiles move slower
+        max_safe_approach_duration += 0.2
+        # Clamp between 0.5s (too fast to read) and 2.0s (too slow)
+        APPROACH_DURATION = max(0.5, min(2.0, max_safe_approach_duration))
+    else:
+        # Single note or no notes, use default
+        APPROACH_DURATION = 1.0
+    
+    # Check if this is a converted SM chart (has source metadata)
+    is_sm_chart = 'converted_from_sm' in level_data.get('meta', {}).get('pattern', '')
+    
+    # For SM charts, we need to handle timing differently
+    music_offset_adjustment = 3.0
+    audio_start_position = 0.0
+    
+    if is_sm_chart:
+        # SM charts have offset baked in, which can result in negative note times
+        # Negative note time means audio must be further ahead when that note plays
+        if level:
+            min_time = min(t for t, _, _, _ in level)
+            if min_time < 0:
+                # Shift all notes so first one is at 3.0 seconds (after countdown)
+                shift_amount = 3.0 - min_time  # e.g., 3.0 - (-14.588) = 17.588
+                level = [(t + shift_amount, box, color, hs) for t, box, color, hs in level]
+                # Audio needs to seek forward by abs(min_time)
+                # When game time is 3.0 (first note), audio should be at 14.588
+                # Music starts at game time 3.0, so we seek to abs(min_time)
+                audio_start_position = abs(min_time)
+            else:
+                # No negative times, just add countdown
+                level = [(t + 3.0, box, color, hs) for t, box, color, hs in level]
+        else:
+            level = [(t + 3.0, box, color, hs) for t, box, color, hs in level]
+    else:
+        # OSU charts need the standard 3 second offset
+        level = [(t + 3.0, box, color, hs) for t, box, color, hs in level]
 
     target_box = None
     target_color = None
@@ -1777,6 +2010,8 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
 
     # Track approach indicators - list of (box_index, color, target_time, approach_duration, event_index, side)
     approach_indicators = []
+    # Track fading tiles for missed notes - list of (box_index, color, x, y, start_time)
+    fading_tiles = []
 
     # Load and scale box image
     box_image = pygame.image.load(resource_path("assets/box.jpg")).convert()
@@ -1788,9 +2023,9 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     box_blue_image = pygame.transform.scale(box_blue_image, (square_size, square_size))
 
     dot_image = pygame.image.load(resource_path("assets/dot.jpg")).convert()
-    dot_image = pygame.transform.scale(dot_image, (50, 50))
+    dot_image = pygame.transform.scale(dot_image, (35, 35))
     dot2_image = pygame.image.load(resource_path("assets/dot2.jpg")).convert()
-    dot2_image = pygame.transform.scale(dot2_image, (50, 50))
+    dot2_image = pygame.transform.scale(dot2_image, (35, 35))
 
     # Load background music using AudioFilename from .osu if available
     audio_path = None
@@ -1856,9 +2091,21 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     # Load hitsounds
     hitsounds = {}
     hitsound_extensions = ['.wav', '.ogg', '.mp3', '.flac', '.aac', '.m4a']
+    
+    # Load default hitsound from assets
+    default_hitsound = None
+    try:
+        default_hit_path = resource_path('assets/hit.wav')
+        if os.path.exists(default_hit_path):
+            default_hitsound = pygame.mixer.Sound(default_hit_path)
+            default_hitsound.set_volume(game_settings.get('hitsound_volume', 0.3))
+    except Exception as e:
+        print(f"Could not load default hitsound: {e}")
+    
     try:
         for sound_name in ['normal', 'whistle', 'finish', 'clap']:
             sound = None
+            # Try to load from beatmap folder first
             for prefix in ['normal', 'soft', 'drum']:
                 for ext in hitsound_extensions:
                     sound_file = f"{prefix}-hit{sound_name}{ext}"
@@ -1868,33 +2115,76 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                         break
                 if sound:
                     break
-            if sound is None:
+            
+            # If not found, use default hitsound from assets
+            if sound is None and default_hitsound is not None:
+                sound = default_hitsound
+            elif sound is None:
+                # Last resort: silent sound
                 sound = pygame.mixer.Sound(buffer=b'\x00' * 1000)
+            
             sound.set_volume(game_settings.get('hitsound_volume', 0.3))
             hitsounds[sound_name] = sound
     except Exception as e:
         print(f"Could not load hitsounds: {e}")
+        # Fallback to default or silent sounds
         for sound_name in ['normal', 'whistle', 'finish', 'clap']:
-            sound = pygame.mixer.Sound(buffer=b'\x00' * 1000)
+            if default_hitsound is not None:
+                sound = default_hitsound
+            else:
+                sound = pygame.mixer.Sound(buffer=b'\x00' * 1000)
             sound.set_volume(game_settings.get('hitsound_volume', 0.3))
             hitsounds[sound_name] = sound
 
     # Load beatmap background image if available
     beatmap_bg_image = None
+    gameplay_bg_image = None  # Full screen background for gameplay
+    
     try:
-        for file in os.listdir(resource_path(audio_dir)):
-            if file.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')):
-                bg_path = os.path.join(audio_dir, file)
-                bg_img = pygame.image.load(resource_path(bg_path))
-                original_width, original_height = bg_img.get_size()
-                target_height = 150
-                aspect_ratio = original_width / original_height
-                target_width = int(target_height * aspect_ratio)
-                beatmap_bg_image = pygame.transform.scale(bg_img, (target_width, target_height))
-                break
+        # First check if level JSON has a background_file in metadata (from song packs)
+        bg_file_from_meta = level_data.get('meta', {}).get('background_file')
+        
+        if bg_file_from_meta and os.path.exists(bg_file_from_meta):
+            # Load the BG.png from song pack
+            gameplay_bg = pygame.image.load(bg_file_from_meta)
+            # Scale to full screen
+            gameplay_bg_image = pygame.transform.scale(gameplay_bg, (screen_width, screen_height))
+            # Create dark overlay
+            dark_overlay = pygame.Surface((screen_width, screen_height))
+            dark_overlay.set_alpha(180)  # Adjust darkness (0-255)
+            dark_overlay.fill((0, 0, 0))
+            # Apply overlay to gameplay background
+            gameplay_bg_image.blit(dark_overlay, (0, 0))
+            
+            # Also use for small thumbnail
+            beatmap_bg_image = pygame.transform.scale(gameplay_bg, (200, 150))
+        else:
+            # Fallback to finding images in audio_dir
+            for file in os.listdir(resource_path(audio_dir)):
+                if file.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')):
+                    bg_path = os.path.join(audio_dir, file)
+                    bg_img = pygame.image.load(resource_path(bg_path))
+                    
+                    # Check if this is BG.png (for full screen gameplay background)
+                    if file.lower().startswith('bg'):
+                        gameplay_bg = bg_img.copy()
+                        gameplay_bg_image = pygame.transform.scale(gameplay_bg, (screen_width, screen_height))
+                        dark_overlay = pygame.Surface((screen_width, screen_height))
+                        dark_overlay.set_alpha(180)
+                        dark_overlay.fill((0, 0, 0))
+                        gameplay_bg_image.blit(dark_overlay, (0, 0))
+                    
+                    # Create thumbnail version
+                    original_width, original_height = bg_img.get_size()
+                    target_height = 150
+                    aspect_ratio = original_width / original_height
+                    target_width = int(target_height * aspect_ratio)
+                    beatmap_bg_image = pygame.transform.scale(bg_img, (target_width, target_height))
+                    break
     except Exception as e:
         print(f"Could not load beatmap background: {e}")
         beatmap_bg_image = None
+        gameplay_bg_image = None
 
     def create_rounded_image(image, radius):
         """Create an image with rounded corners"""
@@ -1961,16 +2251,25 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
 
     dot_positions = get_dot_positions(center_x, center_y, square_size, spacing)
 
-    font_countdown = pygame.font.Font(None, 120)
-    font_judgment = pygame.font.Font(None, 36)
-    font_stats = pygame.font.Font(None, 32)
-    font_metadata = pygame.font.Font(None, 24)
-    font_combo = pygame.font.Font(None, 92)
+    font_countdown = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 100)
+    font_judgment = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 32)
+    font_stats = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 28)
+    font_metadata = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 20)
+    font_combo = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 48)
 
-    count_300 = 0
-    count_100 = 0
-    count_50 = 0
+    count_fantastic = 0
+    count_perfect = 0
+    count_great = 0
+    count_cool = 0
+    count_bad = 0
     count_miss = 0
+    
+    # Health system
+    max_health = 75.0
+    current_health = 75.0
+    target_health = 75.0  # Animated health bar target
+    displayed_health = 75.0  # Current animated health
+    lost_health_bars = []  # [(width, alpha, timestamp)] - white bars showing health loss
     judgment_displays = []
 
     combo = 0
@@ -1998,33 +2297,62 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
 
     # ======= Hitcheck helpers =======
     
-    # Get keybinds from settings
+    # Key mappings for 8-key system - built from settings
+    # Since users might map multiple actions to the same key, we store a list of (color, box) per key
     keybinds = game_settings.get('keybinds')
-    mouse_binds = game_settings.get('mouse_binds')
+    KEY_MAPPINGS = {}
+    
+    # Add all keybinds, allowing multiple mappings per key
+    key_mapping_list = [
+        (keybinds['red_top'], 'red', 0),
+        (keybinds['red_right'], 'red', 1),
+        (keybinds['red_bottom'], 'red', 2),
+        (keybinds['red_left'], 'red', 3),
+        (keybinds['blue_top'], 'blue', 0),
+        (keybinds['blue_right'], 'blue', 1),
+        (keybinds['blue_bottom'], 'blue', 2),
+        (keybinds['blue_left'], 'blue', 3)
+    ]
+    
+    for key, color, box_idx in key_mapping_list:
+        if key not in KEY_MAPPINGS:
+            KEY_MAPPINGS[key] = []
+        KEY_MAPPINGS[key].append((color, box_idx))
+    
+    # Track which keys are currently pressed
+    keys_pressed = set()
 
-    def key_for_box(box_idx):
-        key_map = ['top', 'right', 'bottom', 'left']
-        return keybinds[key_map[box_idx]]
+    # New 5-tier judgment system with symmetric timing windows
+    # Timing windows (in seconds from perfect time):
+    # bad: 0.150 - 0.100
+    # cool: 0.100 - 0.060
+    # great: 0.060 - 0.030
+    # perfect: 0.030 - 0.015
+    # fantastic: 0.015 - 0.000 (closest to exact time)
+    # Then symmetric on the other side
+    
+    TIMING_WINDOWS = [
+        (0.0225, 'fantastic', 500, 0.5),   # fantastic: ±15ms, score 500, health +0.5
+        (0.045, 'perfect', 400, 1.0),     # perfect: ±30ms, score 400, health +1
+        (0.090, 'great', 300, 0.5),       # great: ±60ms, score 300, health +0.5
+        (0.135, 'cool', 100, 0.0),        # cool: ±100ms, score 100, health 0
+        (0.180, 'bad', 50, -1.0),         # bad: ±150ms, score 50, health -1
+    ]
+    
+    # Maximum timing window (for miss detection)
+    MAX_TIMING_WINDOW = 0.180
 
-    def button_for_color(color):
-        return mouse_binds[color]
-
-    def compute_dynamic_window(evt_idx, base_window):
-        if evt_idx >= len(level):
-            return base_window
-        t0 = level[evt_idx][0]
-        t1 = level[evt_idx + 1][0] if evt_idx + 1 < len(level) else t0 + 10.0
-        gap = t1 - t0
-        return (gap / 2) if gap > 1.0 else base_window
-
-    def judgment_from_error(timing_error):
-        if timing_error <= 0.02:
-            return 300, "300"
-        if timing_error <= 0.0475:
-            return 100, "100"
-        if timing_error <= 0.075:
-            return 50, "50"
-        return None, None
+    def judgment_from_timing(elapsed_time, note_time):
+        """Get judgment based on timing difference (can be early or late)"""
+        timing_diff = abs(elapsed_time - note_time)
+        
+        # Check each timing window from tightest to loosest
+        for window, name, score, health_change in TIMING_WINDOWS:
+            if timing_diff <= window:
+                return name, score, health_change
+        
+        # Outside all windows = miss
+        return None, None, None
 
     def box_centers_display():
         return [
@@ -2047,38 +2375,64 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         shake_box = box_idx
 
     def resolve_miss(evt_idx, miss_box_idx):
-        nonlocal count_miss, total_notes, combo, current_event_index
+        nonlocal count_miss, total_notes, combo, current_event_index, current_health, lost_health_bars
+        nonlocal fading_tiles, approach_indicators
         count_miss += 1
         total_notes += 1
         combo = 0
+        # Track old health for animation
+        old_health = current_health
+        # Misses decrease health by 2
+        current_health = max(0, current_health - 2.0)
+        # Don't update target_health here - let it animate smoothly down
+        # Record health loss for white bar animation
+        if old_health > current_health:
+            health_bar_width = int(screen_width * 0.3)
+            old_width = int(health_bar_width * (old_health / max_health))
+            lost_health_bars.append((old_width, 255, time.time()))
         add_judgment_text("miss", miss_box_idx)
+        
         resolved_events.add(evt_idx)
         current_event_index += 1
 
-    def resolve_hit(evt_idx, hit_box_idx, timing_error):
+    def resolve_hit(evt_idx, hit_box_idx, judgment_name, judgment_score, health_change):
         nonlocal score, total_hits, total_notes, combo, combo_pop_time, current_event_index
-        nonlocal count_300, count_100, count_50
+        nonlocal count_fantastic, count_perfect, count_great, count_cool, count_bad, current_health
         nonlocal particles, hit_glows, impact_waves, screen_flash_time, screen_flash_alpha
-        judgment, text = judgment_from_error(timing_error)
-        if judgment is None:
-            resolve_miss(evt_idx, hit_box_idx)
-            return
+        nonlocal lost_health_bars, fading_tiles, approach_indicators, game_over
+        
+        # Track old health for animation
+        old_health = current_health
+        # Apply health change
+        current_health = max(0, min(max_health, current_health + health_change))
+        # Don't update target_health here - let displayed_health animate to current_health
+        # Record health loss for white bar animation (only on damage)
+        if old_health > current_health:
+            health_bar_width = int(screen_width * 0.3)
+            old_width = int(health_bar_width * (old_health / max_health))
+            lost_health_bars.append((old_width, 255, time.time()))
 
-        score += judgment
+        score += judgment_score
         total_hits += 1
         total_notes += 1
         combo += 1
         combo_pop_time = time.time()
 
-        if judgment == 300:
-            count_300 += 1
-        elif judgment == 100:
-            count_100 += 1
-        else:
-            count_50 += 1
+        # Update judgment counts
+        if judgment_name == 'fantastic':
+            count_fantastic += 1
+        elif judgment_name == 'perfect':
+            count_perfect += 1
+        elif judgment_name == 'great':
+            count_great += 1
+        elif judgment_name == 'cool':
+            count_cool += 1
+        elif judgment_name == 'bad':
+            count_bad += 1
 
-        add_judgment_text(text, hit_box_idx)
-        trigger_box_shake(hit_box_idx, intensity=9)
+        add_judgment_text(judgment_name, hit_box_idx)
+        if not game_over:
+            trigger_box_shake(hit_box_idx, intensity=9)
         if game_settings.get('hitsounds_enabled', True):
             hitsounds['normal'].play()
 
@@ -2089,21 +2443,31 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         current_time = time.time()
         
         # Determine effect color based on judgment
-        if judgment == 300:
-            # Perfect hit - gold particles and bright effects
+        if judgment_name == 'fantastic':
+            # Fantastic - bright cyan particles
+            particle_color = (0, 255, 255)  # Cyan
+            particle_count = 30
+            glow_intensity = 2.0
+        elif judgment_name == 'perfect':
+            # Perfect - gold particles
             particle_color = (255, 215, 0)  # Gold
             particle_count = 25
             glow_intensity = 1.5
-        elif judgment == 100:
-            # Good hit - white particles
+        elif judgment_name == 'great':
+            # Great - white particles
             particle_color = (255, 255, 255)  # White
-            particle_count = 15
-            glow_intensity = 1.0
-        else:
-            # OK hit - light blue particles
+            particle_count = 20
+            glow_intensity = 1.2
+        elif judgment_name == 'cool':
+            # Cool - light blue particles
             particle_color = (180, 220, 255)
+            particle_count = 15
+            glow_intensity = 0.8
+        else:  # bad
+            # Bad - gray particles
+            particle_color = (150, 150, 150)
             particle_count = 10
-            glow_intensity = 0.7
+            glow_intensity = 0.5
         
         # Create particle burst
         import random
@@ -2130,25 +2494,18 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
 
         evt_time, evt_box, evt_color, evt_hitsound = level[evt_idx]
 
-        # NEW: cannot judge this note until 0.5s after it spawns on screen
-        spawn_time = evt_time - APPROACH_DURATION
-        if elapsed_time_local < spawn_time + JUDGE_DELAY_AFTER_SPAWN:
+        # Check if the pressed key matches the note (both color and box position)
+        if button_name != evt_color:
             return False
 
-        dyn_window = compute_dynamic_window(evt_idx, accuracy_window)
-        timing_error = abs(elapsed_time_local - evt_time)
-
-        if timing_error > dyn_window:
+        # Get judgment based on timing
+        judgment_name, judgment_score, health_change = judgment_from_timing(elapsed_time_local, evt_time)
+        
+        # If outside all timing windows, don't register hit
+        if judgment_name is None:
             return False
-
-        expected_key = key_for_box(evt_box)
-        expected_button = button_for_color(evt_color)
-
-        if button_name != expected_button or active_key != expected_key:
-            # This note doesn't match our input - skip it and keep searching
-            return False
-
-        resolve_hit(evt_idx, evt_box, timing_error)
+        
+        resolve_hit(evt_idx, evt_box, judgment_name, judgment_score, health_change)
         return True
 
 
@@ -2160,6 +2517,10 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     music_fade_start_elapsed = None
     POST_LEVEL_DELAY = 3.0
     POST_LEVEL_MUSIC_FADE = 3.0
+    
+    # Game over on HP = 0
+    game_over = False
+    game_over_time = None
 
     while running:
         elapsed_time = time.time() - game_start_time - total_pause_duration
@@ -2177,8 +2538,12 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
 
         display_time = paused_elapsed_time if paused else elapsed_time
 
-        if music_start_time is None and elapsed_time >= 3.0 and not paused:
-            pygame.mixer.music.play()
+        if music_start_time is None and elapsed_time >= music_offset_adjustment and not paused:
+            # For SM charts with negative times, seek to the calculated position
+            if audio_start_position > 0:
+                pygame.mixer.music.play(start=audio_start_position)
+            else:
+                pygame.mixer.music.play()
             music_start_time = time.time()
 
         if current_event_index < len(level):
@@ -2187,18 +2552,19 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         # Autoplay
         if autoplay_enabled and not paused and current_event_index < len(level):
             if elapsed_time >= target_time:
-                active_key = key_for_box(target_box)
-
-                score += 300
+                score += 500  # Fantastic score
                 total_hits += 1
                 total_notes += 1
                 combo += 1
                 combo_pop_time = time.time()
-                count_300 += 1
+                count_fantastic += 1
+                # Autoplay always gets perfect timing, so health +0.5
+                current_health = min(max_health, current_health + 0.5)
 
-                add_judgment_text("300", target_box)
+                add_judgment_text("fantastic", target_box)
                 resolved_events.add(current_event_index)
-                trigger_box_shake(target_box, intensity=9)
+                if not game_over:
+                    trigger_box_shake(target_box, intensity=9)
 
                 # Play hitsounds during autoplay
                 if game_settings.get('hitsounds_enabled', True):
@@ -2231,11 +2597,11 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                 # Add impact wave
                 impact_waves.append((hit_x, hit_y, current_time, particle_color))
                 
-                # Trigger dot switch animation
-                if target_box != last_active_dot:
-                    last_active_dot = target_box
-                    dot_switch_time = current_time
-                    dot_switch_ripples.append((target_box, dot_switch_time))
+                # Trigger dot animation for autoplay
+                if target_box not in last_active_dots:
+                    dot_pulse_times[target_box] = current_time
+                    dot_switch_ripples.append((target_box, current_time))
+                    last_active_dots.add(target_box)
                 
                 current_event_index += 1
 
@@ -2245,8 +2611,8 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
 
             if event.type == pygame.KEYDOWN:
                 # Check for Ctrl+P to toggle autoplay (debug feature)
-                keys_pressed = pygame.key.get_pressed()
-                if event.key == pygame.K_p and (keys_pressed[pygame.K_LCTRL] or keys_pressed[pygame.K_RCTRL]):
+                keys_held = pygame.key.get_pressed()
+                if event.key == pygame.K_p and (keys_held[pygame.K_LCTRL] or keys_held[pygame.K_RCTRL]):
                     autoplay_enabled = not autoplay_enabled
                     game_settings.set('autoplay_enabled', autoplay_enabled)
                     print(f"Autoplay {'enabled' if autoplay_enabled else 'disabled'}")
@@ -2270,15 +2636,18 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                         pygame.mixer.music.set_volume(game_settings.get('music_volume', 0.7))
                         for sound in hitsounds.values():
                             sound.set_volume(game_settings.get('hitsound_volume', 0.3))
-                        # Reload keybinds
-                        keybinds = game_settings.get('keybinds')
-                        mouse_binds = game_settings.get('mouse_binds')
                     elif settings_result == 'QUIT_MENU':
                         # Quit to menu
                         pygame.mixer.music.stop()
                         if game_settings.get('fade_effects', True):
                             fade_out(screen, duration=0.7)
                         return 'RESTART'
+                    elif settings_result == 'RESTART_LEVEL':
+                        # Restart the current level
+                        pygame.mixer.music.stop()
+                        if game_settings.get('fade_effects', True):
+                            fade_out(screen, duration=0.3)
+                        return ('RESTART_LEVEL', level_json)
                     elif settings_result == 'QUIT':
                         # Quit game completely
                         pygame.mixer.music.stop()
@@ -2287,80 +2656,84 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                         pygame.quit()
                         sys.exit()
 
-                if not paused:
-                    # Check if any keybind was pressed and track input flash
-                    box_pressed = None
-                    if event.key == keybinds['top']:
-                        active_key = keybinds['top']
-                        box_pressed = 0
-                    elif event.key == keybinds['right']:
-                        active_key = keybinds['right']
-                        box_pressed = 1
-                    elif event.key == keybinds['bottom']:
-                        active_key = keybinds['bottom']
-                        box_pressed = 2
-                    elif event.key == keybinds['left']:
-                        active_key = keybinds['left']
-                        box_pressed = 3
-                    
-                    # Check if red/blue are mapped to keyboard keys
-                    if display_time >= 3.0:
-                        if event.key == mouse_binds['red']:
-                            # Check all unhit notes within timing window
+                # Handle gameplay keys (WASD and Arrows) - 8 key system
+                if not paused and display_time >= 3.0 and not game_over:
+                    if event.key in KEY_MAPPINGS:
+                        keys_pressed.add(event.key)
+                        
+                        # A key can map to multiple (color, box) pairs - check all of them
+                        elapsed_time = time.time() - game_start_time - total_pause_duration
+                        for color, box_idx in KEY_MAPPINGS[event.key]:
+                            # Check all unhit notes within timing window for this color and box
                             for check_idx in range(current_event_index, len(level)):
                                 if check_idx not in resolved_events:
-                                    if handle_click(mouse_binds['red'], elapsed_time, check_idx):
-                                        break
-                            # Add input flash with red color (only for clicks, not WASD)
-                            if box_pressed is not None:
-                                input_flashes[box_pressed] = (time.time(), 'red')
-                        elif event.key == mouse_binds['blue']:
-                            # Check all unhit notes within timing window
-                            for check_idx in range(current_event_index, len(level)):
-                                if check_idx not in resolved_events:
-                                    if handle_click(mouse_binds['blue'], elapsed_time, check_idx):
-                                        break
-                            # Add input flash with blue color (only for clicks, not WASD)
-                            if box_pressed is not None:
-                                input_flashes[box_pressed] = (time.time(), 'blue')
-
-            if event.type == pygame.MOUSEBUTTONDOWN and not paused:
-                if display_time < 3.0:
-                    continue
-                
-                # Determine which box corresponds to active_key and add input flash
-                box_for_click = None
-                if active_key == keybinds['top']:
-                    box_for_click = 0
-                elif active_key == keybinds['right']:
-                    box_for_click = 1
-                elif active_key == keybinds['bottom']:
-                    box_for_click = 2
-                elif active_key == keybinds['left']:
-                    box_for_click = 3
-                
-                # Check all unhit notes within timing window
-                if event.button == mouse_binds['red']:
-                    for check_idx in range(current_event_index, len(level)):
-                        if check_idx not in resolved_events:
-                            if handle_click(mouse_binds['red'], elapsed_time, check_idx):
-                                break
-                    # Add input flash with red color
-                    if box_for_click is not None:
-                        input_flashes[box_for_click] = (time.time(), 'red')
-                elif event.button == mouse_binds['blue']:
-                    for check_idx in range(current_event_index, len(level)):
-                        if check_idx not in resolved_events:
-                            if handle_click(mouse_binds['blue'], elapsed_time, check_idx):
-                                break
-                    # Add input flash with blue color
-                    if box_for_click is not None:
-                        input_flashes[box_for_click] = (time.time(), 'blue')
+                                    evt_time, evt_box, evt_color, evt_hitsound = level[check_idx]
+                                    # Only check notes that match the pressed key's color and box
+                                    if evt_color == color and evt_box == box_idx:
+                                        if handle_click(color, elapsed_time, check_idx):
+                                            # Add input flash (only if not game over)
+                                            if not game_over:
+                                                input_flashes[box_idx] = (time.time(), color)
+                                            break
+            
+            if event.type == pygame.KEYUP:
+                # Remove key from pressed set
+                if event.key in KEY_MAPPINGS:
+                    keys_pressed.discard(event.key)
 
         # Auto-miss past window
-        if not paused:
+        if not paused and not game_over:
             elapsed_time = time.time() - game_start_time - total_pause_duration
-            while current_event_index < len(level) and elapsed_time > level[current_event_index][0] + accuracy_window:
+            
+            # Check for game over (HP = 0 or below)
+            if current_health <= 0.01 and not game_over:  # Use 0.01 to handle floating point precision
+                game_over = True
+                game_over_time = elapsed_time
+                print(f"Game over! Health: {current_health}")
+                # Start fading music immediately
+                pygame.mixer.music.fadeout(3000)  # 3 second fade
+                
+                # Clear input flashes so boxes don't flash after game over
+                input_flashes.clear()
+                
+                # Fade out all tiles currently on screen
+                box_centers = [
+                    (center_x, center_y - square_size // 2 - spacing),
+                    (center_x + square_size // 2 + spacing, center_y),
+                    (center_x, center_y + square_size // 2 + spacing),
+                    (center_x - square_size // 2 - spacing, center_y),
+                ]
+                for box_idx, color, t_time, duration, evt_idx, side in approach_indicators:
+                    # Calculate current position of the tile
+                    approach_start_time = t_time - duration
+                    progress = (elapsed_time - approach_start_time) / duration
+                    progress = max(0.0, min(1.0, progress))
+                    
+                    travel_distance = screen_width // 2
+                    target_x, target_y = box_centers[box_idx]
+                    if box_idx == 0:
+                        start_x = target_x - travel_distance if side == 'left' else target_x + travel_distance
+                        start_y = target_y
+                    elif box_idx == 1:
+                        start_x = target_x + travel_distance
+                        start_y = target_y
+                    elif box_idx == 2:
+                        start_x = target_x - travel_distance if side == 'left' else target_x + travel_distance
+                        start_y = target_y
+                    else:
+                        start_x = target_x - travel_distance
+                        start_y = target_y
+                    
+                    current_x = start_x + (target_x - start_x) * progress
+                    current_y = start_y + (target_y - start_y) * progress
+                    
+                    # Add tile to fading list at its current position
+                    fading_tiles.append((box_idx, color, current_x, current_y, elapsed_time))
+                
+                # Clear approach_indicators since all tiles are now fading
+                approach_indicators = []
+            
+            while current_event_index < len(level) and elapsed_time > level[current_event_index][0] + MAX_TIMING_WINDOW:
                 missed_time, missed_box, missed_color, missed_hitsound = level[current_event_index]
                 if current_event_index not in resolved_events:
                     resolve_miss(current_event_index, missed_box)
@@ -2370,58 +2743,150 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
             if current_event_index < len(level):
                 target_time, target_box, target_color, target_hitsound = level[current_event_index]
 
-            # Maintain approach indicators
+            # Maintain approach indicators - remove tiles that have been resolved or passed timing window
             approach_indicators = [
                 (box_idx, color, t_time, duration, evt_idx, side)
                 for box_idx, color, t_time, duration, evt_idx, side in approach_indicators
-                if elapsed_time <= t_time
+                if evt_idx not in resolved_events and elapsed_time <= t_time + MAX_TIMING_WINDOW
             ]
 
             existing_events = {evt_idx for _, _, _, _, evt_idx, _ in approach_indicators}
-            APPROACH_DURATION = 0.8
             JUDGE_DELAY_AFTER_SPAWN = 0.1
 
+            # Use the pre-calculated constant approach duration for all tiles
             approach_duration = APPROACH_DURATION
-            lookahead = 10
+            
+            # Dynamic lookahead based on approach duration to show all visible notes
+            # lookahead time = approach_duration + small buffer
+            lookahead_time = approach_duration + 0.2
+            lookahead = 0
+            for i in range(current_event_index, len(level)):
+                if level[i][0] <= elapsed_time + lookahead_time:
+                    lookahead += 1
+                else:
+                    break
+            
+            # Cap lookahead for performance
+            lookahead = min(lookahead, 50)
+            
             lookback = 5
             start_scan = max(0, current_event_index - lookback)
-            for i in range(start_scan, min(current_event_index + lookahead, len(level))):
-                if i not in existing_events:
-                    evt_time, evt_box, evt_color, evt_hitsound = level[i]
-                    if elapsed_time <= evt_time:
-                        if evt_box == 0:
-                            approach_indicators.append((evt_box, evt_color, evt_time, approach_duration, i, 'left'))
-                        elif evt_box == 2:
-                            approach_indicators.append((evt_box, evt_color, evt_time, approach_duration, i, 'right'))
-                        else:
-                            approach_indicators.append((evt_box, evt_color, evt_time, approach_duration, i, None))
+            
+            # Only spawn new tiles if not game over
+            if not game_over:
+                for i in range(start_scan, min(current_event_index + lookahead, len(level))):
+                    if i not in existing_events:
+                        evt_time, evt_box, evt_color, evt_hitsound = level[i]
+                        # Only spawn if within approach window
+                        if elapsed_time <= evt_time <= elapsed_time + approach_duration:
+                            if evt_box == 0:
+                                approach_indicators.append((evt_box, evt_color, evt_time, approach_duration, i, 'left'))
+                            elif evt_box == 2:
+                                approach_indicators.append((evt_box, evt_color, evt_time, approach_duration, i, 'right'))
+                            else:
+                                approach_indicators.append((evt_box, evt_color, evt_time, approach_duration, i, None))
 
             # One-time shake exactly when tile reaches box (TRULY timing-driven; independent of input)
-            while arrival_shake_index < len(level) and elapsed_time >= level[arrival_shake_index][0]:
-                t_note, box_idx, color, hs = level[arrival_shake_index]
-                if arrival_shake_index not in reached_shake_events:
-                    reached_shake_events.add(arrival_shake_index)
-                    trigger_box_shake(box_idx, intensity=9)
-                arrival_shake_index += 1
+            # Don't shake boxes during game over
+            if not game_over:
+                while arrival_shake_index < len(level) and elapsed_time >= level[arrival_shake_index][0]:
+                    t_note, box_idx, color, hs = level[arrival_shake_index]
+                    if arrival_shake_index not in reached_shake_events:
+                        reached_shake_events.add(arrival_shake_index)
+                        trigger_box_shake(box_idx, intensity=9)
+                    arrival_shake_index += 1
+        
+        # ===== Game over handling (HP = 0) - outside paused/game_over check so it can execute =====
+        if game_over and game_over_time is not None:
+            elapsed_time = time.time() - game_start_time - total_pause_duration
+            # After 2.5 seconds, return to level selector
+            if (elapsed_time - game_over_time) >= 2.5:
+                print("Returning to level selector after game over")
+                if game_settings.get('fade_effects', True):
+                    fade_out(screen, duration=0.5)
+                return 'RESTART'
+        
+        # ===== End-of-level flow (NO freezing; let visuals keep running) =====
+        # Mark end-of-level once ALL notes are resolved (hit or miss)
+        if current_event_index >= len(level) and level_end_elapsed is None and not game_over:
+            elapsed_time = time.time() - game_start_time - total_pause_duration
+            level_end_elapsed = elapsed_time
 
-            # ===== End-of-level flow (NO freezing; let visuals keep running) =====
-            # Mark end-of-level once ALL notes are resolved (hit or miss)
-            if current_event_index >= len(level) and level_end_elapsed is None:
-                level_end_elapsed = elapsed_time
+        # After 2s delay, fade music for 3s, then fade screen and return to selector
+        if level_end_elapsed is not None and not game_over:
+            elapsed_time = time.time() - game_start_time - total_pause_duration
+            if (elapsed_time - level_end_elapsed) >= POST_LEVEL_DELAY and not music_fade_started:
+                pygame.mixer.music.fadeout(int(POST_LEVEL_MUSIC_FADE * 1000))
+                music_fade_started = True
+                music_fade_start_elapsed = elapsed_time
 
-            # After 2s delay, fade music for 3s, then fade screen and return to selector
-            if level_end_elapsed is not None:
-                if (elapsed_time - level_end_elapsed) >= POST_LEVEL_DELAY and not music_fade_started:
-                    pygame.mixer.music.fadeout(int(POST_LEVEL_MUSIC_FADE * 1000))
-                    music_fade_started = True
-                    music_fade_start_elapsed = elapsed_time
+            if music_fade_started and (elapsed_time - music_fade_start_elapsed) >= POST_LEVEL_MUSIC_FADE:
+                if game_settings.get('fade_effects', True):
+                    fade_out(screen, duration=0.7)
+                return 'RESTART'
 
-                if music_fade_started and (elapsed_time - music_fade_start_elapsed) >= POST_LEVEL_MUSIC_FADE:
-                    if game_settings.get('fade_effects', True):
-                        fade_out(screen, duration=0.7)
-                    return 'RESTART'
+        # Draw background (either gameplay bg image or white)
+        if gameplay_bg_image:
+            screen.blit(gameplay_bg_image, (0, 0))
+        else:
+            screen.fill(WHITE)
 
-        screen.fill(WHITE)
+        # Draw health bar at top of screen (30% width, centered) with animations
+        health_bar_width = int(screen_width * 0.3)
+        health_bar_x = (screen_width - health_bar_width) // 2
+        health_bar_y = 60
+        health_bar_thickness = 12  # Decreased from 20
+        
+        # Update displayed_health: snap down immediately on loss, animate up on gain
+        if current_health < displayed_health:
+            # Health loss - snap immediately, no animation
+            displayed_health = current_health
+        elif current_health > displayed_health:
+            # Health gain - smooth animation
+            health_diff = current_health - displayed_health
+            if abs(health_diff) > 0.01:
+                displayed_health += health_diff * 0.15
+            else:
+                displayed_health = current_health
+        # If equal, no change needed
+        
+        health_percentage = displayed_health / max_health
+        
+        # Create semi-transparent surface for health bar
+        health_surface = pygame.Surface((health_bar_width, health_bar_thickness), pygame.SRCALPHA)
+        
+        # Background bar (dark gray, semi-transparent)
+        pygame.draw.rect(health_surface, (50, 50, 50, 180), (0, 0, health_bar_width, health_bar_thickness))
+        
+        # Draw fading white bars showing health loss
+        current_time = time.time()
+        expired_bars = []
+        for i, (bar_width, alpha, timestamp) in enumerate(lost_health_bars):
+            time_since = current_time - timestamp
+            if time_since < 0.8:  # Fade over 0.8 seconds
+                fade_alpha = int(255 * (1 - time_since / 0.8))  # Keep white color, just fade alpha
+                pygame.draw.rect(health_surface, (255, 255, 255, fade_alpha), (0, 0, bar_width, health_bar_thickness))
+            else:
+                expired_bars.append(i)
+        # Remove expired bars
+        for i in reversed(expired_bars):
+            lost_health_bars.pop(i)
+        
+        # Foreground bar (colored based on health percentage, semi-transparent)
+        current_bar_width = int(health_bar_width * health_percentage)
+        if health_percentage > 0.7:
+            health_color = (0, 255, 0, 200)  # Green
+        elif health_percentage > 0.4:
+            health_color = (255, 255, 0, 200)  # Yellow
+        elif health_percentage > 0.2:
+            health_color = (255, 165, 0, 200)  # Orange
+        else:
+            health_color = (255, 0, 0, 200)  # Red
+        
+        if current_bar_width > 0:
+            pygame.draw.rect(health_surface, health_color, (0, 0, current_bar_width, health_bar_thickness))
+        
+        screen.blit(health_surface, (health_bar_x, health_bar_y))
 
         # Screen shake offset
         shake_x, shake_y = 0, 0
@@ -2466,49 +2931,51 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         ]
 
         # ===== Arrival flash overlay (timing-driven; works even if you miss) =====
-        # Move pointer forward past old flashes
-        while arrival_flash_index < len(level) and render_time > level[arrival_flash_index][0] + arrival_flash_duration:
-            arrival_flash_index += 1
+        # Only render arrival flashes if not game over
+        if not game_over:
+            # Move pointer forward past old flashes
+            while arrival_flash_index < len(level) and render_time > level[arrival_flash_index][0] + arrival_flash_duration:
+                arrival_flash_index += 1
 
-        # For each box, keep the strongest flash currently active
-        best_flash_alpha = [0, 0, 0, 0]
-        best_flash_color = [None, None, None, None]
+            # For each box, keep the strongest flash currently active
+            best_flash_alpha = [0, 0, 0, 0]
+            best_flash_color = [None, None, None, None]
 
-        j = arrival_flash_index
-        # Scan forward only a small window around "now"
-        while j < len(level) and level[j][0] <= render_time + arrival_flash_duration:
-            t_note, box_idx, color, hs = level[j]
-            dt = render_time - t_note
-            if 0 <= dt <= arrival_flash_duration:
-                if dt <= arrival_flash_sustain:
-                    alpha = 255
-                else:
-                    # linear fade out after sustain
-                    fade_t = (dt - arrival_flash_sustain) / (arrival_flash_duration - arrival_flash_sustain)
-                    alpha = max(0, int(255 * (1 - fade_t)))
+            j = arrival_flash_index
+            # Scan forward only a small window around "now"
+            while j < len(level) and level[j][0] <= render_time + arrival_flash_duration:
+                t_note, box_idx, color, hs = level[j]
+                dt = render_time - t_note
+                if 0 <= dt <= arrival_flash_duration:
+                    if dt <= arrival_flash_sustain:
+                        alpha = 255
+                    else:
+                        # linear fade out after sustain
+                        fade_t = (dt - arrival_flash_sustain) / (arrival_flash_duration - arrival_flash_sustain)
+                        alpha = max(0, int(255 * (1 - fade_t)))
 
-                if alpha > best_flash_alpha[box_idx]:
-                    best_flash_alpha[box_idx] = alpha
-                    best_flash_color[box_idx] = color
-            j += 1
+                    if alpha > best_flash_alpha[box_idx]:
+                        best_flash_alpha[box_idx] = alpha
+                        best_flash_color[box_idx] = color
+                j += 1
 
-        # Draw the flashes (move WITH the box shake so it doesn't look like the tile shakes)
-        for box_idx in range(4):
-            alpha = best_flash_alpha[box_idx]
-            color = best_flash_color[box_idx]
-            if alpha > 0 and color is not None:
-                overlay_img = box_red_rounded if color == 'red' else box_blue_rounded
-                overlay_surface = overlay_img.copy()
-                overlay_surface.set_alpha(alpha)
+            # Draw the flashes (move WITH the box shake so it doesn't look like the tile shakes)
+            for box_idx in range(4):
+                alpha = best_flash_alpha[box_idx]
+                color = best_flash_color[box_idx]
+                if alpha > 0 and color is not None:
+                    overlay_img = box_red_rounded if color == 'red' else box_blue_rounded
+                    overlay_surface = overlay_img.copy()
+                    overlay_surface.set_alpha(alpha)
 
-                bx, by = big_box_positions[box_idx]
+                    bx, by = big_box_positions[box_idx]
 
-                # If this is the currently-shaken box, apply the same shake offset
-                if shake_box == box_idx:
-                    bx += shake_x
-                    by += shake_y
+                    # If this is the currently-shaken box, apply the same shake offset
+                    if shake_box == box_idx:
+                        bx += shake_x
+                        by += shake_y
 
-                screen.blit(overlay_surface, (bx, by))
+                    screen.blit(overlay_surface, (bx, by))
 
         # ===== Input flash overlay (shows taps even when nothing is hit) =====
         input_flash_duration = 0.25
@@ -2553,62 +3020,64 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         edge_flash_duration = 0.25
         edge_offset = 0
 
-        for box_idx, color, target_time, approach_duration, event_idx, side in approach_indicators:
-            approach_start_time = target_time - approach_duration
-            time_until_start = approach_start_time - render_time
+        # Only render edge flashes if not game over
+        if not game_over:
+            for box_idx, color, target_time, approach_duration, event_idx, side in approach_indicators:
+                approach_start_time = target_time - approach_duration
+                time_until_start = approach_start_time - render_time
 
-            if 0 <= time_until_start <= edge_flash_duration:
-                flash_progress = 1 - (time_until_start / edge_flash_duration)
+                if 0 <= time_until_start <= edge_flash_duration:
+                    flash_progress = 1 - (time_until_start / edge_flash_duration)
 
-                if flash_progress < 0.3:
-                    alpha = int(255 * (flash_progress / 0.3))
-                else:
-                    alpha = int(255 * (1 - (flash_progress - 0.3) / 0.7))
-
-                box_centers = [
-                    (center_x, center_y - square_size // 2 - spacing),
-                    (center_x + square_size // 2 + spacing, center_y),
-                    (center_x, center_y + square_size // 2 + spacing),
-                    (center_x - square_size // 2 - spacing, center_y),
-                ]
-
-                target_x, target_y = box_centers[box_idx]
-
-                if box_idx == 0:
-                    gradient_x = edge_offset if side == 'left' else screen_width - edge_offset
-                    edge_y = target_y - edge_flash_height // 2
-                    is_left = (side == 'left')
-                elif box_idx == 1:
-                    gradient_x = screen_width - edge_offset
-                    edge_y = target_y - edge_flash_height // 2
-                    is_left = False
-                elif box_idx == 2:
-                    gradient_x = edge_offset if side == 'left' else screen_width - edge_offset
-                    edge_y = target_y - edge_flash_height // 2
-                    is_left = (side == 'left')
-                else:
-                    gradient_x = edge_offset
-                    edge_y = target_y - edge_flash_height // 2
-                    is_left = True
-
-                flash_color = (255, 0, 0) if color == 'red' else (0, 0, 255)
-                gradient_length = 175
-                max_gradient_alpha = 85
-
-                gradient_surface = pygame.Surface((gradient_length, edge_flash_height), pygame.SRCALPHA)
-                for i in range(gradient_length):
-                    if is_left:
-                        gradient_alpha = int(max_gradient_alpha * (1 - i / gradient_length) * (alpha / 255))
+                    if flash_progress < 0.3:
+                        alpha = int(255 * (flash_progress / 0.3))
                     else:
-                        gradient_alpha = int(max_gradient_alpha * (i / gradient_length) * (alpha / 255))
-                    gradient_color = (*flash_color, gradient_alpha)
-                    pygame.draw.rect(gradient_surface, gradient_color, (i, 0, 1, edge_flash_height))
+                        alpha = int(255 * (1 - (flash_progress - 0.3) / 0.7))
 
-                final_gradient_x = gradient_x if is_left else gradient_x - gradient_length
-                screen.blit(gradient_surface, (int(final_gradient_x), int(edge_y)))
+                    box_centers = [
+                        (center_x, center_y - square_size // 2 - spacing),
+                        (center_x + square_size // 2 + spacing, center_y),
+                        (center_x, center_y + square_size // 2 + spacing),
+                        (center_x - square_size // 2 - spacing, center_y),
+                    ]
+
+                    target_x, target_y = box_centers[box_idx]
+
+                    if box_idx == 0:
+                        gradient_x = edge_offset if side == 'left' else screen_width - edge_offset
+                        edge_y = target_y - edge_flash_height // 2
+                        is_left = (side == 'left')
+                    elif box_idx == 1:
+                        gradient_x = screen_width - edge_offset
+                        edge_y = target_y - edge_flash_height // 2
+                        is_left = False
+                    elif box_idx == 2:
+                        gradient_x = edge_offset if side == 'left' else screen_width - edge_offset
+                        edge_y = target_y - edge_flash_height // 2
+                        is_left = (side == 'left')
+                    else:
+                        gradient_x = edge_offset
+                        edge_y = target_y - edge_flash_height // 2
+                        is_left = True
+
+                    flash_color = (255, 0, 0) if color == 'red' else (0, 0, 255)
+                    gradient_length = 175
+                    max_gradient_alpha = 85
+
+                    gradient_surface = pygame.Surface((gradient_length, edge_flash_height), pygame.SRCALPHA)
+                    for i in range(gradient_length):
+                        if is_left:
+                            gradient_alpha = int(max_gradient_alpha * (1 - i / gradient_length) * (alpha / 255))
+                        else:
+                            gradient_alpha = int(max_gradient_alpha * (i / gradient_length) * (alpha / 255))
+                        gradient_color = (*flash_color, gradient_alpha)
+                        pygame.draw.rect(gradient_surface, gradient_color, (i, 0, 1, edge_flash_height))
+
+                    final_gradient_x = gradient_x if is_left else gradient_x - gradient_length
+                    screen.blit(gradient_surface, (int(final_gradient_x), int(edge_y)))
 
         # Approach indicators
-        indicator_size = 95
+        indicator_size = 65
         for box_idx, color, target_time, approach_duration, event_idx, side in approach_indicators:
             approach_start_time = target_time - approach_duration
             progress = (render_time - approach_start_time) / approach_duration
@@ -2639,11 +3108,51 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
             current_x = start_x + (target_x - start_x) * progress
             current_y = start_y + (target_y - start_y) * progress
 
-            alpha = int(245 * min(1.0, progress))
-            indicator_color = (255, 0, 0) if color == 'red' else (0, 0, 255)
-            indicator_surface = pygame.Surface((indicator_size, indicator_size), pygame.SRCALPHA)
-            pygame.draw.rect(indicator_surface, (*indicator_color, alpha), (0, 0, indicator_size, indicator_size), 0, 8)
-            screen.blit(indicator_surface, (int(current_x - indicator_size // 2), int(current_y - indicator_size // 2)))
+            # Tiles start fading when they reach target (progress >= 1.0)
+            if progress >= 1.0 and event_idx not in resolved_events:
+                # Tile has reached the box - start fading
+                time_since_arrival = render_time - target_time
+                fade_duration_here = 0.15
+                if time_since_arrival < fade_duration_here:
+                    fade_progress = time_since_arrival / fade_duration_here
+                    alpha = int(245 * (1 - fade_progress))
+                else:
+                    alpha = 0  # Fully faded
+            else:
+                # Tile is still traveling - normal fade-in
+                if progress < 0.15:
+                    alpha = int(245 * (progress / 0.15))
+                else:
+                    alpha = 245
+            
+            if alpha > 0:
+                indicator_color = (255, 0, 0) if color == 'red' else (0, 0, 255)
+                indicator_surface = pygame.Surface((indicator_size, indicator_size), pygame.SRCALPHA)
+                # Draw black border first
+                pygame.draw.rect(indicator_surface, (0, 0, 0, alpha), (0, 0, indicator_size, indicator_size), 0, 8)
+                # Draw colored fill slightly smaller to create border effect
+                pygame.draw.rect(indicator_surface, (*indicator_color, alpha), (3, 3, indicator_size - 6, indicator_size - 6), 0, 6)
+                screen.blit(indicator_surface, (int(current_x - indicator_size // 2), int(current_y - indicator_size // 2)))
+
+        # Draw fading tiles (missed notes)
+        fade_duration = 0.15  # 0.15 seconds fade
+        active_fading_tiles = []
+        for box_idx, color, x, y, fade_start_time in fading_tiles:
+            time_since_fade = elapsed_time - fade_start_time
+            if time_since_fade < fade_duration:
+                # Calculate fade alpha (245 -> 0)
+                fade_progress = time_since_fade / fade_duration
+                alpha = int(245 * (1 - fade_progress))
+                
+                indicator_color = (255, 0, 0) if color == 'red' else (0, 0, 255)
+                indicator_surface = pygame.Surface((indicator_size, indicator_size), pygame.SRCALPHA)
+                # Draw black border first
+                pygame.draw.rect(indicator_surface, (0, 0, 0, alpha), (0, 0, indicator_size, indicator_size), 0, 8)
+                # Draw colored fill slightly smaller to create border effect
+                pygame.draw.rect(indicator_surface, (*indicator_color, alpha), (3, 3, indicator_size - 6, indicator_size - 6), 0, 6)
+                screen.blit(indicator_surface, (int(x - indicator_size // 2), int(y - indicator_size // 2)))
+                active_fading_tiles.append((box_idx, color, x, y, fade_start_time))
+        fading_tiles = active_fading_tiles
 
         # ===== RENDER PARTICLE EFFECTS (drawn on top of boxes) =====
         current_time = time.time()
@@ -2749,7 +3258,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                     display_x = jx
                     display_y = jy + 100 - offset_move
 
-                judgment_surface = font_judgment.render(judgment_text, True, BLACK)
+                judgment_surface = font_judgment.render(judgment_text, True, WHITE)
                 judgment_surface.set_alpha(alpha)
                 text_rect = judgment_surface.get_rect(center=(int(display_x), int(display_y)))
                 screen.blit(judgment_surface, text_rect)
@@ -2758,7 +3267,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
 
         # Combo
         combo_text_str = f"{combo}x"
-        combo_surface = font_combo.render(combo_text_str, True, BLACK)
+        combo_surface = font_combo.render(combo_text_str, True, WHITE)
 
         if combo > 0:
             time_since_pop = time.time() - combo_pop_time
@@ -2777,7 +3286,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
             rotation_angle = 0
 
         rotated_combo = pygame.transform.rotate(combo_surface, rotation_angle)
-        combo_rect = rotated_combo.get_rect(bottomleft=(30, screen_height - 130))
+        combo_rect = rotated_combo.get_rect(bottomleft=(35, screen_height - 155))
         screen.blit(rotated_combo, combo_rect)
 
         # Metadata + image
@@ -2790,28 +3299,47 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
             artist = meta.get('artist', 'Unknown')
             creator = meta.get('creator', 'Unknown')
             version = meta.get('version', 'Unknown')
+            
+            # Determine difficulty color based on version name (matching level selector colors)
+            version_lower = version.lower()
+            if 'easy' in version_lower or 'beginner' in version_lower:
+                diff_color = (100, 200, 255)  # Light blue
+            elif 'medium' in version_lower or 'platter' in version_lower:
+                diff_color = (150, 220, 150)  # Medium light green
+            elif 'normal' in version_lower or 'basic' in version_lower:
+                diff_color = (100, 255, 100)  # Green
+            elif 'hard' in version_lower or 'advanced' in version_lower:
+                diff_color = (255, 200, 100)  # Orange
+            elif 'expert' in version_lower or 'insane' in version_lower:
+                diff_color = (255, 100, 100)  # Red
+            elif 'extra' in version_lower or 'challenge' in version_lower or 'master' in version_lower:
+                diff_color = (200, 100, 255)  # Purple
+            else:
+                diff_color = (200, 200, 200)  # Gray (default)
 
             metadata_lines = [
-                f"{title} - {artist}",
-                f"[{version}] by {creator}"
+                (f"{title} - {artist}", (255, 255, 255)),
+                (f"[{version}] by {creator}", diff_color)
             ]
 
-            for i, line in enumerate(metadata_lines):
-                meta_text = font_metadata.render(line, True, BLACK)
+            for i, (line, color) in enumerate(metadata_lines):
+                meta_text = font_metadata.render(line, True, color)
                 meta_rect = meta_text.get_rect(right=screen_width - right_margin, top=stats_start_y + i * 25)
                 screen.blit(meta_text, meta_rect)
+            
+            stats_start_y += len(metadata_lines) * 25 + 5
+        
+        # Autoplay indicator below title/charter
+        if autoplay_enabled:
+            autoplay_text = font_metadata.render("AUTOPLAY", True, (255, 100, 100))
+            autoplay_rect = autoplay_text.get_rect(right=screen_width - right_margin, top=stats_start_y)
+            screen.blit(autoplay_text, autoplay_rect)
+            stats_start_y += 30
 
             stats_start_y += len(metadata_lines) * 25 + 10
 
-        if beatmap_bg_image:
-            img_width = beatmap_bg_image.get_width()
-            img_height = beatmap_bg_image.get_height()
-            img_x = screen_width - img_width - right_margin
-            screen.blit(beatmap_bg_image, (img_x, stats_start_y))
-            stats_start_y += img_height + 10
-
         # Stats
-        total_possible = total_notes * 300
+        total_possible = total_notes * 500  # Max score is 500 (fantastic)
         accuracy = (score / total_possible * 100) if total_possible > 0 else 100.0
         completion = (current_event_index / len(level) * 100) if len(level) > 0 else 0
 
@@ -2825,66 +3353,52 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         stats_bottom_y = screen_height - 20
 
         for i, (number, label) in enumerate(reversed(stats_data)):
-            y_pos = stats_bottom_y - (i + 1) * 30
-            label_text = font_stats.render(label, True, BLACK)
+            y_pos = stats_bottom_y - (i + 1) * 40
+            label_text = font_stats.render(label, True, WHITE)
             label_rect = label_text.get_rect(left=left_margin, top=y_pos)
             screen.blit(label_text, label_rect)
 
-            number_text = font_stats.render(number, True, BLACK)
-            number_rect = number_text.get_rect(left=left_margin + 120, top=y_pos)
+            number_text = font_stats.render(number, True, WHITE)
+            number_rect = number_text.get_rect(left=left_margin + 140, top=y_pos)
             screen.blit(number_text, number_rect)
 
         # Dots
-        dot_size = 50
+        dot_size = 35
         
-        # Determine current active dot
-        current_active_dot = None
-        if active_key == keybinds['top']:
-            current_active_dot = 0
-        elif active_key == keybinds['right']:
-            current_active_dot = 1
-        elif active_key == keybinds['bottom']:
-            current_active_dot = 2
-        elif active_key == keybinds['left']:
-            current_active_dot = 3
+        # Determine which boxes have active keys pressed (from 8-key system)
+        active_boxes = set()
+        for key in keys_pressed:
+            if key in KEY_MAPPINGS:
+                # A key can map to multiple (color, box) pairs
+                for color, box_idx in KEY_MAPPINGS[key]:
+                    active_boxes.add(box_idx)
         
-        # Detect dot switch and trigger animation
-        if current_active_dot is not None and current_active_dot != last_active_dot:
-            last_active_dot = current_active_dot
-            dot_switch_time = time.time()
-            dot_switch_ripples.append((current_active_dot, dot_switch_time))
-        elif current_active_dot is None:
-            last_active_dot = None
+        # Detect newly activated dots and trigger animations for all of them
+        newly_active = active_boxes - last_active_dots
+        for dot_idx in newly_active:
+            current_time_local = time.time()
+            dot_pulse_times[dot_idx] = current_time_local
+            dot_switch_ripples.append((dot_idx, current_time_local))
+        
+        # Update last active dots
+        last_active_dots = active_boxes.copy()
         
         # Draw dots FIRST (underneath everything)
         for i, (dot_x, dot_y) in enumerate(dot_positions):
-            is_active = False
-            if i == 0 and active_key == keybinds['top']:
-                is_active = True
-            elif i == 1 and active_key == keybinds['right']:
-                is_active = True
-            elif i == 2 and active_key == keybinds['bottom']:
-                is_active = True
-            elif i == 3 and active_key == keybinds['left']:
-                is_active = True
-
+            is_active = i in active_boxes
             current_dot = dot2_image if is_active else dot_image
+            # Draw black border circle first
+            pygame.draw.circle(screen, (0, 0, 0), (int(dot_x), int(dot_y)), dot_size // 2 + 2)
+            # Then draw the dot image
             screen.blit(current_dot, (int(dot_x - dot_size // 2), int(dot_y - dot_size // 2)))
         
         # Render pulse animation on top of dots
         for i, (dot_x, dot_y) in enumerate(dot_positions):
-            is_active = False
-            if i == 0 and active_key == keybinds['top']:
-                is_active = True
-            elif i == 1 and active_key == keybinds['right']:
-                is_active = True
-            elif i == 2 and active_key == keybinds['bottom']:
-                is_active = True
-            elif i == 3 and active_key == keybinds['left']:
-                is_active = True
+            is_active = i in active_boxes
             
-            if is_active and i == last_active_dot:
-                switch_age = current_time - dot_switch_time
+            # Check if this dot has an active pulse animation
+            if i in dot_pulse_times:
+                switch_age = current_time - dot_pulse_times[i]
                 pulse_duration = 0.2
                 if switch_age < pulse_duration:
                     pulse_progress = switch_age / pulse_duration
@@ -2899,6 +3413,9 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                         pygame.draw.circle(pulse_surface, (255, 100, 100, pulse_alpha), 
                                          (pulse_radius, pulse_radius), pulse_radius)
                         screen.blit(pulse_surface, (int(dot_x - pulse_radius), int(dot_y - pulse_radius)))
+                else:
+                    # Clean up finished pulse
+                    del dot_pulse_times[i]
         
         # Render dot switch ripples (ON TOP of everything)
         ripple_duration = 0.3
@@ -2919,7 +3436,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                     active_ripples.append((ripple_idx, ripple_start_time))
         dot_switch_ripples = active_ripples
 
-        # Countdown
+        # Countdown - positioned above play area, below HP bar
         if display_time < 3.0:
             if display_time < 1.0:
                 countdown_text = "3"
@@ -2934,9 +3451,11 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
             else:
                 alpha = int(255 * (1 - (flash_cycle - 0.15) / 0.85))
 
-            countdown_surface = font_countdown.render(countdown_text, True, BLACK)
+            countdown_surface = font_countdown.render(countdown_text, True, (255, 255, 255))
             countdown_surface.set_alpha(alpha)
-            countdown_rect = countdown_surface.get_rect(center=(center_x, center_y))
+            # Position below health bar (health_bar_y + health_bar_thickness + margin)
+            countdown_y = health_bar_y + health_bar_thickness + 80
+            countdown_rect = countdown_surface.get_rect(center=(center_x, countdown_y))
             screen.blit(countdown_surface, countdown_rect)
 
         # Fade-in overlay
@@ -2969,31 +3488,31 @@ if __name__ == "__main__":
     import multiprocessing
     multiprocessing.freeze_support()
 
-    # Initialize levels/beatmaps from .osz files if needed
-    initialize_levels_from_osz()
+    # No longer initializing OSU levels - using song packs only
+    # initialize_levels_from_osz()
 
-    REGENERATE_LEVEL = False
+    preloaded_metadata = show_loading_screen()
 
-    if REGENERATE_LEVEL:
-        from batch_process_osz import process_osz_files
-        print("Running batch processor to generate levels from .osz files...")
-        process_osz_files()
-    else:
-        preloaded_metadata = show_loading_screen()
+    if preloaded_metadata is None:
+        preloaded_metadata = []  # Empty list is fine now
 
-        if preloaded_metadata is None:
-            print("Failed to load assets. Exiting...")
-            sys.exit()
-
-        returning = False
-        while True:
-            result = main(returning_from_game=returning, preloaded_metadata=preloaded_metadata)
-            if result != 'RESTART':
-                break
+    returning = False
+    last_level = None
+    while True:
+        result = main(level_json=last_level, returning_from_game=returning, preloaded_metadata=preloaded_metadata)
+        if result is None:
+            break
+        elif isinstance(result, tuple) and result[0] == 'RESTART_LEVEL':
+            # Restart the same level
+            last_level = result[1]
             returning = True
+        elif result == 'RESTART':
+            # Go back to level selector
+            last_level = None
+            returning = True
+        else:
+            break
 
-        pygame.display.quit()
-        pygame.quit()
-        sys.exit()
-
-
+    pygame.display.quit()
+    pygame.quit()
+    sys.exit()

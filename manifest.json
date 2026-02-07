@@ -1,6 +1,6 @@
 {
-  "version": "0.6.31",
-  "release_date": "2026-02-04",
+  "version": "0.7.0",
+  "release_date": "2026-02-07",
   "manifest_version": 1,
   "files": {
     "assets": {
@@ -24,6 +24,10 @@
         "hash": "d7806f0cccae53a6757a7f9192e4a3f977d4408245b33fa92b5816b9878f47a0",
         "size": 20888
       },
+      "hit.wav": {
+        "hash": "5c86a97ed1fe5148e84e6f4891d12b9ddd8e99a789c654074b4e642b5aa00561",
+        "size": 41412
+      },
       "icon.png": {
         "hash": "12c5b4de023eba843697089e2662aa7daa76db504265f8bfe13731e4b87a814c",
         "size": 5834
@@ -36,97 +40,49 @@
         "hash": "4d51b8fac5c06f492db45b306f3645bcbf1f312a60c8d2c834ead0ad8207948d",
         "size": 5826
       },
-      "osz/allthethingsshesaid.osz": {
-        "hash": "9962cfebb31fe419ea539b0a39134cf7e51d00916d97a0e6881a3c557273c010",
-        "size": 4632961
-      },
-      "osz/drumgodum.osz": {
-        "hash": "9a0a4d83461bbd2294af7760020a53f8f73c913cd3da4b6ad545be1e3de335bc",
-        "size": 7195724
-      },
-      "osz/giants.osz": {
-        "hash": "8780b3d1e30c172a19b35d50e046713b88088394adff2bd639e2368e281be702",
-        "size": 14925594
-      },
-      "osz/gods.osz": {
-        "hash": "7b21a5344363a2d0812ab84078f132f1ef5ffd56bab421893d9b5faf5a510893",
-        "size": 29894762
-      },
-      "osz/misfittoys.osz": {
-        "hash": "6fb19a3a7acb522a1b75fa9b18e277f5fe026b5d37b9b047b63d28fa6bb3f0fe",
-        "size": 5143124
-      },
-      "osz/more.osz": {
-        "hash": "835bc4ea7bdd262af65b4784323c469caf32ec4def8720846e419fecf695982c",
-        "size": 11999120
-      },
-      "osz/popstars.osz": {
-        "hash": "8b8ed78df9f691827da78cd575081e93319a61ebc2edaabfa0f0fc8ad722dbf6",
-        "size": 6466477
-      },
-      "osz/rise.osz": {
-        "hash": "2d70f7e62f501885a124b5a0312d8db37705ea7a3ec60a4779b0f6ed1d18d27b",
-        "size": 14242061
-      },
-      "osz/starwalkin.osz": {
-        "hash": "c97f6b31e393ed4a402739760a27c4652dc0837bd7a32975e235d02fa7d0454f",
-        "size": 6441370
-      },
-      "osz/takeover.osz": {
-        "hash": "23ea475fff25db7d21ffa6ede20a137d149f557fdccd50e167acbd7eaf7209bb",
-        "size": 3707850
-      },
-      "osz/thebaddest.osz": {
-        "hash": "52cda6f32acecef25b219d7a52a38e3c811f69feb8e3336df97d8bd4aad5226d",
-        "size": 8353729
-      },
-      "osz/villain.osz": {
-        "hash": "c5c6b6b8015cc3c7fd25c9e249fed96f80faf08b0d803ac141567fed2364f428",
-        "size": 6174861
-      },
-      "osz/warriors.osz": {
-        "hash": "acbe4d220dfaf490fcb2ad5ca075e9c814667dea58fe90b97e4cd5e83bd07bd2",
-        "size": 8897808
+      "songpacks/Xiao's Solo Beginner Pack II.zip": {
+        "hash": "d29a7343a3b520cc62290c219c1c797f70a8327b8da289dccf562b46a761777c",
+        "size": 37281370
       }
     },
     "code": {
       "main.py": {
-        "hash": "aef201e0ce1a49252570465b88062787484c90c386de3685defd493db83168c0",
-        "size": 131702
-      },
-      "osu_to_level.py": {
-        "hash": "a93d4370e3ea9d6d0f49c79e3b4d5c8bc347574500464d2680185d4695645d00",
-        "size": 5724
-      },
-      "unzip.py": {
-        "hash": "5ad3dc665f5f2000c269d3912586558be08bed2ba12459ae4106dd47c339e609",
-        "size": 1426
+        "hash": "b327f7a5f67658321cc55526e227887f090b2c78a8e331b9af05d3a08b02da74",
+        "size": 159182
       },
       "auto_updater.py": {
-        "hash": "4e2676c18caa5f8af170a56133fac73b5804ca12bd1c321e160fc556b33cc32e",
-        "size": 33666
-      },
-      "batch_process_osz.py": {
-        "hash": "ea91cd87e57ddfa1d9481b450e15a55658f8942203e89637e41760f02caf373d",
-        "size": 5350
+        "hash": "71dcf17c5100b62bc73e4472fb5ddcaa724835714fcecc4ca6341577c4ea1b61",
+        "size": 33651
       },
       "launcher.py": {
         "hash": "02703c514a897a6682e8d90f360870831ead8e4e0336e4c5e85f123d42613b66",
         "size": 24317
+      },
+      "songpack_loader.py": {
+        "hash": "03f0b2599351a6686f26fffbf90900d092155d11968be3ba7b6b36b2e2c5da4c",
+        "size": 38019
+      },
+      "songpack_ui.py": {
+        "hash": "23d50c669e2f45c4a4f1e193aed94355ed507ff13b8ad50018897a222033e65a",
+        "size": 59609
       }
     }
   },
   "patches": {
-    "from_0.6.30": {
-      "description": "Patch from 0.6.30 to 0.6.31",
+    "from_0.6.31": {
+      "description": "Patch from 0.6.31 to 0.7.0",
       "changed_files": [
+        "assets/songpacks/Xiao's Solo Beginner Pack II.zip",
         "main.py"
       ],
-      "removed_files": []
+      "removed_files": [
+        "assets/songpacks/012s Easy Pakcage.zip",
+        "assets/songpacks/10Dollar Dump Dump Revolutions 4.zip"
+      ]
     }
   },
   "rollback": {
-    "previous_version": "0.6.30",
+    "previous_version": "0.6.31",
     "can_rollback": true
   }
 }

@@ -1,19 +1,18 @@
 {
-  "music_volume": 0.17,
-  "hitsound_volume": 0.07333333333333333,
+  "music_volume": 0.17666666666666667,
+  "hitsound_volume": 0.05333333333333334,
   "hitsounds_enabled": true,
-  "scroll_speed": 234,
+  "scroll_speed": 75,
   "fade_effects": true,
   "autoplay_enabled": true,
   "keybinds": {
-    "top": 119,
-    "right": 100,
-    "bottom": 115,
-    "left": 97
-  },
-  "mouse_binds": {
-    "red": 1,
-    "blue": 3
-  },
-  "monitor_index": 1
+    "red_top": 97,
+    "red_right": 115,
+    "red_bottom": 100,
+    "red_left": 102,
+    "blue_top": 106,
+    "blue_right": 107,
+    "blue_bottom": 108,
+    "blue_left": 59
+  }
 }

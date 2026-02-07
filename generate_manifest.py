@@ -80,7 +80,7 @@ def generate_manifest(
         
         for root, dirs, files in os.walk('assets'):
             for file in files:
-                if file.endswith(('.json', '.osu', '.mp3', '.wav', '.ogg', '.jpg', '.png', '.osz', '.ico')):
+                if file.endswith(('.json', '.osu', '.mp3', '.wav', '.ogg', '.jpg', '.png', '.osz', '.ico', '.zip')):
                     file_path = os.path.join(root, file)
                     relative_path = os.path.relpath(file_path, 'assets')
                     relative_path = relative_path.replace('\\', '/')
@@ -101,11 +101,10 @@ def generate_manifest(
         manifest['files']['code'] = {}
         code_files = [
             'main.py',
-            'osu_to_level.py',
-            'unzip.py',
             'auto_updater.py',
-            'batch_process_osz.py',
-            'launcher.py'
+            'launcher.py',
+            'songpack_loader.py',
+            'songpack_ui.py',
         ]
         
         for code_file in code_files:
