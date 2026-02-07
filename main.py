@@ -37,7 +37,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.7.26"
+__version__ = "0.7.27"
 
 # Settings management
 class Settings:
@@ -1684,24 +1684,45 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         returning_from_game: If True, we're returning from game and should fade in level selector
         preloaded_metadata: Pre-loaded level metadata from loading screen
     """
+    # Debug logging
+    def log_debug(msg):
+        try:
+            log_path = os.path.join('.toa', 'songpack_debug.log') if os.path.exists('.toa') else 'songpack_debug.log'
+            with open(log_path, 'a', encoding='utf-8') as f:
+                import datetime
+                timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+                f.write(f"[{timestamp}] MAIN: {msg}\n")
+        except:
+            pass
+    
+    log_debug(f"main() called with level_json={level_json}")
+    
     if level_json is None:
+        log_debug("level_json is None, showing songpack selector")
         # Go straight to song packs
         from songpack_ui import show_songpack_selector, show_pack_levels_selector, build_pack_metadata_cache
         
         # Initialize pygame if not already
         if not pygame.get_init():
+            log_debug("Initializing pygame")
             pygame.init()
         
         screen = pygame.display.get_surface()
         if screen is None:
+            log_debug("Creating new pygame screen")
             screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
         
+        log_debug(f"Screen size: {screen.get_size()}")
+        
         while True:
+            log_debug("Calling show_songpack_selector")
             # Show song pack selector
             selected_pack = show_songpack_selector(screen, game_settings, resource_path)
+            log_debug(f"show_songpack_selector returned: {selected_pack}")
             
             if selected_pack == "QUIT" or selected_pack is None:
                 print("Exiting...")
+                log_debug("Exiting due to QUIT or None")
                 return
             elif selected_pack == "RELOAD":
                 # Reload songpacks - just break to rescan, don't restart loading screen
