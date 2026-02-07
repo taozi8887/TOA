@@ -5,6 +5,7 @@
   "scroll_speed": 75,
   "fade_effects": true,
   "autoplay_enabled": true,
+  "custom_songpack_folder": "C:/Users/edwar/Downloads/New folder (2)/imported",
   "keybinds": {
     "red_top": 97,
     "red_right": 115,
@@ -14,5 +15,6 @@
     "blue_right": 107,
     "blue_bottom": 108,
     "blue_left": 59
-  }
+  },
+  "custom_etterna_folder": "C:/Users/edwar/Downloads/New folder (2)/imported"
 }

@@ -8,6 +8,8 @@ import os
 import json
 import time
 import re
+import tkinter as tk
+from tkinter import filedialog
 from songpack_loader import scan_and_load_songpacks, convert_level_to_json
 
 # Global font cache to avoid slow SysFont calls
@@ -62,6 +64,22 @@ def wrap_text(text, font, max_width):
     
     return lines if lines else [text]
 
+def choose_folder_dialog():
+    """Show a folder picker dialog and return the selected path"""
+    # Create a hidden tkinter root window
+    root = tk.Tk()
+    root.withdraw()
+    root.attributes('-topmost', True)
+    
+    # Show folder picker dialog
+    folder_path = filedialog.askdirectory(
+        title="Select Songpack Folder",
+        mustexist=True
+    )
+    
+    root.destroy()
+    return folder_path if folder_path else None
+
 def fade_transition_out(screen, game_settings, duration=0.25):
     """Quick fade out to black"""
     if not game_settings.get('fade_effects', True):
@@ -114,7 +132,7 @@ def fade_transition_in(screen, content_func, game_settings, duration=0.25):
 def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_path=None):
     """
     Show song pack selection screen with level selector layout.
-    Returns: Selected pack info or None/QUIT
+    Returns: Selected pack info or None/QUIT or "RELOAD"
     """
     import math
     
@@ -123,10 +141,16 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
         # Default to .toa/assets/songpacks if .toa exists, otherwise assets/songpacks
         songpacks_path = os.path.join('.toa', 'assets', 'songpacks') if os.path.exists('.toa') else os.path.join('assets', 'songpacks')
     
+    # User import folder
+    import_path = os.path.join('.toa', 'import') if os.path.exists('.toa') else 'import'
+    
+    # User's custom folder from settings
+    custom_folder = game_settings.get('custom_songpack_folder')
+    
     # Extracted songpacks go to .toa/songpacks/extracted or songpacks/extracted
     extracted_path = os.path.join('.toa', 'songpacks', 'extracted') if os.path.exists('.toa') else os.path.join('songpacks', 'extracted')
     
-    packs = scan_and_load_songpacks(songpacks_path, extracted_path)
+    packs = scan_and_load_songpacks(songpacks_path, extracted_path, import_path, custom_folder)
     
     if not packs:
         print("No song packs found!")
@@ -139,37 +163,52 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
     valid_level_patterns = set()
     
     for pack in packs:
-        print(f"Pre-loading metadata for {pack['pack_name']}...")
-        
-        # First, ensure all levels are converted to JSON
-        print(f"  Checking {len(pack['levels'])} levels...")
-        all_level_files = set()
-        if os.path.exists(levels_dir):
-            all_level_files = set(os.listdir(levels_dir))
-        
-        for level_info in pack['levels']:
-            folder_name = level_info['name']
-            safe_pattern = re.sub(r'[^\w\s-]', '', folder_name).strip().replace(' ', '_')
-            valid_level_patterns.add(safe_pattern.lower())
+        try:
+            # Skip metadata loading if already cached (e.g., from loading screen)
+            if 'metadata_cache' in pack and pack['metadata_cache']:
+                print(f"Pack {pack['pack_name']} already has cached metadata, skipping...")
+                continue
+                
+            print(f"Pre-loading metadata for {pack['pack_name']}...")
             
-            # Check if JSONs exist for this level
-            existing = False
-            for file in all_level_files:
-                if file.lower().endswith('.json'):
-                    json_name_base = os.path.splitext(file)[0]
-                    if json_name_base.lower().startswith(safe_pattern.lower() + '_'):
-                        existing = True
-                        break
+            # First, ensure all levels are converted to JSON
+            print(f"  Checking {len(pack['levels'])} levels...")
+            all_level_files = set()
+            if os.path.exists(levels_dir):
+                all_level_files = set(os.listdir(levels_dir))
             
-            # Convert if missing
-            if not existing:
-                print(f"    Converting {level_info['name']}...")
-                created = convert_level_to_json(level_info, output_dir=levels_dir)
-                for created_path in created:
-                    all_level_files.add(os.path.basename(created_path))
-        
-        # Now build metadata cache from all JSONs
-        pack['metadata_cache'] = build_pack_metadata_cache(pack, levels_dir)
+            for level_info in pack['levels']:
+                folder_name = level_info['name']
+                safe_pattern = re.sub(r'[^\w\s-]', '', folder_name).strip().replace(' ', '_')
+                valid_level_patterns.add(safe_pattern.lower())
+                
+                # Check if JSONs exist for this level
+                existing = False
+                for file in all_level_files:
+                    if file.lower().endswith('.json'):
+                        json_name_base = os.path.splitext(file)[0]
+                        if json_name_base.lower().startswith(safe_pattern.lower() + '_'):
+                            existing = True
+                            break
+                
+                # Convert if missing
+                if not existing:
+                    print(f"    Converting {level_info['name']}...")
+                    try:
+                        created = convert_level_to_json(level_info, output_dir=levels_dir)
+                        for created_path in created:
+                            all_level_files.add(os.path.basename(created_path))
+                    except Exception as e:
+                        print(f"    ERROR converting {level_info['name']}: {e}")
+                        continue
+            
+            # Now build metadata cache from all JSONs
+            pack['metadata_cache'] = build_pack_metadata_cache(pack, levels_dir)
+        except Exception as e:
+            print(f"ERROR processing pack {pack['pack_name']}: {e}")
+            import traceback
+            traceback.print_exc()
+            continue
         
         # Pre-build COMPLETE level_metadata list for instant loading
         pack['level_metadata_full'] = []
@@ -244,15 +283,22 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
         if deleted_count > 0:
             print(f"Cleaned up {deleted_count} old level file(s)")
     
-    window_width, window_height = screen.get_size()
-    clock = pygame.time.Clock()
-    
-    # Use cached fonts for instant loading
-    font_title = get_cached_font(['meiryo', 'msgothic', 'yugothic', 'arial'], 48)
-    font_pack_name = get_cached_font(['meiryo', 'msgothic', 'yugothic', 'arial'], 32)
-    font_stats = get_cached_font(['meiryo', 'msgothic', 'yugothic', 'arial'], 22)
-    font_hint = get_cached_font(['meiryo', 'msgothic', 'yugothic', 'arial'], 24)
-    font_level_name = get_cached_font(['meiryo', 'msgothic', 'yugothic', 'arial'], 20)
+    try:
+        print("Setting up songpack selector UI...")
+        window_width, window_height = screen.get_size()
+        clock = pygame.time.Clock()
+        
+        # Use cached fonts for instant loading
+        font_title = get_cached_font(['meiryo', 'msgothic', 'yugothic', 'arial'], 48)
+        font_pack_name = get_cached_font(['meiryo', 'msgothic', 'yugothic', 'arial'], 32)
+        font_stats = get_cached_font(['meiryo', 'msgothic', 'yugothic', 'arial'], 22)
+        font_hint = get_cached_font(['meiryo', 'msgothic', 'yugothic', 'arial'], 24)
+        font_level_name = get_cached_font(['meiryo', 'msgothic', 'yugothic', 'arial'], 20)
+    except Exception as e:
+        print(f"ERROR in songpack selector UI setup: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
     
     # Colors
     WHITE = (255, 255, 255)
@@ -288,9 +334,19 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
 
     hovered_index = None
     selected_pack = None
+    import_button_hovered = False
+    
+    # Import button setup
+    button_font = get_cached_font(['meiryo', 'msgothic', 'yugothic', 'arial'], 24)
+    button_width = 240
+    button_height = 50
+    button_x = info_panel_x + 20
+    button_y = window_height - 90
+    import_button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
     
     while selected_pack is None:
         mouse_pos = pygame.mouse.get_pos()
+        import_button_hovered = import_button_rect.collidepoint(mouse_pos)
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -308,7 +364,17 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
                 scroll_offset = max(0, min(max_scroll, scroll_offset - event.y * scroll_speed))
             
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if mouse_pos[0] < list_width:
+                # Check import button click first
+                if import_button_rect.collidepoint(mouse_pos):
+                    # Show folder picker dialog
+                    folder_path = choose_folder_dialog()
+                    if folder_path:
+                        # Save to settings
+                        game_settings.set('custom_songpack_folder', folder_path)
+                        print(f"Custom songpack folder set to: {folder_path}")
+                        # Return signal to reload
+                        return "RELOAD"
+                elif mouse_pos[0] < list_width:
                     mouse_down_pos = mouse_pos
                     mouse_down_y = mouse_pos[1]
                     item_dragging = False
@@ -635,6 +701,25 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
                         screen.blit(img_scaled, (img_x, img_y))
                 except:
                     pass
+        
+        # Draw import button
+        button_color = (80, 180, 80) if import_button_hovered else (60, 140, 60)
+        button_border_color = (120, 220, 120) if import_button_hovered else (100, 180, 100)
+        
+        pygame.draw.rect(screen, button_color, import_button_rect, border_radius=8)
+        pygame.draw.rect(screen, button_border_color, import_button_rect, 2, border_radius=8)
+        
+        button_text = button_font.render("Set Folder", True, WHITE)
+        button_text_rect = button_text.get_rect(center=import_button_rect.center)
+        screen.blit(button_text, button_text_rect)
+        
+        # Add a small info text under the button
+        if game_settings.get('custom_songpack_folder'):
+            info_text = font_hint.render("Custom folder set", True, GREEN)
+        else:
+            info_text = font_hint.render("Choose songpack folder", True, GRAY)
+        info_text_rect = info_text.get_rect(midtop=(import_button_rect.centerx, import_button_rect.bottom + 5))
+        screen.blit(info_text, info_text_rect)
         
         pygame.display.flip()
         clock.tick(60)
@@ -1002,9 +1087,19 @@ def show_pack_levels_selector(screen, pack_info, game_settings, resource_path_fu
 
     hovered_index = None
     selected_level = None
+    import_button_hovered = False
+    
+    # Import button setup (same position as in songpack selector)
+    button_font = get_cached_font(['meiryo', 'msgothic', 'yugothic', 'arial'], 24)
+    button_width = 240
+    button_height = 50
+    button_x = info_panel_x + 20
+    button_y = window_height - 90
+    import_button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
     
     while selected_level is None:
         mouse_pos = pygame.mouse.get_pos()
+        import_button_hovered = import_button_rect.collidepoint(mouse_pos)
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -1022,6 +1117,17 @@ def show_pack_levels_selector(screen, pack_info, game_settings, resource_path_fu
                 scroll_offset = max(0, min(max_scroll, scroll_offset - event.y * scroll_speed))
             
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                # Check import button click first
+                if import_button_rect.collidepoint(mouse_pos):
+                    # Show folder picker dialog
+                    folder_path = choose_folder_dialog()
+                    if folder_path:
+                        # Save to settings
+                        game_settings.set('custom_songpack_folder', folder_path)
+                        print(f"Custom songpack folder set to: {folder_path}")
+                        # Return signal to reload
+                        return "RELOAD"
+                
                 viewport_rect = pygame.Rect(0, list_start_y, window_width, available_height)
                 if viewport_rect.collidepoint(mouse_pos):
                     mouse_down_pos = mouse_pos
@@ -1368,6 +1474,26 @@ def show_pack_levels_selector(screen, pack_info, game_settings, resource_path_fu
                     screen.blit(bg_preview, (preview_x, info_y + 10))
                 except:
                     pass
+        
+        # Draw import button (same as in songpack selector)
+        button_color = (80, 180, 80) if import_button_hovered else (60, 140, 60)
+        button_border_color = (120, 220, 120) if import_button_hovered else (100, 180, 100)
+        GREEN = (112, 255, 148)
+        
+        pygame.draw.rect(screen, button_color, import_button_rect, border_radius=8)
+        pygame.draw.rect(screen, button_border_color, import_button_rect, 2, border_radius=8)
+        
+        button_text = button_font.render("Set Folder", True, WHITE)
+        button_text_rect = button_text.get_rect(center=import_button_rect.center)
+        screen.blit(button_text, button_text_rect)
+        
+        # Add a small info text under the button
+        if game_settings.get('custom_songpack_folder'):
+            info_text = font_hint.render("Custom folder set", True, GREEN)
+        else:
+            info_text = font_hint.render("Choose songpack folder", True, GRAY)
+        info_text_rect = info_text.get_rect(midtop=(import_button_rect.centerx, import_button_rect.bottom + 5))
+        screen.blit(info_text, info_text_rect)
         
         pygame.display.flip()
         clock.tick(60)

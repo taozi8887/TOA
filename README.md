@@ -49,6 +49,50 @@ The game will:
 - **P** - Pause/Resume
 - **ESC (double press)** - Return to level selector
 
+## Importing Custom Songpacks
+
+TOA supports Etterna/StepMania songpacks in ZIP format! You have two ways to import custom songpacks:
+
+### Method 1: Import Folder (Recommended)
+Simply drop your songpack ZIPs into the `import/` folder:
+
+1. **Place ZIPs in `import/` folder**
+2. **Start the game** - it will automatically scan and process them
+3. **Your packs appear** as separate songpacks in the selector
+
+### Method 2: Choose Custom Folder
+You can select any folder on your computer to load songpacks from:
+
+1. **In the songpack or level selector, click "Set Folder"**
+2. **Browse to your songpack folder** (where you keep your ZIPs)
+3. **Confirm** - the game will reload and scan that folder
+4. **All ZIPs in that folder** will appear as separate songpacks
+
+Both methods work together - songpacks from `import/`, your custom folder, and the game's built-in packs all appear in the same selector!
+
+### Supported Formats
+- Etterna/StepMania songpacks (.zip files)
+- Chart formats: `.sm`, `.ssc`, `.dwi`
+- Audio formats: `.mp3`, `.ogg`, `.wav`, `.flac`
+
+### How It Works
+- On startup, the game scans all configured folders
+- ZIP files are automatically extracted and converted
+- New maps added while the game is closed will be imported on next launch
+- Each ZIP becomes its own separate songpack
+- All packs work seamlessly with full metadata, previews, and gameplay features
+
+### Example Structure
+```
+toa/
+├── import/              # Drop ZIPs here
+│   ├── Pack1.zip
+│   └── Pack2.zip
+└── [Custom Folder]      # Set via "Set Folder" button
+    ├── MorePacks.zip
+    └── EvenMore.zip
+```
+
 ## Creating Custom Levels
 
 ### Method 1: From osu! Beatmaps (.osz files)

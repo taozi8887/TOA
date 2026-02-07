@@ -37,7 +37,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.7.23"
+__version__ = "0.7.24"
 
 # Settings management
 class Settings:
@@ -50,6 +50,7 @@ class Settings:
         'scroll_speed': 75,
         'fade_effects': True,
         'autoplay_enabled': False,  # Debug feature - toggle with Ctrl+P
+        'custom_songpack_folder': None,  # User's custom songpack folder
         'keybinds': {
             # Red keys (WASD by default)
             'red_top': pygame.K_w,
@@ -308,10 +309,16 @@ def show_loading_screen():
     # Songpacks are in assets/songpacks/ (or .toa/assets/songpacks/ when running from exe)
     songpacks_path = os.path.join('.toa', 'assets', 'songpacks') if os.path.exists('.toa') else os.path.join('assets', 'songpacks')
     
+    # User import folder for custom songpacks
+    import_path = os.path.join('.toa', 'import') if os.path.exists('.toa') else 'import'
+    
+    # User's custom songpack folder from settings
+    custom_folder = game_settings.get('custom_songpack_folder')
+    
     # Extracted songpacks go to .toa/songpacks/extracted or songpacks/extracted
     extracted_path = os.path.join('.toa', 'songpacks', 'extracted') if os.path.exists('.toa') else os.path.join('songpacks', 'extracted')
     
-    packs = scan_and_load_songpacks(songpacks_path, extracted_path)
+    packs = scan_and_load_songpacks(songpacks_path, extracted_path, import_path, custom_folder)
     
     # Cache for level metadata
     level_metadata_cache = {}
@@ -1699,6 +1706,18 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
             if selected_pack == "QUIT" or selected_pack is None:
                 print("Exiting...")
                 return
+            elif selected_pack == "RELOAD":
+                # Reload songpacks - just break to rescan, don't restart loading screen
+                print("Reloading songpacks...")
+                # Clear the screen and show a brief message
+                screen.fill((0, 0, 0))
+                font = pygame.font.SysFont(['arial'], 36)
+                text = font.render("Rescanning songpacks... Please wait", True, (255, 255, 255))
+                text_rect = text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+                screen.blit(text, text_rect)
+                pygame.display.flip()
+                # Continue loop to reload selector with new packs
+                continue
             
             # Use pre-loaded metadata cache for instant loading
             metadata_cache = selected_pack.get('metadata_cache', None)
@@ -1708,6 +1727,17 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
             
             if level_json == "QUIT":
                 return
+            elif level_json == "RELOAD":
+                # Reload songpacks - break to outer loop to rescan
+                print("Reloading songpacks from level selector...")
+                screen.fill((0, 0, 0))
+                font = pygame.font.SysFont(['arial'], 36)
+                text = font.render("Rescanning songpacks... Please wait", True, (255, 255, 255))
+                text_rect = text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+                screen.blit(text, text_rect)
+                pygame.display.flip()
+                # Continue outer loop to reload pack selector
+                continue
             elif level_json is not None:
                 # Level selected, break and continue to game
                 break

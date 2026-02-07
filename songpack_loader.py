@@ -917,25 +917,26 @@ def convert_level_to_json(level_info, output_dir='levels'):
     
     return created_files
 
-def scan_and_load_songpacks(songpacks_dir='songpacks', extract_to=None):
+def scan_and_load_songpacks(songpacks_dir='songpacks', extract_to=None, import_dir=None, custom_dir=None):
     """
-    Scan the songpacks directory and load all ZIP files.
+    Scan multiple directories for songpack ZIP files.
     
     Args:
         songpacks_dir: Directory containing .zip songpack files
         extract_to: Directory to extract songpacks to (must be specified explicitly)
+        import_dir: Optional import directory for user songpacks
+        custom_dir: Optional custom directory selected by user
     
     Returns: List of pack info dicts
     """
-    if not os.path.exists(songpacks_dir):
-        return []
+    packs = []
     
     if extract_to is None:
         # Default: if songpacks_dir contains '.toa', put extracted in .toa/songpacks/extracted
         # Otherwise put in songpacks/extracted
-        if '.toa' in songpacks_dir:
+        if '.toa' in str(songpacks_dir):
             # Extract .toa prefix
-            if songpacks_dir.startswith('.toa'):
+            if str(songpacks_dir).startswith('.toa'):
                 extract_to = os.path.join('.toa', 'songpacks', 'extracted')
             else:
                 # Handle case where full path contains .toa
@@ -943,17 +944,25 @@ def scan_and_load_songpacks(songpacks_dir='songpacks', extract_to=None):
         else:
             extract_to = 'songpacks/extracted'
     
-    packs = []
+    # Scan directories to check
+    dirs_to_scan = []
+    if os.path.exists(songpacks_dir):
+        dirs_to_scan.append(songpacks_dir)
+    if import_dir and os.path.exists(import_dir):
+        dirs_to_scan.append(import_dir)
+    if custom_dir and os.path.exists(custom_dir):
+        dirs_to_scan.append(custom_dir)
     
-    for file in os.listdir(songpacks_dir):
-        if file.lower().endswith('.zip'):
-            zip_path = os.path.join(songpacks_dir, file)
-            try:
-                pack_info = extract_songpack(zip_path, extract_to=extract_to)
-                packs.append(pack_info)
-                print(f"Loaded pack: {pack_info['pack_name']} ({len(pack_info['levels'])} levels)")
-            except Exception as e:
-                print(f"Error loading {file}: {e}")
+    for scan_dir in dirs_to_scan:
+        for file in os.listdir(scan_dir):
+            if file.lower().endswith('.zip'):
+                zip_path = os.path.join(scan_dir, file)
+                try:
+                    pack_info = extract_songpack(zip_path, extract_to=extract_to)
+                    packs.append(pack_info)
+                    print(f"Loaded pack: {pack_info['pack_name']} ({len(pack_info['levels'])} levels)")
+                except Exception as e:
+                    print(f"Error loading {file}: {e}")
     
     return packs
 

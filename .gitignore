@@ -71,10 +71,16 @@ separated/
 deprecatedlevels/
 *.mp3
 assets/oldosz/
+songpacks/
 
 # Beatmaps and levels are generated from .osz files, don't commit them
 beatmaps/
 levels/
+
+# Import folder - users' custom songpacks
+import/*.zip
+import/*/
+!import/README.txt
 
 # Build outputs
 dist/
