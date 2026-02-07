@@ -123,7 +123,10 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
         # Default to .toa/assets/songpacks if .toa exists, otherwise assets/songpacks
         songpacks_path = os.path.join('.toa', 'assets', 'songpacks') if os.path.exists('.toa') else os.path.join('assets', 'songpacks')
     
-    packs = scan_and_load_songpacks(songpacks_path)
+    # Extracted songpacks go to .toa/songpacks/extracted or songpacks/extracted
+    extracted_path = os.path.join('.toa', 'songpacks', 'extracted') if os.path.exists('.toa') else os.path.join('songpacks', 'extracted')
+    
+    packs = scan_and_load_songpacks(songpacks_path, extracted_path)
     
     if not packs:
         print("No song packs found!")

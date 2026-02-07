@@ -914,14 +914,21 @@ def convert_level_to_json(level_info, output_dir='levels'):
     
     return created_files
 
-def scan_and_load_songpacks(songpacks_dir='songpacks'):
+def scan_and_load_songpacks(songpacks_dir='songpacks', extract_to=None):
     """
     Scan the songpacks directory and load all ZIP files.
+    
+    Args:
+        songpacks_dir: Directory containing .zip songpack files
+        extract_to: Directory to extract songpacks to (defaults to songpacks_dir/../extracted)
     
     Returns: List of pack info dicts
     """
     if not os.path.exists(songpacks_dir):
         return []
+    
+    if extract_to is None:
+        extract_to = os.path.join(os.path.dirname(songpacks_dir), 'songpacks', 'extracted')
     
     packs = []
     
@@ -929,7 +936,7 @@ def scan_and_load_songpacks(songpacks_dir='songpacks'):
         if file.lower().endswith('.zip'):
             zip_path = os.path.join(songpacks_dir, file)
             try:
-                pack_info = extract_songpack(zip_path)
+                pack_info = extract_songpack(zip_path, extract_to=extract_to)
                 packs.append(pack_info)
                 print(f"Loaded pack: {pack_info['pack_name']} ({len(pack_info['levels'])} levels)")
             except Exception as e:
