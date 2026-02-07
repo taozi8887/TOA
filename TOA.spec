@@ -23,7 +23,9 @@ a = Analysis(
         'pygame.gfxdraw',
         'wave',
         'songpack_loader',
-        'songpack_ui'
+        'songpack_ui',
+        'tkinter',
+        'tkinter.filedialog'
     ],
     hookspath=[],
     hooksconfig={},

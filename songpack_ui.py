@@ -8,6 +8,8 @@ import os
 import json
 import time
 import re
+import tkinter as tk
+from tkinter import filedialog
 from songpack_loader import scan_and_load_songpacks, convert_level_to_json
 
 # Global font cache to avoid slow SysFont calls
@@ -63,66 +65,20 @@ def wrap_text(text, font, max_width):
     return lines if lines else [text]
 
 def choose_folder_dialog():
-    """Show a folder picker dialog and return the selected path (Windows-native)"""
-    try:
-        import ctypes
-        from ctypes import wintypes
-        
-        # Windows shell32 API for folder picker
-        class BROWSEINFO(ctypes.Structure):
-            _fields_ = [
-                ('hwndOwner', wintypes.HWND),
-                ('pidlRoot', wintypes.LPVOID),
-                ('pszDisplayName', wintypes.LPWSTR),
-                ('lpszTitle', wintypes.LPCWSTR),
-                ('ulFlags', wintypes.UINT),
-                ('lpfn', wintypes.LPVOID),
-                ('lParam', wintypes.LPARAM),
-                ('iImage', ctypes.c_int)
-            ]
-        
-        # Constants for folder browser
-        BIF_RETURNONLYFSDIRS = 0x0001
-        BIF_NEWDIALOGSTYLE = 0x0040
-        
-        shell32 = ctypes.windll.shell32
-        ole32 = ctypes.windll.ole32
-        
-        # Initialize COM
-        ole32.CoInitialize(None)
-        
-        # Setup browse info
-        bi = BROWSEINFO()
-        bi.hwndOwner = None
-        bi.pidlRoot = None
-        bi.pszDisplayName = ctypes.create_unicode_buffer(260)
-        bi.lpszTitle = "Select Songpack Folder"
-        bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE
-        bi.lpfn = None
-        bi.lParam = 0
-        bi.iImage = 0
-        
-        # Show dialog
-        pidl = shell32.SHBrowseForFolderW(ctypes.byref(bi))
-        
-        if pidl:
-            # Get path from pidl
-            path_buffer = ctypes.create_unicode_buffer(260)
-            shell32.SHGetPathFromIDListW(pidl, path_buffer)
-            
-            # Free pidl
-            ole32.CoTaskMemFree(pidl)
-            ole32.CoUninitialize()
-            
-            path = path_buffer.value
-            return path if path else None
-        else:
-            ole32.CoUninitialize()
-            return None
-            
-    except Exception as e:
-        print(f"Error showing folder dialog: {e}")
-        return None
+    """Show a folder picker dialog and return the selected path"""
+    # Create a hidden tkinter root window
+    root = tk.Tk()
+    root.withdraw()
+    root.attributes('-topmost', True)
+    
+    # Show folder picker dialog
+    folder_path = filedialog.askdirectory(
+        title="Select Songpack Folder",
+        mustexist=True
+    )
+    
+    root.destroy()
+    return folder_path if folder_path else None
 
 def fade_transition_out(screen, game_settings, duration=0.25):
     """Quick fade out to black"""
