@@ -40,7 +40,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.7.10"
+__version__ = "0.7.11"
 
 # Settings management
 class Settings:
@@ -1889,16 +1889,26 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                     # Check if path is absolute - if so, use directly without resource_path
                     if os.path.isabs(audio_file_path) and os.path.exists(audio_file_path):
                         audio_dir = os.path.dirname(audio_file_path)
-                    # Otherwise treat as relative path
+                    # Try with resource_path
                     elif os.path.exists(resource_path(audio_file_path)):
                         audio_dir = os.path.dirname(resource_path(audio_file_path))
+                    # Fix old relative paths missing .toa prefix (e.g., "songpacks/extracted/..." -> ".toa/songpacks/extracted/...")
+                    elif audio_file_path.startswith('songpacks/') or audio_file_path.startswith('songpacks\\\\'):
+                        fixed_path = os.path.join('.toa', audio_file_path)
+                        if os.path.exists(resource_path(fixed_path)):
+                            audio_dir = os.path.dirname(resource_path(fixed_path))
+                        else:
+                            # Still can't find it - delete this JSON and it will be regenerated
+                            print(f"Invalid audio path in {level_json}, deleting to force regeneration")
+                            os.remove(level_json)
+                            return None
                     else:
-                        # Fallback to traditional beatmap structure
-                        level_filename = os.path.basename(level_json)
-                        beatmap_name = level_filename.replace('.json', '').split('_')[0]
-                        audio_dir = f"beatmaps/{beatmap_name}"
+                        # Can't find audio file - delete this JSON and it will be regenerated
+                        print(f"Audio file not found for {level_json}, deleting to force regeneration")
+                        os.remove(level_json)
+                        return None
                 else:
-                    # Fallback to traditional beatmap structure
+                    # No audio_file in metadata - fallback to traditional beatmap structure
                     level_filename = os.path.basename(level_json)
                     beatmap_name = level_filename.replace('.json', '').split('_')[0]
                     audio_dir = f"beatmaps/{beatmap_name}"

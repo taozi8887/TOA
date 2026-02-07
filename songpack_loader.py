@@ -671,6 +671,9 @@ def extract_songpack(zip_path, extract_to='songpacks/extracted'):
     
     Returns: Dict with pack info and list of level folders
     """
+    # Convert to absolute path to ensure consistent path storage
+    extract_to = os.path.abspath(extract_to)
+    
     pack_name = Path(zip_path).stem
     pack_dir = os.path.join(extract_to, pack_name)
     
