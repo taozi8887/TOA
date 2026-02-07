@@ -47,8 +47,8 @@
     },
     "code": {
       "main.py": {
-        "hash": "317f1dde9194be41f55afff2d85d126d0bedefac5282f23d06e0333043cb7cf8",
-        "size": 161951
+        "hash": "ddca59ed147c9fb799ea3711f6f62ff7f5ad28b3b7d53a0a27e740a4fafecad2",
+        "size": 162325
       },
       "auto_updater.py": {
         "hash": "3a1ee33ef885cd5a8b80d9a330c6b0778bb5ac1ba53da278f449ab12121a3937",
@@ -68,7 +68,15 @@
       }
     }
   },
-  "patches": {},
+  "patches": {
+    "from_0.7.28": {
+      "description": "Patch from 0.7.28 to 0.7.28",
+      "changed_files": [
+        "main.py"
+      ],
+      "removed_files": []
+    }
+  },
   "rollback": {
     "previous_version": "0.7.28",
     "can_rollback": true
