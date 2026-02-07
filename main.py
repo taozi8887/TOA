@@ -12,7 +12,8 @@ if os.name == 'nt':  # Windows
     import msvcrt
     import ctypes
     # Redirect stderr file descriptor to NUL
-    sys.stderr.flush()
+    if sys.stderr is not None:
+        sys.stderr.flush()
     newstderr = os.open(os.devnull, os.O_WRONLY)
     os.dup2(newstderr, 2)
     os.close(newstderr)
@@ -39,7 +40,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.7.0"
+__version__ = "0.7.1"
 
 # Settings management
 class Settings:

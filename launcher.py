@@ -524,7 +524,10 @@ def main():
         print(f"Error starting game: {e}")
         import traceback
         traceback.print_exc()
-        input("Press Enter to exit...")
+        if sys.stdin is not None:
+            input("Press Enter to exit...")
+        else:
+            time.sleep(5)  # Give user time to see error
         sys.exit(1)
 
 if __name__ == "__main__":
