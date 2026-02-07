@@ -37,7 +37,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.7.31"
+__version__ = "0.7.32"
 
 # Settings management
 class Settings:
@@ -3482,17 +3482,6 @@ if __name__ == "__main__":
 
     if preloaded_metadata is None:
         preloaded_metadata = {}  # Empty dict is fine now
-    
-    # Show main menu to choose between levels and song packs
-    log_debug("Calling show_main_menu()")
-    menu_choice = show_main_menu(fade_in_start=True)
-    log_debug(f"show_main_menu() returned: {menu_choice}")
-    
-    if menu_choice == "QUIT" or menu_choice is None:
-        log_debug("User chose to quit from main menu")
-        pygame.display.quit()
-        pygame.quit()
-        sys.exit()
 
     returning = False
     last_level = None
