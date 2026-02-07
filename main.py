@@ -40,7 +40,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.7.17"
+__version__ = "0.7.18"
 
 # Settings management
 class Settings:
@@ -1982,7 +1982,13 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     total_notes = 0
     accuracy_window = 0.15
 
-    with open(resource_path(level_json), "r") as f:
+    # Handle both absolute and relative paths
+    if os.path.isabs(level_json):
+        level_path = level_json
+    else:
+        level_path = resource_path(level_json)
+    
+    with open(level_path, "r") as f:
         level_data = json.load(f)
 
     level = []
@@ -3583,6 +3589,7 @@ if __name__ == "__main__":
     pygame.display.quit()
     pygame.quit()
     sys.exit()
+
 
 
 
