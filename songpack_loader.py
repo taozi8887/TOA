@@ -921,7 +921,6 @@ def scan_and_load_songpacks(songpacks_dir='songpacks'):
     Returns: List of pack info dicts
     """
     if not os.path.exists(songpacks_dir):
-        os.makedirs(songpacks_dir)
         return []
     
     packs = []

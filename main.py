@@ -40,7 +40,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.7.5"
+__version__ = "0.7.6"
 
 # Settings management
 class Settings:
@@ -538,6 +538,19 @@ def show_loading_screen():
     # Cache for level metadata
     level_metadata_cache = {}
     
+    # Use .toa/levels when running from exe
+    levels_dir = os.path.join('.toa', 'levels') if os.path.exists('.toa') else 'levels'
+    os.makedirs(levels_dir, exist_ok=True)
+    
+    # Track which levels are valid from current songpacks
+    valid_level_names = set()
+    if packs:
+        for pack in packs:
+            for level_info in pack['levels']:
+                import re
+                safe_name = re.sub(r'[^\w\s-]', '', level_info['name']).strip().replace(' ', '_')
+                valid_level_names.add(safe_name)
+    
     if packs:
         total_levels = sum(len(pack['levels']) for pack in packs)
         converted_count = 0
@@ -549,17 +562,17 @@ def show_loading_screen():
                 import re
                 safe_name = re.sub(r'[^\w\s-]', '', level_info['name']).strip().replace(' ', '_')
                 existing_jsons = []
-                if os.path.exists('levels'):
-                    for file in os.listdir('levels'):
+                if os.path.exists(levels_dir):
+                    for file in os.listdir(levels_dir):
                         if file.startswith(safe_name) and file.endswith('.json'):
-                            existing_jsons.append(os.path.join('levels', file))
+                            existing_jsons.append(os.path.join(levels_dir, file))
                 
                 # Convert if not already done
                 if not existing_jsons:
                     progress = converted_count / total_levels if total_levels > 0 else 0
                     update_loading_screen(f"Loading {pack_name}: {level_info['name']}", progress)
                     try:
-                        created_jsons = convert_level_to_json(level_info)
+                        created_jsons = convert_level_to_json(level_info, output_dir=levels_dir)
                         existing_jsons.extend(created_jsons)
                     except Exception as e:
                         print(f"Error converting {level_info['name']}: {e}")
@@ -570,6 +583,10 @@ def show_loading_screen():
                         with open(json_path, 'r', encoding='utf-8') as f:
                             data = json.load(f)
                             meta = data.get('meta', {})
+                            
+                            # Skip if missing required fields (old/invalid JSON)
+                            if not meta.get('title') or not meta.get('audio_file'):
+                                continue
                             level_notes = data.get('level', [])
                             
                             # Calculate NPS range
