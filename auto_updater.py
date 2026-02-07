@@ -269,8 +269,8 @@ class AutoUpdater:
                     print(f"FAILED to download: {file_path}")
                     failed_files.append(file_path)
                 else:
-                    log(f"  ✓ Successfully downloaded: {file_path}")
-                    print(f"✓ Downloaded: {file_path}")
+                    log(f"  [OK] Successfully downloaded: {file_path}")
+                    print(f"[OK] Downloaded: {file_path}")
                 
                 time.sleep(0.1)
             
@@ -278,8 +278,8 @@ class AutoUpdater:
             if len(failed_files) == 0:
                 log("All files downloaded successfully, updating manifest...")
                 self._update_local_manifest(remote_manifest)
-                print("✓ Updated local manifest")
-                log("✓ Manifest updated")
+                print("[OK] Updated local manifest")
+                log("[OK] Manifest updated")
                 
                 # Download config files if initial install
                 if is_initial_download:
@@ -291,7 +291,7 @@ class AutoUpdater:
                             if response.status_code == 200:
                                 with open(os.path.join(data_folder, config_file), 'wb') as f:
                                     f.write(response.content)
-                                log(f"  ✓ Downloaded {config_file}")
+                                log(f"  [OK] Downloaded {config_file}")
                         except Exception as e:
                             log(f"  Failed to download {config_file}: {e}")
             else:
@@ -659,7 +659,7 @@ class AutoUpdater:
             success = self._download_file_chunked(file_path, data_folder, expected_hash, progress_callback)
             
             if success:
-                print(f"✓ Repaired {file_path}")
+                print(f"[OK] Repaired {file_path}")
             
             return success
         except Exception as e:

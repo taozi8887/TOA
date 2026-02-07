@@ -497,9 +497,6 @@ def main():
             import multiprocessing
             multiprocessing.freeze_support()
             
-            # Initialize levels/beatmaps from .osz files if needed
-            game_main.initialize_levels_from_osz()
-            
             game_main.REGENERATE_LEVEL = False
             
             preloaded_metadata = game_main.show_loading_screen()
