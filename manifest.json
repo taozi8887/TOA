@@ -51,12 +51,12 @@
         "size": 157760
       },
       "auto_updater.py": {
-        "hash": "e86c8fe0aee98443db44d8e2e7f427953b8bf38b6e713728c7642ca96210885d",
-        "size": 33627
+        "hash": "3a1ee33ef885cd5a8b80d9a330c6b0778bb5ac1ba53da278f449ab12121a3937",
+        "size": 33633
       },
       "launcher.py": {
-        "hash": "9719b2ecaf4a3b964fe8338df5c3ba6ee3e8958673799d21f82f933472a492a7",
-        "size": 24430
+        "hash": "6a0effcc8c2646132d573e78a4c2edf1c501349b5bc093f555abe1af74422146",
+        "size": 24296
       },
       "songpack_loader.py": {
         "hash": "f3e57ee4d8c4499b630a2b2664363609407fef729b15c75f6e7ad954c8c364a3",
@@ -69,10 +69,9 @@
     }
   },
   "patches": {
-    "from_0.7.20": {
-      "description": "Patch from 0.7.20 to 0.7.21",
+    "from_0.7.21": {
+      "description": "Patch from 0.7.21 to 0.7.21",
       "changed_files": [
-        "main.py",
         "auto_updater.py",
         "launcher.py"
       ],
@@ -80,7 +79,7 @@
     }
   },
   "rollback": {
-    "previous_version": "0.7.20",
+    "previous_version": "0.7.21",
     "can_rollback": true
   }
 }
