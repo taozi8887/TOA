@@ -1,5 +1,5 @@
 {
-  "version": "0.7.0",
+  "version": "0.7.1",
   "release_date": "2026-02-07",
   "manifest_version": 1,
   "files": {
@@ -47,16 +47,16 @@
     },
     "code": {
       "main.py": {
-        "hash": "b327f7a5f67658321cc55526e227887f090b2c78a8e331b9af05d3a08b02da74",
-        "size": 159182
+        "hash": "c1d829ad6c853ab1b4bc887bb4e11634e4636083538db2440fbc26651b491968",
+        "size": 159218
       },
       "auto_updater.py": {
         "hash": "71dcf17c5100b62bc73e4472fb5ddcaa724835714fcecc4ca6341577c4ea1b61",
         "size": 33651
       },
       "launcher.py": {
-        "hash": "02703c514a897a6682e8d90f360870831ead8e4e0336e4c5e85f123d42613b66",
-        "size": 24317
+        "hash": "91008f6050570655d818628dd4575b9665247a6f7f11ee9a831b7b4e4c6f524e",
+        "size": 24429
       },
       "songpack_loader.py": {
         "hash": "03f0b2599351a6686f26fffbf90900d092155d11968be3ba7b6b36b2e2c5da4c",
@@ -68,7 +68,16 @@
       }
     }
   },
-  "patches": {},
+  "patches": {
+    "from_0.7.0": {
+      "description": "Patch from 0.7.0 to 0.7.1",
+      "changed_files": [
+        "main.py",
+        "launcher.py"
+      ],
+      "removed_files": []
+    }
+  },
   "rollback": {
     "previous_version": "0.7.0",
     "can_rollback": true
