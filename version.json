@@ -1,5 +1,5 @@
 {
-  "version": "0.7.18",
+  "version": "0.7.19",
   "files": {
     "assets": {
       "box.jpg": "40ed857c173a25d0d9ed4b3f6dffb6ac38641bb729b7dcd52bf5a32196871095",
@@ -14,7 +14,7 @@
       "songpacks/Piano Minipack of Elegance.zip": "98f45ed53ba948375ca656e4b7d0370ecf8a97437cb700d74aba877a0ce92821"
     },
     "code": {
-      "main.py": "359d314e3c115a70cea5aed51571c01f049d4a2481bc8fb47545776fe175e8f2",
+      "main.py": "510b39610c217c572d3c46041c06a82ed965a441f2557b2e84f6d34681585e65",
       "auto_updater.py": "71dcf17c5100b62bc73e4472fb5ddcaa724835714fcecc4ca6341577c4ea1b61",
       "launcher.py": "2015b865f6351cf7c7f0f6f115e6708fbdad4f18e2a8ed1abaa2788b2dccc9d9",
       "songpack_loader.py": "817005bcd60e0ea5894102ee545f0eb47a90c258e318ca8acabba5c9675723fa",

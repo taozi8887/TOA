@@ -40,7 +40,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.7.18"
+__version__ = "0.7.19"
 
 # Settings management
 class Settings:
@@ -950,9 +950,11 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
                             if item_rect.collidepoint(mouse_pos):
                                 # level_metadata[i][0] is already a full path from songpack_ui
                                 json_path = level_metadata[i][0]
-                                if not os.path.isabs(json_path):
-                                    json_path = os.path.join(levels_dir, json_path)
-                                selected_level = resource_path(json_path) if not os.path.isabs(json_path) else json_path
+                                # Don't add levels_dir if path already contains .toa or is absolute
+                                if os.path.isabs(json_path) or json_path.startswith('.toa'):
+                                    selected_level = json_path
+                                else:
+                                    selected_level = resource_path(os.path.join(levels_dir, json_path))
                                 break
                 
                 # Reset drag state
@@ -1983,7 +1985,8 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     accuracy_window = 0.15
 
     # Handle both absolute and relative paths
-    if os.path.isabs(level_json):
+    # If path already contains .toa or is absolute, use it directly
+    if os.path.isabs(level_json) or level_json.startswith('.toa'):
         level_path = level_json
     else:
         level_path = resource_path(level_json)
@@ -3589,6 +3592,7 @@ if __name__ == "__main__":
     pygame.display.quit()
     pygame.quit()
     sys.exit()
+
 
 
 
