@@ -920,7 +920,7 @@ def scan_and_load_songpacks(songpacks_dir='songpacks', extract_to=None):
     
     Args:
         songpacks_dir: Directory containing .zip songpack files
-        extract_to: Directory to extract songpacks to (defaults to songpacks_dir/../extracted)
+        extract_to: Directory to extract songpacks to (must be specified explicitly)
     
     Returns: List of pack info dicts
     """
@@ -928,7 +928,17 @@ def scan_and_load_songpacks(songpacks_dir='songpacks', extract_to=None):
         return []
     
     if extract_to is None:
-        extract_to = os.path.join(os.path.dirname(songpacks_dir), 'songpacks', 'extracted')
+        # Default: if songpacks_dir contains '.toa', put extracted in .toa/songpacks/extracted
+        # Otherwise put in songpacks/extracted
+        if '.toa' in songpacks_dir:
+            # Extract .toa prefix
+            if songpacks_dir.startswith('.toa'):
+                extract_to = os.path.join('.toa', 'songpacks', 'extracted')
+            else:
+                # Handle case where full path contains .toa
+                extract_to = 'songpacks/extracted'
+        else:
+            extract_to = 'songpacks/extracted'
     
     packs = []
     

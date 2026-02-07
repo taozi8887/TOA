@@ -40,7 +40,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.7.9"
+__version__ = "0.7.10"
 
 # Settings management
 class Settings:
@@ -1885,9 +1885,18 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                 level_data = json.load(f)
                 audio_file_path = level_data.get('meta', {}).get('audio_file')
                 
-                if audio_file_path and os.path.exists(audio_file_path):
-                    # Use the directory containing the audio file
-                    audio_dir = os.path.dirname(audio_file_path)
+                if audio_file_path:
+                    # Check if path is absolute - if so, use directly without resource_path
+                    if os.path.isabs(audio_file_path) and os.path.exists(audio_file_path):
+                        audio_dir = os.path.dirname(audio_file_path)
+                    # Otherwise treat as relative path
+                    elif os.path.exists(resource_path(audio_file_path)):
+                        audio_dir = os.path.dirname(resource_path(audio_file_path))
+                    else:
+                        # Fallback to traditional beatmap structure
+                        level_filename = os.path.basename(level_json)
+                        beatmap_name = level_filename.replace('.json', '').split('_')[0]
+                        audio_dir = f"beatmaps/{beatmap_name}"
                 else:
                     # Fallback to traditional beatmap structure
                     level_filename = os.path.basename(level_json)
@@ -2057,6 +2066,9 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     audio_extensions = ['.mp3', '.ogg', '.wav', '.flac', '.aac', '.m4a']
     osu_audio_filename = None
     try:
+        # Check if audio_dir is absolute or relative
+        check_dir = audio_dir if os.path.isabs(audio_dir) else resource_path(audio_dir)
+        
         # Try to find the .osu file matching the level
         level_base = os.path.splitext(os.path.basename(level_json))[0]
         # Remove difficulty suffix (after last underscore)
@@ -2066,25 +2078,28 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
             base_name = level_base
         # Find .osu file in audio_dir that matches base_name
         osu_file = None
-        for file in os.listdir(resource_path(audio_dir)):
+        for file in os.listdir(check_dir):
             if file.lower().endswith('.osu') and base_name.lower() in file.lower():
                 osu_file = os.path.join(audio_dir, file)
                 break
         # Parse AudioFilename from .osu file
-        if osu_file and os.path.exists(resource_path(osu_file)):
-            with open(resource_path(osu_file), 'r', encoding='utf-8', errors='ignore') as f:
-                for line in f:
-                    if line.strip().lower().startswith('audiofilename:'):
-                        osu_audio_filename = line.strip().split(':', 1)[1].strip()
-                        break
+        if osu_file:
+            check_osu = osu_file if os.path.isabs(osu_file) else resource_path(osu_file)
+            if os.path.exists(check_osu):
+                with open(check_osu, 'r', encoding='utf-8', errors='ignore') as f:
+                    for line in f:
+                        if line.strip().lower().startswith('audiofilename:'):
+                            osu_audio_filename = line.strip().split(':', 1)[1].strip()
+                            break
         # If found, use it
         if osu_audio_filename:
             candidate = os.path.join(audio_dir, osu_audio_filename)
-            if os.path.exists(resource_path(candidate)):
+            check_candidate = candidate if os.path.isabs(candidate) else resource_path(candidate)
+            if os.path.exists(check_candidate):
                 audio_path = candidate
         # Fallback: search for any audio file
         if audio_path is None:
-            files = os.listdir(resource_path(audio_dir))
+            files = os.listdir(check_dir)
             for ext in audio_extensions:
                 for file in files:
                     if file.lower().endswith(ext):
@@ -2100,17 +2115,24 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
 
     # Load music with error handling
     try:
-        full_audio_path = resource_path(audio_path)
+        # Check if audio_path is absolute - if so, don't use resource_path
+        if os.path.isabs(audio_path):
+            full_audio_path = audio_path
+        else:
+            full_audio_path = resource_path(audio_path)
+            
         print(f"Loading music from: {full_audio_path}")
         if not os.path.exists(full_audio_path):
             print(f"WARNING: Audio file not found: {full_audio_path}")
-            print(f"Audio directory contents: {os.listdir(resource_path(audio_dir)) if os.path.exists(resource_path(audio_dir)) else 'Directory not found'}")
+            # Check if audio_dir is absolute for listing
+            check_dir = audio_dir if os.path.isabs(audio_dir) else resource_path(audio_dir)
+            print(f"Audio directory contents: {os.listdir(check_dir) if os.path.exists(check_dir) else 'Directory not found'}")
         pygame.mixer.music.load(full_audio_path)
         pygame.mixer.music.set_volume(game_settings.get('music_volume', 0.7))
         print(f"Music loaded successfully: {audio_path}")
     except Exception as e:
         print(f"ERROR loading music: {e}")
-        print(f"Attempted to load from: {resource_path(audio_path)}")
+        print(f"Attempted to load from: {full_audio_path}")
     music_start_time = None
 
     # Load hitsounds
@@ -2169,26 +2191,32 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         # First check if level JSON has a background_file in metadata (from song packs)
         bg_file_from_meta = level_data.get('meta', {}).get('background_file')
         
-        if bg_file_from_meta and os.path.exists(bg_file_from_meta):
-            # Load the BG.png from song pack
-            gameplay_bg = pygame.image.load(bg_file_from_meta)
-            # Scale to full screen
-            gameplay_bg_image = pygame.transform.scale(gameplay_bg, (screen_width, screen_height))
-            # Create dark overlay
-            dark_overlay = pygame.Surface((screen_width, screen_height))
-            dark_overlay.set_alpha(180)  # Adjust darkness (0-255)
-            dark_overlay.fill((0, 0, 0))
-            # Apply overlay to gameplay background
-            gameplay_bg_image.blit(dark_overlay, (0, 0))
-            
-            # Also use for small thumbnail
-            beatmap_bg_image = pygame.transform.scale(gameplay_bg, (200, 150))
-        else:
+        if bg_file_from_meta:
+            # Check if path is absolute
+            check_bg = bg_file_from_meta if os.path.isabs(bg_file_from_meta) else resource_path(bg_file_from_meta)
+            if os.path.exists(check_bg):
+                # Load the BG.png from song pack
+                gameplay_bg = pygame.image.load(check_bg)
+                # Scale to full screen
+                gameplay_bg_image = pygame.transform.scale(gameplay_bg, (screen_width, screen_height))
+                # Create dark overlay
+                dark_overlay = pygame.Surface((screen_width, screen_height))
+                dark_overlay.set_alpha(180)  # Adjust darkness (0-255)
+                dark_overlay.fill((0, 0, 0))
+                # Apply overlay to gameplay background
+                gameplay_bg_image.blit(dark_overlay, (0, 0))
+                
+                # Also use for small thumbnail
+                beatmap_bg_image = pygame.transform.scale(gameplay_bg, (200, 150))
+        
+        if beatmap_bg_image is None:
             # Fallback to finding images in audio_dir
-            for file in os.listdir(resource_path(audio_dir)):
+            check_dir = audio_dir if os.path.isabs(audio_dir) else resource_path(audio_dir)
+            for file in os.listdir(check_dir):
                 if file.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')):
                     bg_path = os.path.join(audio_dir, file)
-                    bg_img = pygame.image.load(resource_path(bg_path))
+                    check_bg_path = bg_path if os.path.isabs(bg_path) else resource_path(bg_path)
+                    bg_img = pygame.image.load(check_bg_path)
                     
                     # Check if this is BG.png (for full screen gameplay background)
                     if file.lower().startswith('bg'):
