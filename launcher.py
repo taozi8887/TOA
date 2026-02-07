@@ -7,6 +7,7 @@ import os
 import sys
 import subprocess
 import json
+import time
 
 # Determine the actual directory where the exe/script is running from
 if getattr(sys, 'frozen', False):

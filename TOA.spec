@@ -20,7 +20,8 @@ a = Analysis(
         'requests.structures',
         'urllib3',
         'pygame',
-        'pygame.gfxdraw'
+        'pygame.gfxdraw',
+        'wave'
     ],
     hookspath=[],
     hooksconfig={},
