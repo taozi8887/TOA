@@ -16,7 +16,7 @@
     "code": {
       "main.py": "c1d829ad6c853ab1b4bc887bb4e11634e4636083538db2440fbc26651b491968",
       "auto_updater.py": "71dcf17c5100b62bc73e4472fb5ddcaa724835714fcecc4ca6341577c4ea1b61",
-      "launcher.py": "91008f6050570655d818628dd4575b9665247a6f7f11ee9a831b7b4e4c6f524e",
+      "launcher.py": "2015b865f6351cf7c7f0f6f115e6708fbdad4f18e2a8ed1abaa2788b2dccc9d9",
       "songpack_loader.py": "03f0b2599351a6686f26fffbf90900d092155d11968be3ba7b6b36b2e2c5da4c",
       "songpack_ui.py": "23d50c669e2f45c4a4f1e193aed94355ed507ff13b8ad50018897a222033e65a"
     }
