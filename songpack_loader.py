@@ -738,11 +738,11 @@ def extract_songpack(zip_path, extract_to='songpacks/extracted'):
                         dwi_file = file_path
                     elif file_lower.endswith(('.mp3', '.ogg', '.wav', '.flac')):
                         audio_file = file_path
-                    # In-game background (bg with any image extension)
-                    elif file_base == 'bg' and file_ext in ['.png', '.jpg', '.jpeg']:
+                    # In-game background (any file containing 'bg' with image extension)
+                    elif 'bg' in file_base and file_ext in ['.png', '.jpg', '.jpeg']:
                         bg_file = file_path
-                    # Level box thumbnail (bn with any image extension)
-                    elif file_base == 'bn' and file_ext in ['.png', '.jpg', '.jpeg']:
+                    # Level box thumbnail (any file containing 'bn' with image extension)
+                    elif 'bn' in file_base and file_ext in ['.png', '.jpg', '.jpeg']:
                         bn_file = file_path
                 
                 if sm_file or ssc_file or dwi_file:
