@@ -51,16 +51,10 @@ The game will:
 
 ## Importing Custom Songpacks
 
-TOA supports Etterna/StepMania songpacks in ZIP format! You have two ways to import custom songpacks:
+TOA supports Etterna/StepMania songpacks in ZIP format! 
 
-### Method 1: Import Folder (Recommended)
-Simply drop your songpack ZIPs into the `import/` folder:
+### How to Import Custom Songpacks
 
-1. **Place ZIPs in `import/` folder**
-2. **Start the game** - it will automatically scan and process them
-3. **Your packs appear** as separate songpacks in the selector
-
-### Method 2: Choose Custom Folder
 You can select any folder on your computer to load songpacks from:
 
 1. **In the songpack or level selector, click "Set Folder"**
@@ -68,7 +62,7 @@ You can select any folder on your computer to load songpacks from:
 3. **Confirm** - the game will reload and scan that folder
 4. **All ZIPs in that folder** will appear as separate songpacks
 
-Both methods work together - songpacks from `import/`, your custom folder, and the game's built-in packs all appear in the same selector!
+Your custom folder works alongside the game's built-in packs - all appear in the same selector!
 
 ### Supported Formats
 - Etterna/StepMania songpacks (.zip files)
@@ -76,22 +70,13 @@ Both methods work together - songpacks from `import/`, your custom folder, and t
 - Audio formats: `.mp3`, `.ogg`, `.wav`, `.flac`
 
 ### How It Works
-- On startup, the game scans all configured folders
+- Click "Set Folder" button to choose where your songpacks are stored
+- The game scans your chosen folder on startup
 - ZIP files are automatically extracted and converted
-- New maps added while the game is closed will be imported on next launch
+- New maps added to your folder will be imported on next launch
 - Each ZIP becomes its own separate songpack
 - All packs work seamlessly with full metadata, previews, and gameplay features
-
-### Example Structure
-```
-toa/
-├── import/              # Drop ZIPs here
-│   ├── Pack1.zip
-│   └── Pack2.zip
-└── [Custom Folder]      # Set via "Set Folder" button
-    ├── MorePacks.zip
-    └── EvenMore.zip
-```
+- Your folder selection is saved permanently in game settings
 
 ## Creating Custom Levels
 

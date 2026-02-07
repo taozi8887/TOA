@@ -77,11 +77,6 @@ songpacks/
 beatmaps/
 levels/
 
-# Import folder - users' custom songpacks
-import/*.zip
-import/*/
-!import/README.txt
-
 # Build outputs
 dist/
 build/

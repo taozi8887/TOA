@@ -37,7 +37,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.7.24"
+__version__ = "0.7.25"
 
 # Settings management
 class Settings:
@@ -309,16 +309,13 @@ def show_loading_screen():
     # Songpacks are in assets/songpacks/ (or .toa/assets/songpacks/ when running from exe)
     songpacks_path = os.path.join('.toa', 'assets', 'songpacks') if os.path.exists('.toa') else os.path.join('assets', 'songpacks')
     
-    # User import folder for custom songpacks
-    import_path = os.path.join('.toa', 'import') if os.path.exists('.toa') else 'import'
-    
-    # User's custom songpack folder from settings
+    # User's custom songpack folder from settings (set via "Set Folder" button)
     custom_folder = game_settings.get('custom_songpack_folder')
     
     # Extracted songpacks go to .toa/songpacks/extracted or songpacks/extracted
     extracted_path = os.path.join('.toa', 'songpacks', 'extracted') if os.path.exists('.toa') else os.path.join('songpacks', 'extracted')
     
-    packs = scan_and_load_songpacks(songpacks_path, extracted_path, import_path, custom_folder)
+    packs = scan_and_load_songpacks(songpacks_path, extracted_path, custom_folder)
     
     # Cache for level metadata
     level_metadata_cache = {}

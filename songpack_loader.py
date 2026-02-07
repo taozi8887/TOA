@@ -917,15 +917,14 @@ def convert_level_to_json(level_info, output_dir='levels'):
     
     return created_files
 
-def scan_and_load_songpacks(songpacks_dir='songpacks', extract_to=None, import_dir=None, custom_dir=None):
+def scan_and_load_songpacks(songpacks_dir='songpacks', extract_to=None, custom_dir=None):
     """
     Scan multiple directories for songpack ZIP files.
     
     Args:
-        songpacks_dir: Directory containing .zip songpack files
+        songpacks_dir: Directory containing built-in .zip songpack files
         extract_to: Directory to extract songpacks to (must be specified explicitly)
-        import_dir: Optional import directory for user songpacks
-        custom_dir: Optional custom directory selected by user
+        custom_dir: Optional custom directory selected by user via "Set Folder" button
     
     Returns: List of pack info dicts
     """
@@ -948,8 +947,6 @@ def scan_and_load_songpacks(songpacks_dir='songpacks', extract_to=None, import_d
     dirs_to_scan = []
     if os.path.exists(songpacks_dir):
         dirs_to_scan.append(songpacks_dir)
-    if import_dir and os.path.exists(import_dir):
-        dirs_to_scan.append(import_dir)
     if custom_dir and os.path.exists(custom_dir):
         dirs_to_scan.append(custom_dir)
     
