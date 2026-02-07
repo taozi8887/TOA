@@ -68,17 +68,9 @@
       }
     }
   },
-  "patches": {
-    "from_0.7.27": {
-      "description": "Patch from 0.7.27 to 0.7.28",
-      "changed_files": [
-        "main.py"
-      ],
-      "removed_files": []
-    }
-  },
+  "patches": {},
   "rollback": {
-    "previous_version": "0.7.27",
+    "previous_version": "0.7.28",
     "can_rollback": true
   }
 }
