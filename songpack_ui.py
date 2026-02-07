@@ -243,13 +243,6 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
         
         if deleted_count > 0:
             print(f"Cleaned up {deleted_count} old level file(s)")
-        for json_path, meta in pack['metadata_cache'].items():
-            pack['level_metadata'].append({
-                'title': meta['title'],
-                'artist': meta['artist'],
-                'version': meta['version'],
-                'json_path': json_path
-            })
     
     window_width, window_height = screen.get_size()
     clock = pygame.time.Clock()
