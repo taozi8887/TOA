@@ -164,7 +164,7 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
                     all_level_files.add(os.path.basename(created_path))
         
         # Now build metadata cache from all JSONs
-        pack['metadata_cache'] = build_pack_metadata_cache(pack)
+        pack['metadata_cache'] = build_pack_metadata_cache(pack, levels_dir)
         
         # Pre-build COMPLETE level_metadata list for instant loading
         pack['level_metadata_full'] = []
@@ -610,13 +610,14 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
         clock.tick(60)
 
 
-def build_pack_metadata_cache(pack_info):
+def build_pack_metadata_cache(pack_info, levels_dir=None):
     """Build metadata cache for all levels in a pack"""
     metadata_cache = {}
     seen_jsons = set()
     
     # Get all JSON files in levels directory
-    levels_dir = os.path.join('.toa', 'levels') if os.path.exists('.toa') else 'levels'
+    if levels_dir is None:
+        levels_dir = os.path.join('.toa', 'levels') if os.path.exists('.toa') else 'levels'
     all_level_files = set()
     if os.path.exists(levels_dir):
         all_level_files = set(os.listdir(levels_dir))
