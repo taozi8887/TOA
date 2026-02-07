@@ -111,7 +111,7 @@ def fade_transition_in(screen, content_func, game_settings, duration=0.25):
     pygame.display.flip()
 
 
-def show_songpack_selector(screen, game_settings, resource_path_func):
+def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_path=None):
     """
     Show song pack selection screen with level selector layout.
     Returns: Selected pack info or None/QUIT
@@ -119,7 +119,11 @@ def show_songpack_selector(screen, game_settings, resource_path_func):
     import math
     
     # Load song packs
-    packs = scan_and_load_songpacks()
+    if songpacks_path is None:
+        # Default to .toa/assets/songpacks if .toa exists, otherwise assets/songpacks
+        songpacks_path = os.path.join('.toa', 'assets', 'songpacks') if os.path.exists('.toa') else os.path.join('assets', 'songpacks')
+    
+    packs = scan_and_load_songpacks(songpacks_path)
     
     if not packs:
         print("No song packs found!")
