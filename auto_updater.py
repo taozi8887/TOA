@@ -124,7 +124,7 @@ class AutoUpdater:
             Tuple of (has_updates, list_of_changed_files, update_info)
         """
         if directories is None:
-            directories = ['levels', 'beatmaps']
+            directories = ['levels']
         
         try:
             # Get local and remote manifests
@@ -678,7 +678,7 @@ def create_version_file(directories: List[str] = None, include_code: bool = True
         output_file: Output filename for version info
     """
     if directories is None:
-        directories = ['levels', 'beatmaps']
+        directories = ['levels']
     
     # Auto-detect version from main.py
     game_version = "0.4.0"  # Default fallback
