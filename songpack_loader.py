@@ -928,6 +928,19 @@ def scan_and_load_songpacks(songpacks_dir='songpacks', extract_to=None, custom_d
     
     Returns: List of pack info dicts
     """
+    # Debug logging
+    def log_debug(msg):
+        try:
+            log_path = os.path.join('.toa', 'songpack_debug.log') if os.path.exists('.toa') else 'songpack_debug.log'
+            with open(log_path, 'a', encoding='utf-8') as f:
+                import datetime
+                timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+                f.write(f"[{timestamp}] {msg}\n")
+        except:
+            pass
+    
+    log_debug(f"scan_and_load_songpacks called: songpacks_dir={songpacks_dir}, extract_to={extract_to}, custom_dir={custom_dir}")
+    
     packs = []
     
     if extract_to is None:
@@ -943,24 +956,47 @@ def scan_and_load_songpacks(songpacks_dir='songpacks', extract_to=None, custom_d
         else:
             extract_to = 'songpacks/extracted'
     
+    log_debug(f"extract_to determined: {extract_to}")
+    
     # Scan directories to check
     dirs_to_scan = []
     if os.path.exists(songpacks_dir):
         dirs_to_scan.append(songpacks_dir)
+        log_debug(f"Added songpacks_dir to scan: {songpacks_dir}")
+    else:
+        log_debug(f"songpacks_dir does not exist: {songpacks_dir}")
     if custom_dir and os.path.exists(custom_dir):
         dirs_to_scan.append(custom_dir)
+        log_debug(f"Added custom_dir to scan: {custom_dir}")
+    elif custom_dir:
+        log_debug(f"custom_dir specified but does not exist: {custom_dir}")
+    
+    log_debug(f"Total dirs to scan: {len(dirs_to_scan)}")
     
     for scan_dir in dirs_to_scan:
-        for file in os.listdir(scan_dir):
-            if file.lower().endswith('.zip'):
-                zip_path = os.path.join(scan_dir, file)
-                try:
-                    pack_info = extract_songpack(zip_path, extract_to=extract_to)
-                    packs.append(pack_info)
-                    print(f"Loaded pack: {pack_info['pack_name']} ({len(pack_info['levels'])} levels)")
-                except Exception as e:
-                    print(f"Error loading {file}: {e}")
+        log_debug(f"Scanning directory: {scan_dir}")
+        try:
+            files = os.listdir(scan_dir)
+            log_debug(f"  Found {len(files)} files")
+            for file in files:
+                log_debug(f"  Checking file: {file}")
+                if file.lower().endswith('.zip'):
+                    zip_path = os.path.join(scan_dir, file)
+                    log_debug(f"    Processing ZIP: {zip_path}")
+                    try:
+                        pack_info = extract_songpack(zip_path, extract_to=extract_to)
+                        packs.append(pack_info)
+                        print(f"Loaded pack: {pack_info['pack_name']} ({len(pack_info['levels'])} levels)")
+                        log_debug(f"    SUCCESS: Loaded {pack_info['pack_name']}")
+                    except Exception as e:
+                        print(f"Error loading {file}: {e}")
+                        log_debug(f"    ERROR loading {file}: {e}")
+                        import traceback
+                        log_debug(traceback.format_exc())
+        except Exception as e:
+            log_debug(f"  ERROR scanning {scan_dir}: {e}")
     
+    log_debug(f"Total packs loaded: {len(packs)}")
     return packs
 
 if __name__ == "__main__":

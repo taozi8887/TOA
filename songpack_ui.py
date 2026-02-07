@@ -136,21 +136,41 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
     """
     import math
     
+    # Debug logging
+    def log_debug(msg):
+        try:
+            log_path = os.path.join('.toa', 'songpack_debug.log') if os.path.exists('.toa') else 'songpack_debug.log'
+            with open(log_path, 'a', encoding='utf-8') as f:
+                import datetime
+                timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+                f.write(f"[{timestamp}] {msg}\n")
+        except:
+            pass
+    
+    log_debug("=== show_songpack_selector called ===")
+    
     # Load song packs
     if songpacks_path is None:
         # Default to .toa/assets/songpacks if .toa exists, otherwise assets/songpacks
         songpacks_path = os.path.join('.toa', 'assets', 'songpacks') if os.path.exists('.toa') else os.path.join('assets', 'songpacks')
     
+    log_debug(f"songpacks_path: {songpacks_path}")
+    log_debug(f"exists: {os.path.exists(songpacks_path)}")
+    
     # User's custom folder from settings (set via "Set Folder" button)
     custom_folder = game_settings.get('custom_songpack_folder')
+    log_debug(f"custom_folder: {custom_folder}")
     
     # Extracted songpacks go to .toa/songpacks/extracted or songpacks/extracted
     extracted_path = os.path.join('.toa', 'songpacks', 'extracted') if os.path.exists('.toa') else os.path.join('songpacks', 'extracted')
+    log_debug(f"extracted_path: {extracted_path}")
     
     packs = scan_and_load_songpacks(songpacks_path, extracted_path, custom_folder)
+    log_debug(f"packs loaded: {len(packs)}")
     
     if not packs:
         print("No song packs found!")
+        log_debug("ERROR: No packs found, returning None")
         return None
     
     # Pre-load FULL metadata cache for all packs for instant navigation
