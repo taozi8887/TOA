@@ -37,7 +37,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.7.27"
+__version__ = "0.7.28"
 
 # Settings management
 class Settings:
@@ -1700,17 +1700,36 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     if level_json is None:
         log_debug("level_json is None, showing songpack selector")
         # Go straight to song packs
-        from songpack_ui import show_songpack_selector, show_pack_levels_selector, build_pack_metadata_cache
+        try:
+            log_debug("Importing songpack_ui")
+            from songpack_ui import show_songpack_selector, show_pack_levels_selector, build_pack_metadata_cache
+            log_debug("Import successful")
+        except Exception as e:
+            log_debug(f"ERROR importing songpack_ui: {e}")
+            import traceback
+            log_debug(traceback.format_exc())
+            return
         
         # Initialize pygame if not already
+        log_debug("Checking pygame.get_init()")
         if not pygame.get_init():
             log_debug("Initializing pygame")
             pygame.init()
+        log_debug("Pygame initialized")
         
+        log_debug("Getting pygame screen surface")
         screen = pygame.display.get_surface()
+        log_debug(f"Got surface: {screen}")
         if screen is None:
             log_debug("Creating new pygame screen")
-            screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
+            try:
+                screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
+                log_debug(f"Created screen: {screen}")
+            except Exception as e:
+                log_debug(f"ERROR creating screen: {e}")
+                import traceback
+                log_debug(traceback.format_exc())
+                return
         
         log_debug(f"Screen size: {screen.get_size()}")
         
@@ -3441,19 +3460,38 @@ if __name__ == "__main__":
     import multiprocessing
     multiprocessing.freeze_support()
 
+    # Debug logging
+    def log_debug(msg):
+        try:
+            log_path = os.path.join('.toa', 'songpack_debug.log') if os.path.exists('.toa') else 'songpack_debug.log'
+            with open(log_path, 'a', encoding='utf-8') as f:
+                import datetime
+                timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+                f.write(f"[{timestamp}] ENTRY: {msg}\n")
+        except:
+            pass
+    
+    log_debug("=== TOA Starting ===")
+    
     # No longer initializing OSU levels - using song packs only
     # initialize_levels_from_osz()
 
+    log_debug("Calling show_loading_screen()")
     preloaded_metadata = show_loading_screen()
+    log_debug(f"show_loading_screen() returned, metadata={preloaded_metadata is not None}")
 
     if preloaded_metadata is None:
         preloaded_metadata = []  # Empty list is fine now
 
     returning = False
     last_level = None
+    log_debug("Entering main game loop")
     while True:
+        log_debug(f"Calling main(level_json={last_level}, returning={returning})")
         result = main(level_json=last_level, returning_from_game=returning, preloaded_metadata=preloaded_metadata)
+        log_debug(f"main() returned: {result}")
         if result is None:
+            log_debug("Breaking main loop - result is None")
             break
         elif isinstance(result, tuple) and result[0] == 'RESTART_LEVEL':
             # Restart the same level
