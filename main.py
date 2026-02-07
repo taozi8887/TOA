@@ -40,7 +40,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.7.15"
+__version__ = "0.7.16"
 
 # Settings management
 class Settings:
@@ -948,7 +948,11 @@ def show_level_select_popup(fade_in_start=False, preloaded_metadata=None):
                                 continue
                             item_rect = pygame.Rect(50, item_y, window_width - 100, item_height - 5)
                             if item_rect.collidepoint(mouse_pos):
-                                selected_level = resource_path(os.path.join(levels_dir, level_metadata[i][0]))
+                                # level_metadata[i][0] is already a full path from songpack_ui
+                                json_path = level_metadata[i][0]
+                                if not os.path.isabs(json_path):
+                                    json_path = os.path.join(levels_dir, json_path)
+                                selected_level = resource_path(json_path) if not os.path.isabs(json_path) else json_path
                                 break
                 
                 # Reset drag state
