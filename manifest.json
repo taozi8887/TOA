@@ -1,5 +1,5 @@
 {
-  "version": "0.7.11",
+  "version": "0.7.12",
   "release_date": "2026-02-07",
   "manifest_version": 1,
   "files": {
@@ -47,8 +47,8 @@
     },
     "code": {
       "main.py": {
-        "hash": "2ad01eb267da057209085dbeb02fc369a3d05db7101009d35495a0452ca1586c",
-        "size": 162976
+        "hash": "c3a5ac948ebf6b15ccbfc810507d32d4c282faff32964eb6550deab2c9ce3783",
+        "size": 162978
       },
       "auto_updater.py": {
         "hash": "71dcf17c5100b62bc73e4472fb5ddcaa724835714fcecc4ca6341577c4ea1b61",
@@ -63,23 +63,23 @@
         "size": 38881
       },
       "songpack_ui.py": {
-        "hash": "d99b051d7ea0c2583d079ac2cc7bf3433b36cf050b701fb7c4cbabf6c1921c2e",
-        "size": 60148
+        "hash": "206e1e9716790e667c8d55845a4b159800294fc32a470fe58a327ffb888d83de",
+        "size": 60365
       }
     }
   },
   "patches": {
-    "from_0.7.10": {
-      "description": "Patch from 0.7.10 to 0.7.11",
+    "from_0.7.11": {
+      "description": "Patch from 0.7.11 to 0.7.12",
       "changed_files": [
         "main.py",
-        "songpack_loader.py"
+        "songpack_ui.py"
       ],
       "removed_files": []
     }
   },
   "rollback": {
-    "previous_version": "0.7.10",
+    "previous_version": "0.7.11",
     "can_rollback": true
   }
 }

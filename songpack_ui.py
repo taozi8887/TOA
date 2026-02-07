@@ -587,9 +587,10 @@ def build_pack_metadata_cache(pack_info):
     seen_jsons = set()
     
     # Get all JSON files in levels directory
+    levels_dir = os.path.join('.toa', 'levels') if os.path.exists('.toa') else 'levels'
     all_level_files = set()
-    if os.path.exists('levels'):
-        all_level_files = set(os.listdir('levels'))
+    if os.path.exists(levels_dir):
+        all_level_files = set(os.listdir(levels_dir))
     
     for level_info in pack_info['levels']:
         folder_name = level_info['name']
@@ -600,7 +601,7 @@ def build_pack_metadata_cache(pack_info):
             if file.lower().endswith('.json'):
                 json_name_base = os.path.splitext(file)[0]
                 if safe_pattern.lower() in json_name_base.lower():
-                    full_path = os.path.join('levels', file)
+                    full_path = os.path.join(levels_dir, file)
                     if full_path not in seen_jsons:
                         seen_jsons.add(full_path)
                         
@@ -747,9 +748,10 @@ def show_pack_levels_selector(screen, pack_info, game_settings, resource_path_fu
         seen_jsons = set()  # Track to prevent duplicates
         
         # Get all JSON files in levels directory once
+        levels_dir = os.path.join('.toa', 'levels') if os.path.exists('.toa') else 'levels'
         all_level_files = set()
-        if os.path.exists('levels'):
-            all_level_files = set(os.listdir('levels'))
+        if os.path.exists(levels_dir):
+            all_level_files = set(os.listdir(levels_dir))
         
         for level_info in pack_info['levels']:
             # Check if JSON already exists using pattern matching
@@ -764,7 +766,7 @@ def show_pack_levels_selector(screen, pack_info, game_settings, resource_path_fu
                     json_name_base = os.path.splitext(file)[0]
                     # Check if safe_pattern is in the filename
                     if safe_pattern.lower() in json_name_base.lower():
-                        full_path = os.path.join('levels', file)
+                        full_path = os.path.join(levels_dir, file)
                         if full_path not in seen_jsons:  # Only add if not seen
                             existing_jsons.append(full_path)
                             seen_jsons.add(full_path)
@@ -772,7 +774,7 @@ def show_pack_levels_selector(screen, pack_info, game_settings, resource_path_fu
             # If no JSONs exist, convert the level
             if not existing_jsons:
                 print(f"Converting {level_info['name']}...")
-                created = convert_level_to_json(level_info)
+                created = convert_level_to_json(level_info, output_dir=levels_dir)
                 for created_path in created:
                     if created_path not in seen_jsons:
                         level_jsons.append(created_path)
