@@ -1,5 +1,5 @@
 {
-  "version": "0.7.27",
+  "version": "0.7.28",
   "release_date": "2026-02-07",
   "manifest_version": 1,
   "files": {
@@ -47,8 +47,8 @@
     },
     "code": {
       "main.py": {
-        "hash": "f1305995e00491bdc5fde0b00bca048ebc6332ff9a0f6c62f3f76e23be098994",
-        "size": 160314
+        "hash": "317f1dde9194be41f55afff2d85d126d0bedefac5282f23d06e0333043cb7cf8",
+        "size": 161951
       },
       "auto_updater.py": {
         "hash": "3a1ee33ef885cd5a8b80d9a330c6b0778bb5ac1ba53da278f449ab12121a3937",
@@ -69,8 +69,8 @@
     }
   },
   "patches": {
-    "from_0.7.26": {
-      "description": "Patch from 0.7.26 to 0.7.27",
+    "from_0.7.27": {
+      "description": "Patch from 0.7.27 to 0.7.28",
       "changed_files": [
         "main.py"
       ],
@@ -78,7 +78,7 @@
     }
   },
   "rollback": {
-    "previous_version": "0.7.26",
+    "previous_version": "0.7.27",
     "can_rollback": true
   }
 }
