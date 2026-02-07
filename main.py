@@ -40,7 +40,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.7.3"
+__version__ = "0.7.4"
 
 # Settings management
 class Settings:
@@ -474,11 +474,40 @@ def show_loading_screen():
     # Preload all songpacks and convert levels
     update_loading_screen("Scanning song packs...")
     
-    from songpack_loader import scan_and_load_songpacks, convert_level_to_json
-    
-    # Songpacks are in assets/songpacks/ (or .toa/assets/songpacks/ when running from exe)
-    songpacks_path = os.path.join('.toa', 'assets', 'songpacks') if os.path.exists('.toa') else os.path.join('assets', 'songpacks')
-    packs = scan_and_load_songpacks(songpacks_path)
+    # Debug logging for songpack loading
+    debug_log = []
+    try:
+        debug_log.append(f"CWD: {os.getcwd()}")
+        debug_log.append(f".toa exists: {os.path.exists('.toa')}")
+        debug_log.append(f"assets exists: {os.path.exists('assets')}")
+        debug_log.append(f".toa/assets exists: {os.path.exists('.toa/assets') if os.path.exists('.toa') else 'N/A'}")
+        
+        from songpack_loader import scan_and_load_songpacks, convert_level_to_json
+        debug_log.append("Imported songpack_loader successfully")
+        
+        # Songpacks are in assets/songpacks/ (or .toa/assets/songpacks/ when running from exe)
+        songpacks_path = os.path.join('.toa', 'assets', 'songpacks') if os.path.exists('.toa') else os.path.join('assets', 'songpacks')
+        debug_log.append(f"Using songpacks_path: {songpacks_path}")
+        debug_log.append(f"songpacks_path exists: {os.path.exists(songpacks_path)}")
+        
+        if os.path.exists(songpacks_path):
+            files = os.listdir(songpacks_path)
+            debug_log.append(f"Files in songpacks: {files}")
+        
+        packs = scan_and_load_songpacks(songpacks_path)
+        debug_log.append(f"Loaded {len(packs)} packs")
+        
+    except Exception as e:
+        import traceback
+        debug_log.append(f"ERROR: {e}")
+        debug_log.append(traceback.format_exc())
+        
+        # Write debug log to file
+        with open('songpack_debug.log', 'w') as f:
+            f.write('\n'.join(debug_log))
+        
+        print('\n'.join(debug_log))
+        raise
     
     # Cache for level metadata
     level_metadata_cache = {}
