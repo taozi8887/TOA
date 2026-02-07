@@ -40,7 +40,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.7.4"
+__version__ = "0.7.5"
 
 # Settings management
 class Settings:
@@ -474,16 +474,28 @@ def show_loading_screen():
     # Preload all songpacks and convert levels
     update_loading_screen("Scanning song packs...")
     
-    # Debug logging for songpack loading
+    # Debug logging for songpack loading - ALWAYS write log
     debug_log = []
+    debug_log.append(f"=== SONGPACK DEBUG LOG ===")
+    debug_log.append(f"CWD: {os.getcwd()}")
+    debug_log.append(f".toa exists: {os.path.exists('.toa')}")
+    debug_log.append(f"assets exists: {os.path.exists('assets')}")
+    
+    if os.path.exists('.toa'):
+        debug_log.append(f".toa/assets exists: {os.path.exists('.toa/assets')}")
+        if os.path.exists('.toa/assets'):
+            debug_log.append(f".toa/assets/songpacks exists: {os.path.exists('.toa/assets/songpacks')}")
+    
+    # Write early log
     try:
-        debug_log.append(f"CWD: {os.getcwd()}")
-        debug_log.append(f".toa exists: {os.path.exists('.toa')}")
-        debug_log.append(f"assets exists: {os.path.exists('assets')}")
-        debug_log.append(f".toa/assets exists: {os.path.exists('.toa/assets') if os.path.exists('.toa') else 'N/A'}")
-        
+        with open('songpack_debug.log', 'w') as f:
+            f.write('\n'.join(debug_log) + '\n\n')
+    except:
+        pass
+    
+    try:
         from songpack_loader import scan_and_load_songpacks, convert_level_to_json
-        debug_log.append("Imported songpack_loader successfully")
+        debug_log.append("✓ Imported songpack_loader successfully")
         
         # Songpacks are in assets/songpacks/ (or .toa/assets/songpacks/ when running from exe)
         songpacks_path = os.path.join('.toa', 'assets', 'songpacks') if os.path.exists('.toa') else os.path.join('assets', 'songpacks')
@@ -493,21 +505,35 @@ def show_loading_screen():
         if os.path.exists(songpacks_path):
             files = os.listdir(songpacks_path)
             debug_log.append(f"Files in songpacks: {files}")
+        else:
+            debug_log.append("songpacks_path DOES NOT EXIST!")
         
         packs = scan_and_load_songpacks(songpacks_path)
-        debug_log.append(f"Loaded {len(packs)} packs")
+        debug_log.append(f"✓ Loaded {len(packs)} packs")
         
     except Exception as e:
         import traceback
-        debug_log.append(f"ERROR: {e}")
+        debug_log.append(f"\n!!! ERROR !!!")
+        debug_log.append(f"Exception: {e}")
+        debug_log.append(f"\nFull traceback:")
         debug_log.append(traceback.format_exc())
         
         # Write debug log to file
-        with open('songpack_debug.log', 'w') as f:
-            f.write('\n'.join(debug_log))
+        try:
+            with open('songpack_debug.log', 'w') as f:
+                f.write('\n'.join(debug_log))
+        except:
+            pass
         
         print('\n'.join(debug_log))
         raise
+    
+    # Always write final log
+    try:
+        with open('songpack_debug.log', 'w') as f:
+            f.write('\n'.join(debug_log))
+    except:
+        pass
     
     # Cache for level metadata
     level_metadata_cache = {}
