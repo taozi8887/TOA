@@ -1,5 +1,5 @@
 {
-  "version": "0.7.1",
+  "version": "0.7.2",
   "release_date": "2026-02-07",
   "manifest_version": 1,
   "files": {
@@ -47,7 +47,7 @@
     },
     "code": {
       "main.py": {
-        "hash": "c1d829ad6c853ab1b4bc887bb4e11634e4636083538db2440fbc26651b491968",
+        "hash": "917cbc7457de31cd07aef577b81a697089816b168ef4c9bd7b59b7106694a06b",
         "size": 159218
       },
       "auto_updater.py": {
@@ -70,9 +70,9 @@
   },
   "patches": {
     "from_0.7.1": {
-      "description": "Patch from 0.7.1 to 0.7.1",
+      "description": "Patch from 0.7.1 to 0.7.2",
       "changed_files": [
-        "launcher.py"
+        "main.py"
       ],
       "removed_files": []
     }
