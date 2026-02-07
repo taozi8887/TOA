@@ -68,17 +68,9 @@
       }
     }
   },
-  "patches": {
-    "from_0.7.1": {
-      "description": "Patch from 0.7.1 to 0.7.2",
-      "changed_files": [
-        "main.py"
-      ],
-      "removed_files": []
-    }
-  },
+  "patches": {},
   "rollback": {
-    "previous_version": "0.7.1",
+    "previous_version": "0.7.2",
     "can_rollback": true
   }
 }
