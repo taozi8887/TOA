@@ -1,5 +1,5 @@
 {
-  "version": "0.7.15",
+  "version": "0.7.16",
   "release_date": "2026-02-07",
   "manifest_version": 1,
   "files": {
@@ -40,15 +40,15 @@
         "hash": "4d51b8fac5c06f492db45b306f3645bcbf1f312a60c8d2c834ead0ad8207948d",
         "size": 5826
       },
-      "songpacks/Xiao's Solo Beginner Pack II.zip": {
-        "hash": "d29a7343a3b520cc62290c219c1c797f70a8327b8da289dccf562b46a761777c",
-        "size": 37281370
+      "songpacks/Piano Minipack of Elegance.zip": {
+        "hash": "98f45ed53ba948375ca656e4b7d0370ecf8a97437cb700d74aba877a0ce92821",
+        "size": 66600524
       }
     },
     "code": {
       "main.py": {
-        "hash": "825f970d807e9d821b04fb122f1804471d56bf534a62e41cfde9bffb4caba99a",
-        "size": 162984
+        "hash": "b1e83ba1791aeb5ff1ab3a9f7971365db5c22540a36f7d1bb2b77efb8a4ac6b7",
+        "size": 163307
       },
       "auto_updater.py": {
         "hash": "71dcf17c5100b62bc73e4472fb5ddcaa724835714fcecc4ca6341577c4ea1b61",
@@ -69,17 +69,19 @@
     }
   },
   "patches": {
-    "from_0.7.14": {
-      "description": "Patch from 0.7.14 to 0.7.15",
+    "from_0.7.15": {
+      "description": "Patch from 0.7.15 to 0.7.16",
       "changed_files": [
-        "main.py",
-        "songpack_ui.py"
+        "assets/songpacks/Piano Minipack of Elegance.zip",
+        "main.py"
       ],
-      "removed_files": []
+      "removed_files": [
+        "assets/songpacks/Xiao's Solo Beginner Pack II.zip"
+      ]
     }
   },
   "rollback": {
-    "previous_version": "0.7.14",
+    "previous_version": "0.7.15",
     "can_rollback": true
   }
 }
