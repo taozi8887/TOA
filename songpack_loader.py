@@ -688,6 +688,18 @@ def extract_songpack(zip_path, extract_to='songpacks/extracted'):
             zip_ref.extractall(pack_dir)
         
         print(f"Extracted '{pack_name}'")
+        
+        # Force file system sync on Windows to ensure all files are visible
+        # This fixes an issue where os.listdir() might not see all extracted files immediately
+        try:
+            if hasattr(os, 'sync'):
+                os.sync()
+            else:
+                # Windows doesn't have os.sync, use a small delay instead
+                import time
+                time.sleep(0.1)
+        except:
+            pass
     
     # Handle nested folder structure (common in song packs)
     # If there's only one folder at the root, use that as the actual pack dir
