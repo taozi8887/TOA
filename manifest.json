@@ -68,21 +68,9 @@
       }
     }
   },
-  "patches": {
-    "from_0.6.31": {
-      "description": "Patch from 0.6.31 to 0.7.0",
-      "changed_files": [
-        "assets/songpacks/Xiao's Solo Beginner Pack II.zip",
-        "main.py"
-      ],
-      "removed_files": [
-        "assets/songpacks/012s Easy Pakcage.zip",
-        "assets/songpacks/10Dollar Dump Dump Revolutions 4.zip"
-      ]
-    }
-  },
+  "patches": {},
   "rollback": {
-    "previous_version": "0.6.31",
+    "previous_version": "0.7.0",
     "can_rollback": true
   }
 }
