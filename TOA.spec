@@ -22,8 +22,6 @@ a = Analysis(
         'pygame',
         'pygame.gfxdraw',
         'wave',
-        'unzip',
-        'osu_to_level',
         'songpack_loader',
         'songpack_ui'
     ],
