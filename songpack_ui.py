@@ -365,12 +365,14 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
     selected_pack = None
     import_button_hovered = False
     
-    # Import button setup
+    # Import button setup - centered in info panel area
     button_font = get_cached_font(['meiryo', 'msgothic', 'yugothic', 'arial'], 24)
     button_width = 240
     button_height = 50
-    button_x = info_panel_x + 20
-    button_y = window_height - 90
+    info_panel_width = window_width - info_panel_x - 50
+    info_panel_height = window_height - 200 - 120  # From y=120 to y=window_height-200
+    button_x = info_panel_x + (info_panel_width - button_width) // 2
+    button_y = 120 + (info_panel_height - button_height) // 2
     import_button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
     
     while selected_pack is None:
@@ -453,6 +455,25 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
         hint_text = font_hint.render("ESC: Back  |  Scroll: Navigate", True, GRAY)
         hint_rect = hint_text.get_rect(midright=(window_width - 30, window_height - 30))
         screen.blit(hint_text, hint_rect)
+        
+        # Draw import button FIRST (so info panel draws over it)
+        button_color = (80, 180, 80) if import_button_hovered else (60, 140, 60)
+        button_border_color = (120, 220, 120) if import_button_hovered else (100, 180, 100)
+        
+        pygame.draw.rect(screen, button_color, import_button_rect, border_radius=8)
+        pygame.draw.rect(screen, button_border_color, import_button_rect, 2, border_radius=8)
+        
+        button_text = button_font.render("Set Folder", True, WHITE)
+        button_text_rect = button_text.get_rect(center=import_button_rect.center)
+        screen.blit(button_text, button_text_rect)
+        
+        # Add a small info text under the button
+        if game_settings.get('custom_songpack_folder'):
+            info_text = font_hint.render("Custom folder set", True, GREEN)
+        else:
+            info_text = font_hint.render("Choose songpack folder", True, GRAY)
+        info_text_rect = info_text.get_rect(midtop=(import_button_rect.centerx, import_button_rect.bottom + 5))
+        screen.blit(info_text, info_text_rect)
         
         # Update hover animations
         for idx in list(hover_animation.keys()):
@@ -565,8 +586,10 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
         if hovered_index is not None and hovered_index < len(packs):
             pack = packs[hovered_index]
             
-            # Info panel background
+            # Info panel background - solid black first to cover button
             info_panel_rect = pygame.Rect(info_panel_x, 120, window_width - info_panel_x - 50, window_height - 200)
+            pygame.draw.rect(screen, BLACK, info_panel_rect)
+            # Semi-transparent white overlay
             info_bg = pygame.Surface((info_panel_rect.width, info_panel_rect.height))
             info_bg.set_alpha(30)
             info_bg.fill(WHITE)
@@ -730,25 +753,6 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
                         screen.blit(img_scaled, (img_x, img_y))
                 except:
                     pass
-        
-        # Draw import button
-        button_color = (80, 180, 80) if import_button_hovered else (60, 140, 60)
-        button_border_color = (120, 220, 120) if import_button_hovered else (100, 180, 100)
-        
-        pygame.draw.rect(screen, button_color, import_button_rect, border_radius=8)
-        pygame.draw.rect(screen, button_border_color, import_button_rect, 2, border_radius=8)
-        
-        button_text = button_font.render("Set Folder", True, WHITE)
-        button_text_rect = button_text.get_rect(center=import_button_rect.center)
-        screen.blit(button_text, button_text_rect)
-        
-        # Add a small info text under the button
-        if game_settings.get('custom_songpack_folder'):
-            info_text = font_hint.render("Custom folder set", True, GREEN)
-        else:
-            info_text = font_hint.render("Choose songpack folder", True, GRAY)
-        info_text_rect = info_text.get_rect(midtop=(import_button_rect.centerx, import_button_rect.bottom + 5))
-        screen.blit(info_text, info_text_rect)
         
         pygame.display.flip()
         clock.tick(60)
@@ -1119,12 +1123,14 @@ def show_pack_levels_selector(screen, pack_info, game_settings, resource_path_fu
     selected_level = None
     import_button_hovered = False
     
-    # Import button setup (same position as in songpack selector)
+    # Import button setup - centered in info panel area (same as songpack selector)
     button_font = get_cached_font(['meiryo', 'msgothic', 'yugothic', 'arial'], 24)
     button_width = 240
     button_height = 50
-    button_x = info_panel_x + 20
-    button_y = window_height - 90
+    info_panel_width = window_width - info_panel_x - 50
+    info_panel_height = window_height - 200 - 120  # From y=120 to y=window_height-200
+    button_x = info_panel_x + (info_panel_width - button_width) // 2
+    button_y = 120 + (info_panel_height - button_height) // 2
     import_button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
     
     while selected_level is None:
@@ -1210,6 +1216,25 @@ def show_pack_levels_selector(screen, pack_info, game_settings, resource_path_fu
         hint_text = font_hint.render("ESC: Back  |  Scroll: Navigate", True, GRAY)
         hint_rect = hint_text.get_rect(midright=(window_width - 30, window_height - 30))
         screen.blit(hint_text, hint_rect)
+        
+        # Draw import button FIRST (so info panel draws over it)
+        button_color = (80, 180, 80) if import_button_hovered else (60, 140, 60)
+        button_border_color = (120, 220, 120) if import_button_hovered else (100, 180, 100)
+        
+        pygame.draw.rect(screen, button_color, import_button_rect, border_radius=8)
+        pygame.draw.rect(screen, button_border_color, import_button_rect, 2, border_radius=8)
+        
+        button_text = button_font.render("Set Folder", True, WHITE)
+        button_text_rect = button_text.get_rect(center=import_button_rect.center)
+        screen.blit(button_text, button_text_rect)
+        
+        # Add a small info text under the button
+        if game_settings.get('custom_songpack_folder'):
+            info_text = font_hint.render("Custom folder set", True, GREEN)
+        else:
+            info_text = font_hint.render("Choose songpack folder", True, GRAY)
+        info_text_rect = info_text.get_rect(midtop=(import_button_rect.centerx, import_button_rect.bottom + 5))
+        screen.blit(info_text, info_text_rect)
         
         # Update hover animations
         for idx in list(hover_animation.keys()):
@@ -1393,8 +1418,10 @@ def show_pack_levels_selector(screen, pack_info, game_settings, resource_path_fu
                     except:
                         pass
             
-            # Info panel background
+            # Info panel background - solid black first to cover button
             info_panel_rect = pygame.Rect(info_panel_x, 120, window_width - info_panel_x - 50, window_height - 200)
+            pygame.draw.rect(screen, BLACK, info_panel_rect)
+            # Semi-transparent white overlay
             info_bg = pygame.Surface((info_panel_rect.width, info_panel_rect.height))
             info_bg.set_alpha(30)
             info_bg.fill(WHITE)
@@ -1504,26 +1531,6 @@ def show_pack_levels_selector(screen, pack_info, game_settings, resource_path_fu
                     screen.blit(bg_preview, (preview_x, info_y + 10))
                 except:
                     pass
-        
-        # Draw import button (same as in songpack selector)
-        button_color = (80, 180, 80) if import_button_hovered else (60, 140, 60)
-        button_border_color = (120, 220, 120) if import_button_hovered else (100, 180, 100)
-        GREEN = (112, 255, 148)
-        
-        pygame.draw.rect(screen, button_color, import_button_rect, border_radius=8)
-        pygame.draw.rect(screen, button_border_color, import_button_rect, 2, border_radius=8)
-        
-        button_text = button_font.render("Set Folder", True, WHITE)
-        button_text_rect = button_text.get_rect(center=import_button_rect.center)
-        screen.blit(button_text, button_text_rect)
-        
-        # Add a small info text under the button
-        if game_settings.get('custom_songpack_folder'):
-            info_text = font_hint.render("Custom folder set", True, GREEN)
-        else:
-            info_text = font_hint.render("Choose songpack folder", True, GRAY)
-        info_text_rect = info_text.get_rect(midtop=(import_button_rect.centerx, import_button_rect.bottom + 5))
-        screen.blit(info_text, info_text_rect)
         
         pygame.display.flip()
         clock.tick(60)
