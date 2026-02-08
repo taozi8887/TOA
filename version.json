@@ -14,11 +14,11 @@
       "songpacks/Piano Minipack of Elegance.zip": "98f45ed53ba948375ca656e4b7d0370ecf8a97437cb700d74aba877a0ce92821"
     },
     "code": {
-      "main.py": "f66646c21703bed9a38f0dd55ec044fa867069ac392bd44dbcc52deebe32fd75",
+      "main.py": "368f7db593e5f487cf4009fcc018c6925cd5571e65df6fb95bd53adca12dbb96",
       "auto_updater.py": "3a1ee33ef885cd5a8b80d9a330c6b0778bb5ac1ba53da278f449ab12121a3937",
       "launcher.py": "4b3190d0b5e399e159eb31367fff87efda92bd8da4da4f12204064bc3649fb94",
       "songpack_loader.py": "98aa7923a2add027ffee83dab64693ff466490a7da0a086cc3e502cc5fa501e4",
-      "songpack_ui.py": "bc1c2d6ef96b29453f671fb8478e0fe9727f98b3fa73be41bdc74fc3f4a79617"
+      "songpack_ui.py": "0f6852ff99864620c1d4b05e988e22e1f14167ae2ed0f2119a41d18d758df4b6"
     }
   }
 }
