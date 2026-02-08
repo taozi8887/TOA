@@ -68,19 +68,9 @@
       }
     }
   },
-  "patches": {
-    "from_0.7.46": {
-      "description": "Patch from 0.7.46 to 0.7.47",
-      "changed_files": [
-        "main.py",
-        "launcher.py",
-        "songpack_loader.py"
-      ],
-      "removed_files": []
-    }
-  },
+  "patches": {},
   "rollback": {
-    "previous_version": "0.7.46",
+    "previous_version": "0.7.47",
     "can_rollback": true
   }
 }
