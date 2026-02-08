@@ -1,5 +1,5 @@
 {
-  "version": "0.7.37",
+  "version": "0.7.38",
   "release_date": "2026-02-07",
   "manifest_version": 1,
   "files": {
@@ -47,7 +47,7 @@
     },
     "code": {
       "main.py": {
-        "hash": "32e796f84098659f25d61e0d33371e1a91bd46b0b82698d8fd726afff02a41c8",
+        "hash": "8f267373087c39a5888e94ac5e62a73ba4df4f3a3d78607d988931197b61f862",
         "size": 161908
       },
       "auto_updater.py": {
@@ -59,8 +59,8 @@
         "size": 24296
       },
       "songpack_loader.py": {
-        "hash": "e3a95dc36c5e53844b2043283c03aea235c6f611dbb8f5be0b72bf48a1e6480a",
-        "size": 43388
+        "hash": "71689e6655343dc0c1635e72a52467714ff87566880ea22942e433352e28e214",
+        "size": 45604
       },
       "songpack_ui.py": {
         "hash": "dab5752d345e4a2ec5cebc77f335f444da55d18b42ce723c65df736ec17ca691",
@@ -69,8 +69,8 @@
     }
   },
   "patches": {
-    "from_0.7.36": {
-      "description": "Patch from 0.7.36 to 0.7.37",
+    "from_0.7.37": {
+      "description": "Patch from 0.7.37 to 0.7.38",
       "changed_files": [
         "main.py",
         "songpack_loader.py"
@@ -79,7 +79,7 @@
     }
   },
   "rollback": {
-    "previous_version": "0.7.36",
+    "previous_version": "0.7.37",
     "can_rollback": true
   }
 }
