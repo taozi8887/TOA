@@ -1,5 +1,5 @@
 {
-  "version": "0.7.51",
+  "version": "0.7.52",
   "release_date": "2026-02-07",
   "manifest_version": 1,
   "files": {
@@ -47,7 +47,7 @@
     },
     "code": {
       "main.py": {
-        "hash": "f8db3b6a77e42a45b5eb16d6d13b2042650bcc62cd4edf4cb2d5fec2a831b41f",
+        "hash": "910acc94c6dc6784a9fd52a3a7131912b9de7d8053e12b02cedc65c713aac010",
         "size": 171145
       },
       "auto_updater.py": {
@@ -63,14 +63,14 @@
         "size": 40982
       },
       "songpack_ui.py": {
-        "hash": "809d0500e203807ddfe38e96c1764e20a6072c29caf10df118e89e00b8c6e189",
-        "size": 70860
+        "hash": "c56f6494a0b73a4110e80dfacd223ab468b828a00a68418a570c8d299550d526",
+        "size": 70902
       }
     }
   },
   "patches": {
-    "from_0.7.50": {
-      "description": "Patch from 0.7.50 to 0.7.51",
+    "from_0.7.51": {
+      "description": "Patch from 0.7.51 to 0.7.52",
       "changed_files": [
         "main.py",
         "songpack_ui.py"
@@ -79,7 +79,7 @@
     }
   },
   "rollback": {
-    "previous_version": "0.7.50",
+    "previous_version": "0.7.51",
     "can_rollback": true
   }
 }
