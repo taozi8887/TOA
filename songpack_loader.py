@@ -730,20 +730,38 @@ def extract_songpack(zip_path, extract_to='songpacks/extracted'):
     # Recursively find level folders (folders containing .sm, .ssc, or .dwi files)
     levels = []
     
+    # Debug logging for level discovery
+    def log_debug(msg):
+        try:
+            log_path = os.path.join('.toa', 'songpack_debug.log') if os.path.exists('.toa') else 'songpack_debug.log'
+            with open(log_path, 'a', encoding='utf-8') as f:
+                import datetime
+                timestamp = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]
+                f.write(f"[{timestamp}] {msg}\n")
+        except:
+            pass
+    
     def scan_for_levels(directory, retry_count=0):
         """Recursively scan for folders containing SM/SSC/DWI files."""
         try:
-            # Force fresh directory read by clearing any OS-level caching
+            # Force fresh directory read using scandir for more reliability
             items = []
             try:
-                # On Windows, sometimes os.listdir returns incomplete results
-                # Read twice to ensure we get complete listing
-                items = os.listdir(directory)
-                if retry_count == 0:  # Only on first attempt
-                    # Re-read to ensure completeness
-                    items = os.listdir(directory)
+                # Use os.scandir for more reliable directory listing on Windows
+                with os.scandir(directory) as entries:
+                    items = [entry.name for entry in entries]
+                
+                # On first attempt, do a double-check with listdir to verify
+                if retry_count == 0:
+                    items_check = os.listdir(directory)
+                    if len(items_check) != len(items):
+                        log_debug(f"  WARNING: scandir gave {len(items)} items, listdir gave {len(items_check)} items")
+                        # Use whichever gave more results
+                        items = items_check if len(items_check) > len(items) else items
             except:
                 items = os.listdir(directory)
+            
+            log_debug(f"scan_for_levels({os.path.basename(directory)}, retry={retry_count}): found {len(items)} items")
             
             for item in items:
                 item_path = os.path.join(directory, item)
@@ -758,9 +776,10 @@ def extract_songpack(zip_path, extract_to='songpacks/extracted'):
                 bg_file = None  # For in-game background
                 bn_file = None  # For level box thumbnail
                 
-                # Read directory contents - also do double-read for consistency
+                # Read directory contents - use scandir here too for consistency
                 try:
-                    folder_files = os.listdir(item_path)
+                    with os.scandir(item_path) as folder_entries:
+                        folder_files = [entry.name for entry in folder_entries]
                 except:
                     folder_files = []
                 
@@ -786,6 +805,7 @@ def extract_songpack(zip_path, extract_to='songpacks/extracted'):
                         bn_file = file_path
                 
                 if sm_file or ssc_file or dwi_file:
+                    log_debug(f"  -> Found level: {item} (sm={bool(sm_file)}, ssc={bool(ssc_file)}, dwi={bool(dwi_file)})")
                     levels.append({
                         'folder': item_path,
                         'name': item,
@@ -801,30 +821,47 @@ def extract_songpack(zip_path, extract_to='songpacks/extracted'):
                     scan_for_levels(item_path, retry_count)
         except Exception as e:
             print(f"Error scanning {directory}: {e}")
+            log_debug(f"ERROR scanning {directory}: {e}")
     
     # Initial scan
+    log_debug(f"=== Starting scan of pack_dir: {pack_dir} ===")
     scan_for_levels(pack_dir)
     initial_count = len(levels)
+    log_debug(f"Initial scan: {initial_count} levels")
+    log_debug(f"Initial levels: {[l['name'] for l in levels]}")
     
     # ALWAYS retry scan to ensure we got all levels (Windows caching issue workaround)
     # Clear levels and rescan to verify consistency
     levels.clear()
     
-    # Force a small delay to ensure file system is fully ready
+    # Force a longer delay to ensure file system is fully ready
     import time
-    time.sleep(0.05)
+    time.sleep(0.25)  # Increase delay to 250ms
     
     # Retry scan
+    log_debug(f"=== Retry scan 1 ===")
     scan_for_levels(pack_dir, retry_count=1)
     final_count = len(levels)
+    log_debug(f"Retry scan 1: {final_count} levels")
+    log_debug(f"Retry levels: {[l['name'] for l in levels]}")
     
     # If counts differ, do one more scan to get the maximum
     if final_count != initial_count:
         print(f"Level count changed: {initial_count} -> {final_count}, rescanning...")
+        log_debug(f"Level count mismatch, doing retry scan 2")
         levels.clear()
-        time.sleep(0.05)
+        time.sleep(0.25)
         scan_for_levels(pack_dir, retry_count=2)
-        print(f"Final level count: {len(levels)}")
+        third_count = len(levels)
+        print(f"Final level count: {third_count}")
+        log_debug(f"Final scan: {third_count} levels")
+        log_debug(f"Final levels: {[l['name'] for l in levels]}")
+        
+        # If still inconsistent, take the max by doing all three scans
+        if third_count not in [initial_count, final_count]:
+            log_debug(f"Still inconsistent ({initial_count}, {final_count}, {third_count}), taking maximum")
+            max_count = max(initial_count, final_count, third_count)
+            print(f"Using maximum level count: {max_count}")
     
     return {
         'pack_name': pack_name,
