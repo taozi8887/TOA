@@ -825,43 +825,54 @@ def extract_songpack(zip_path, extract_to='songpacks/extracted'):
     
     # Initial scan
     log_debug(f"=== Starting scan of pack_dir: {pack_dir} ===")
-    scan_for_levels(pack_dir)
-    initial_count = len(levels)
-    log_debug(f"Initial scan: {initial_count} levels")
-    log_debug(f"Initial levels: {[l['name'] for l in levels]}")
     
-    # ALWAYS retry scan to ensure we got all levels (Windows caching issue workaround)
-    # Clear levels and rescan to verify consistency
-    levels.clear()
+    # Do 3 scans with delays and MERGE results (take union to get ALL levels)
+    all_levels_dict = {}  # Use dict to dedupe by folder path
     
-    # Force a longer delay to ensure file system is fully ready
-    import time
-    time.sleep(0.25)  # Increase delay to 250ms
-    
-    # Retry scan
-    log_debug(f"=== Retry scan 1 ===")
-    scan_for_levels(pack_dir, retry_count=1)
-    final_count = len(levels)
-    log_debug(f"Retry scan 1: {final_count} levels")
-    log_debug(f"Retry levels: {[l['name'] for l in levels]}")
-    
-    # If counts differ, do one more scan to get the maximum
-    if final_count != initial_count:
-        print(f"Level count changed: {initial_count} -> {final_count}, rescanning...")
-        log_debug(f"Level count mismatch, doing retry scan 2")
-        levels.clear()
-        time.sleep(0.25)
-        scan_for_levels(pack_dir, retry_count=2)
-        third_count = len(levels)
-        print(f"Final level count: {third_count}")
-        log_debug(f"Final scan: {third_count} levels")
-        log_debug(f"Final levels: {[l['name'] for l in levels]}")
+    for scan_num in range(3):
+        if scan_num > 0:
+            import time
+            time.sleep(0.3)  # 300ms delay between scans
+            log_debug(f"=== Scan {scan_num + 1} (after delay) ===")
         
-        # If still inconsistent, take the max by doing all three scans
-        if third_count not in [initial_count, final_count]:
-            log_debug(f"Still inconsistent ({initial_count}, {final_count}, {third_count}), taking maximum")
-            max_count = max(initial_count, final_count, third_count)
-            print(f"Using maximum level count: {max_count}")
+        # Clear levels for this scan
+        levels.clear()
+        
+        # Force directory cache clear by accessing directory multiple ways
+        try:
+            # Try to invalidate OS cache
+            _ = os.stat(pack_dir)
+            _ = list(os.scandir(pack_dir))
+            _ = os.listdir(pack_dir)
+        except:
+            pass
+        
+        # Run scan
+        scan_for_levels(pack_dir, retry_count=scan_num)
+        scan_count = len(levels)
+        scan_names = [l['name'] for l in levels]
+        
+        log_debug(f"Scan {scan_num + 1}: found {scan_count} levels")
+        log_debug(f"Scan {scan_num + 1} levels: {scan_names}")
+        
+        # Merge this scan's results into all_levels_dict (keyed by folder path)
+        for level in levels:
+            folder_path = level['folder']
+            if folder_path not in all_levels_dict:
+                all_levels_dict[folder_path] = level
+                log_debug(f"  + Added: {level['name']}")
+            # else already have this level
+        
+        if scan_num == 0:
+            print(f"Initial scan found {scan_count} levels")
+    
+    # Convert merged dict back to list
+    levels = list(all_levels_dict.values())
+    final_count = len(levels)
+    
+    log_debug(f"=== Merged result: {final_count} unique levels ===")
+    log_debug(f"Final levels: {[l['name'] for l in levels]}")
+    print(f"Loaded {final_count} levels after merging {3} scans")
     
     return {
         'pack_name': pack_name,
