@@ -506,18 +506,23 @@ def main():
                 sys.exit()
             
             returning = False
-            last_level = None
+            restart_level = None
             while True:
-                result = game_main.main(level_json=last_level, returning_from_game=returning, preloaded_metadata=preloaded_metadata)
+                # Only pass level_json if restarting a specific level
+                if restart_level:
+                    result = game_main.main(level_json=restart_level, returning_from_game=returning, preloaded_metadata=preloaded_metadata)
+                    restart_level = None
+                else:
+                    result = game_main.main(returning_from_game=returning, preloaded_metadata=preloaded_metadata)
+                
                 if result is None:
                     break
                 elif isinstance(result, tuple) and result[0] == 'RESTART_LEVEL':
                     # Restart the same level
-                    last_level = result[1]
+                    restart_level = result[1]
                     returning = True
                 elif result == 'RESTART':
                     # Go back to level selector
-                    last_level = None
                     returning = True
                 else:
                     break
