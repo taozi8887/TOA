@@ -37,7 +37,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.7.45"
+__version__ = "0.7.46"
 
 # Settings management
 class Settings:

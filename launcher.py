@@ -506,11 +506,21 @@ def main():
                 sys.exit()
             
             returning = False
+            last_level = None
             while True:
-                result = game_main.main(returning_from_game=returning, preloaded_metadata=preloaded_metadata)
-                if result != 'RESTART':
+                result = game_main.main(level_json=last_level, returning_from_game=returning, preloaded_metadata=preloaded_metadata)
+                if result is None:
                     break
-                returning = True
+                elif isinstance(result, tuple) and result[0] == 'RESTART_LEVEL':
+                    # Restart the same level
+                    last_level = result[1]
+                    returning = True
+                elif result == 'RESTART':
+                    # Go back to level selector
+                    last_level = None
+                    returning = True
+                else:
+                    break
             
             # Pygame cleanup
             if 'pygame' in sys.modules:
