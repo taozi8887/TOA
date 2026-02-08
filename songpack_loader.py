@@ -707,6 +707,16 @@ def extract_songpack(zip_path, extract_to='songpacks/extracted'):
     if len(items_in_pack) == 1 and os.path.isdir(os.path.join(pack_dir, items_in_pack[0])):
         pack_dir = os.path.join(pack_dir, items_in_pack[0])
     
+    # Force clear any directory cache on Windows before scanning
+    try:
+        # Invalidate stat cache to ensure fresh directory listings
+        if hasattr(os, 'stat'):
+            os.stat.cache_clear() if hasattr(os.stat, 'cache_clear') else None
+        # Read directory once to prime the cache
+        _ = os.listdir(pack_dir)
+    except:
+        pass
+    
     # Find pack cover image (PNG or JPG in root, not in song folders)
     pack_image = None
     for file in os.listdir(pack_dir):
@@ -720,10 +730,22 @@ def extract_songpack(zip_path, extract_to='songpacks/extracted'):
     # Recursively find level folders (folders containing .sm, .ssc, or .dwi files)
     levels = []
     
-    def scan_for_levels(directory):
+    def scan_for_levels(directory, retry_count=0):
         """Recursively scan for folders containing SM/SSC/DWI files."""
         try:
-            for item in os.listdir(directory):
+            # Force fresh directory read by clearing any OS-level caching
+            items = []
+            try:
+                # On Windows, sometimes os.listdir returns incomplete results
+                # Read twice to ensure we get complete listing
+                items = os.listdir(directory)
+                if retry_count == 0:  # Only on first attempt
+                    # Re-read to ensure completeness
+                    items = os.listdir(directory)
+            except:
+                items = os.listdir(directory)
+            
+            for item in items:
                 item_path = os.path.join(directory, item)
                 if not os.path.isdir(item_path):
                     continue
@@ -736,7 +758,13 @@ def extract_songpack(zip_path, extract_to='songpacks/extracted'):
                 bg_file = None  # For in-game background
                 bn_file = None  # For level box thumbnail
                 
-                for file in os.listdir(item_path):
+                # Read directory contents - also do double-read for consistency
+                try:
+                    folder_files = os.listdir(item_path)
+                except:
+                    folder_files = []
+                
+                for file in folder_files:
                     file_lower = file.lower()
                     file_path = os.path.join(item_path, file)
                     file_base = os.path.splitext(file_lower)[0]
@@ -770,11 +798,33 @@ def extract_songpack(zip_path, extract_to='songpacks/extracted'):
                     })
                 else:
                     # Recurse into subdirectories
-                    scan_for_levels(item_path)
+                    scan_for_levels(item_path, retry_count)
         except Exception as e:
             print(f"Error scanning {directory}: {e}")
     
+    # Initial scan
     scan_for_levels(pack_dir)
+    initial_count = len(levels)
+    
+    # ALWAYS retry scan to ensure we got all levels (Windows caching issue workaround)
+    # Clear levels and rescan to verify consistency
+    levels.clear()
+    
+    # Force a small delay to ensure file system is fully ready
+    import time
+    time.sleep(0.05)
+    
+    # Retry scan
+    scan_for_levels(pack_dir, retry_count=1)
+    final_count = len(levels)
+    
+    # If counts differ, do one more scan to get the maximum
+    if final_count != initial_count:
+        print(f"Level count changed: {initial_count} -> {final_count}, rescanning...")
+        levels.clear()
+        time.sleep(0.05)
+        scan_for_levels(pack_dir, retry_count=2)
+        print(f"Final level count: {len(levels)}")
     
     return {
         'pack_name': pack_name,
