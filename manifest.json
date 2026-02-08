@@ -47,8 +47,8 @@
     },
     "code": {
       "main.py": {
-        "hash": "e5ab9b64ba4e95473cb041ae9946411887e34ca89405b9c830919099ecfc1cb8",
-        "size": 162721
+        "hash": "2b49cbeb95a5e50800ddd05a0469ee3aa1dd7142ba8f66712f2fa1a27c8bbe57",
+        "size": 163026
       },
       "auto_updater.py": {
         "hash": "3a1ee33ef885cd5a8b80d9a330c6b0778bb5ac1ba53da278f449ab12121a3937",
@@ -63,22 +63,23 @@
         "size": 40982
       },
       "songpack_ui.py": {
-        "hash": "0f6852ff99864620c1d4b05e988e22e1f14167ae2ed0f2119a41d18d758df4b6",
-        "size": 71589
+        "hash": "53343c76d1350675d21222d65cb5a1595ae8a8b23c5bb509a634f9e04442c8ad",
+        "size": 71920
       }
     }
   },
   "patches": {
-    "from_0.7.56": {
-      "description": "Patch from 0.7.56 to 0.8.0",
+    "from_0.8.0": {
+      "description": "Patch from 0.8.0 to 0.8.0",
       "changed_files": [
-        "main.py"
+        "main.py",
+        "songpack_ui.py"
       ],
       "removed_files": []
     }
   },
   "rollback": {
-    "previous_version": "0.7.56",
+    "previous_version": "0.8.0",
     "can_rollback": true
   }
 }
