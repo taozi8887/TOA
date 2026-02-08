@@ -1872,7 +1872,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     screen_width, screen_height = screen.get_size()
     center_x, center_y = screen_width // 2, screen_height // 2
 
-    square_size = 70
+    square_size = 60
     spacing = 110  # Horizontal spacing between boxes
     border_width = 3
     radius = 10
@@ -1932,18 +1932,24 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         level.append((event["t"], event["box"], event["color"], hitsound_data))
 
     # Calculate optimal approach duration to prevent tile overlap
-    # Find minimum time gap between any consecutive notes
+    # Group notes by box (lane) and find minimum time gap within each lane
+    notes_by_box = {0: [], 1: [], 2: [], 3: []}
+    for t, box, color, hs in level:
+        notes_by_box[box].append(t)
+    
+    # Find minimum time gap between consecutive notes in the SAME lane
     min_time_gap = float('inf')
-    if len(level) > 1:
-        for i in range(len(level) - 1):
-            time_gap = level[i + 1][0] - level[i][0]
-            if time_gap > 0 and time_gap < min_time_gap:
-                min_time_gap = time_gap
+    for box in range(4):
+        if len(notes_by_box[box]) > 1:
+            for i in range(len(notes_by_box[box]) - 1):
+                time_gap = notes_by_box[box][i + 1] - notes_by_box[box][i]
+                if time_gap > 0 and time_gap < min_time_gap:
+                    min_time_gap = time_gap
     
     # Calculate approach duration that ensures tiles never overlap
     # For horizontal layout at bottom with vertical movement
-    tile_size = 65  # Original size restored
-    min_spacing = 5  # Tight spacing
+    tile_size = 60
+    min_spacing = 15  # Minimum visual spacing between tiles
     min_distance_needed = tile_size + min_spacing
     # Tiles travel from top (y=0) to bottom boxes (screen_height - 80)
     bottom_offset = screen_height // 2 - 80
@@ -1953,8 +1959,8 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     # So: approach_duration <= (travel_distance * min_time_gap) / min_distance_needed
     if min_time_gap != float('inf'):
         max_safe_approach_duration = (travel_distance * min_time_gap) / min_distance_needed
-        # Clamp between 0.8s (minimum readable) and 3.0s (maximum for visibility)
-        APPROACH_DURATION = max(0.8, min(3.0, max_safe_approach_duration))
+        # Clamp between 0.6s (minimum readable) and 3.0s (maximum for visibility)
+        APPROACH_DURATION = max(0.6, min(3.0, max_safe_approach_duration))
     else:
         # Single note or no notes, use default
         APPROACH_DURATION = 1.5
@@ -3011,7 +3017,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                     screen.blit(gradient_surface, (int(gradient_x), int(edge_y)))
 
         # Approach indicators
-        indicator_size = 65  # Original size restored
+        indicator_size = 60  # Original size restored
         
         # Sort approach indicators by progress (render back-to-front for proper layering)
         # Calculate progress for each and sort by it
@@ -3072,9 +3078,9 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         health_bar_width = int(screen_width * 0.3)
         health_bar_x = (screen_width - health_bar_width) // 2
         if scroll_direction == 'down':
-            health_bar_y = 45  # At top when tiles spawn from top
+            health_bar_y = 50  # At top when tiles spawn from top
         else:  # 'up'
-            health_bar_y = screen_height - 45 - 12  # At bottom when tiles spawn from bottom (minus thickness)
+            health_bar_y = screen_height - 50 - 12  # At bottom when tiles spawn from bottom (minus thickness)
         health_bar_thickness = 12  # Decreased from 20
         
         # Update displayed_health: snap down immediately on loss, animate up on gain
@@ -3449,7 +3455,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                 screen_flash_alpha = 0
 
         pygame.display.flip()
-        clock.tick(60)
+        clock.tick(120)
 
     pygame.mixer.music.stop()
     return None

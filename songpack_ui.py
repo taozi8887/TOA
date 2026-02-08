@@ -1052,17 +1052,24 @@ def show_pack_levels_selector(screen, pack_info, game_settings, resource_path_fu
                 return int(parts[0]) * 60 + int(parts[1])
             except:
                 return 0
-        # For BPM/NPM, extract the number
+        # For ranges like "3-5", extract the maximum value
+        if '-' in str(text) and not str(text).startswith('-'):
+            try:
+                parts = str(text).split('-')
+                return float(parts[-1])  # Return max value from range
+            except:
+                return 0
+        # For single values, extract the number
         try:
             return float(str(text).split()[0])
         except:
             return 0
     
-    # Multi-key sort: difficulty (x[2]), BPM (x[7]), NPM (x[8]), length (x[9])
+    # Multi-key sort: difficulty (x[2]), max NPS (x[8]), BPM (x[7]), length (x[9])
     level_metadata.sort(key=lambda x: (
         get_difficulty_order(x[2]),  # Primary: difficulty
-        parse_numeric_value(x[7]),   # Secondary: BPM
-        parse_numeric_value(x[8]),   # Tertiary: NPM
+        parse_numeric_value(x[8]),   # Secondary: max NPS (density)
+        parse_numeric_value(x[7]),   # Tertiary: BPM
         parse_numeric_value(x[9])    # Quaternary: length
     ))
     
