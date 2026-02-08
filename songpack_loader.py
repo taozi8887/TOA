@@ -665,9 +665,14 @@ def convert_chart_to_json(sm_data, chart, colors=['red', 'blue']): #, 'yellow', 
     notes.sort(key=lambda x: x['t'])
     return notes
 
-def extract_songpack(zip_path, extract_to='songpacks/extracted'):
+def extract_songpack(zip_path, extract_to='songpacks/extracted', force_reextract=False):
     """
     Extract a song pack ZIP file.
+    
+    Args:
+        zip_path: Path to the ZIP file
+        extract_to: Directory to extract to
+        force_reextract: If True, delete and re-extract even if already extracted
     
     Returns: Dict with pack info and list of level folders
     """
@@ -679,8 +684,14 @@ def extract_songpack(zip_path, extract_to='songpacks/extracted'):
     
     # Check if already extracted
     if os.path.exists(pack_dir):
-        print(f"Pack '{pack_name}' already extracted, skipping...")
-    else:
+        if force_reextract:
+            print(f"Force re-extracting '{pack_name}'...")
+            import shutil
+            shutil.rmtree(pack_dir)
+        else:
+            print(f"Pack '{pack_name}' already extracted, skipping...")
+    
+    if not os.path.exists(pack_dir):
         # Extract ZIP
         os.makedirs(pack_dir, exist_ok=True)
         
@@ -711,12 +722,9 @@ def extract_songpack(zip_path, extract_to='songpacks/extracted'):
     def scan_for_levels(directory):
         """Recursively scan for folders containing SM/SSC/DWI files."""
         try:
-            # Use os.scandir for more reliable directory reading
-            with os.scandir(directory) as entries:
-                items = [(entry.name, entry.path, entry.is_dir()) for entry in entries]
-            
-            for item_name, item_path, is_dir in items:
-                if not is_dir:
+            for item in os.listdir(directory):
+                item_path = os.path.join(directory, item)
+                if not os.path.isdir(item_path):
                     continue
                 
                 # Check if this folder contains SM/SSC/DWI files
@@ -727,18 +735,9 @@ def extract_songpack(zip_path, extract_to='songpacks/extracted'):
                 bg_file = None  # For in-game background
                 bn_file = None  # For level box thumbnail
                 
-                try:
-                    with os.scandir(item_path) as file_entries:
-                        files = [(e.name, e.path, e.is_file()) for e in file_entries]
-                except Exception as e:
-                    print(f"Error reading {item_path}: {e}")
-                    continue
-                
-                for file_name, file_path, is_file in files:
-                    if not is_file:
-                        continue
-                        
-                    file_lower = file_name.lower()
+                for file in os.listdir(item_path):
+                    file_lower = file.lower()
+                    file_path = os.path.join(item_path, file)
                     file_base = os.path.splitext(file_lower)[0]
                     file_ext = os.path.splitext(file_lower)[1]
                     
@@ -748,7 +747,7 @@ def extract_songpack(zip_path, extract_to='songpacks/extracted'):
                         ssc_file = file_path
                     elif file_lower.endswith('.dwi'):
                         dwi_file = file_path
-                    elif file_lower.endswith(('.mp3', '.ogg', '.wav', '.flac')):
+                    elif file_lower.endswith(('.mp3','.ogg', '.wav', '.flac')):
                         audio_file = file_path
                     # In-game background (any file containing 'bg' with image extension)
                     elif 'bg' in file_base and file_ext in ['.png', '.jpg', '.jpeg']:
@@ -760,7 +759,7 @@ def extract_songpack(zip_path, extract_to='songpacks/extracted'):
                 if sm_file or ssc_file or dwi_file:
                     levels.append({
                         'folder': item_path,
-                        'name': item_name,
+                        'name': item,
                         'audio': audio_file,
                         'sm_file': sm_file,
                         'ssc_file': ssc_file,
@@ -773,10 +772,10 @@ def extract_songpack(zip_path, extract_to='songpacks/extracted'):
                     scan_for_levels(item_path)
         except Exception as e:
             print(f"Error scanning {directory}: {e}")
-            import traceback
-            traceback.print_exc()
     
     scan_for_levels(pack_dir)
+    
+    print(f"Found {len(levels)} levels in '{pack_name}'")
     
     return {
         'pack_name': pack_name,
@@ -975,20 +974,20 @@ def scan_and_load_songpacks(songpacks_dir='songpacks', extract_to=None, custom_d
     # Scan directories to check
     dirs_to_scan = []
     if os.path.exists(songpacks_dir):
-        dirs_to_scan.append(songpacks_dir)
+        dirs_to_scan.append((songpacks_dir, False))  # (dir, force_reextract)
         log_debug(f"Added songpacks_dir to scan: {songpacks_dir}")
     else:
         log_debug(f"songpacks_dir does not exist: {songpacks_dir}")
     if custom_dir and os.path.exists(custom_dir):
-        dirs_to_scan.append(custom_dir)
-        log_debug(f"Added custom_dir to scan: {custom_dir}")
+        dirs_to_scan.append((custom_dir, True))  # Force re-extract for custom folder
+        log_debug(f"Added custom_dir to scan: {custom_dir} (force_reextract=True)")
     elif custom_dir:
         log_debug(f"custom_dir specified but does not exist: {custom_dir}")
     
     log_debug(f"Total dirs to scan: {len(dirs_to_scan)}")
     
-    for scan_dir in dirs_to_scan:
-        log_debug(f"Scanning directory: {scan_dir}")
+    for scan_dir, force_reextract in dirs_to_scan:
+        log_debug(f"Scanning directory: {scan_dir} (force_reextract={force_reextract})")
         try:
             files = os.listdir(scan_dir)
             log_debug(f"  Found {len(files)} files")
@@ -998,10 +997,10 @@ def scan_and_load_songpacks(songpacks_dir='songpacks', extract_to=None, custom_d
                     zip_path = os.path.join(scan_dir, file)
                     log_debug(f"    Processing ZIP: {zip_path}")
                     try:
-                        pack_info = extract_songpack(zip_path, extract_to=extract_to)
+                        pack_info = extract_songpack(zip_path, extract_to=extract_to, force_reextract=force_reextract)
                         packs.append(pack_info)
                         print(f"Loaded pack: {pack_info['pack_name']} ({len(pack_info['levels'])} levels)")
-                        log_debug(f"    SUCCESS: Loaded {pack_info['pack_name']}")
+                        log_debug(f"    SUCCESS: Loaded {pack_info['pack_name']} with {len(pack_info['levels'])} levels")
                     except Exception as e:
                         print(f"Error loading {file}: {e}")
                         log_debug(f"    ERROR loading {file}: {e}")
@@ -1010,7 +1009,7 @@ def scan_and_load_songpacks(songpacks_dir='songpacks', extract_to=None, custom_d
         except Exception as e:
             log_debug(f"  ERROR scanning {scan_dir}: {e}")
     
-    log_debug(f"Total packs loaded: {len(packs)}")
+    log_debug(f"Total packs loaded: {len(packs)}, total levels: {sum(len(p['levels']) for p in packs)}")
     return packs
 
 if __name__ == "__main__":
