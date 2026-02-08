@@ -1,5 +1,5 @@
 {
-  "version": "0.8.0",
+  "version": "0.8.1",
   "release_date": "2026-02-08",
   "manifest_version": 1,
   "files": {
@@ -47,7 +47,7 @@
     },
     "code": {
       "main.py": {
-        "hash": "2b49cbeb95a5e50800ddd05a0469ee3aa1dd7142ba8f66712f2fa1a27c8bbe57",
+        "hash": "ecec27b467582ae725b34dc5dcbdfb372a9b2406029cdbd30d59a2f9a2bdf8e5",
         "size": 163026
       },
       "auto_updater.py": {
@@ -70,10 +70,9 @@
   },
   "patches": {
     "from_0.8.0": {
-      "description": "Patch from 0.8.0 to 0.8.0",
+      "description": "Patch from 0.8.0 to 0.8.1",
       "changed_files": [
-        "main.py",
-        "songpack_ui.py"
+        "main.py"
       ],
       "removed_files": []
     }
