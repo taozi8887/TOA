@@ -762,7 +762,7 @@ def build_pack_metadata_cache(pack_info, levels_dir=None):
         for file in all_level_files:
             if file.lower().endswith('.json'):
                 json_name_base = os.path.splitext(file)[0]
-                if safe_pattern.lower() in json_name_base.lower():
+                if json_name_base.lower().startswith(safe_pattern.lower() + '_'):
                     full_path = os.path.join(levels_dir, file)
                     if full_path not in seen_jsons:
                         seen_jsons.add(full_path)

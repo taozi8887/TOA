@@ -37,7 +37,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.7.42"
+__version__ = "0.7.45"
 
 # Settings management
 class Settings:
@@ -322,17 +322,6 @@ def show_loading_screen():
     
     # Use .toa/levels when running from exe
     levels_dir = os.path.join('.toa', 'levels') if os.path.exists('.toa') else 'levels'
-    
-    # CRITICAL: Clear levels directory to prevent level accumulation from previous loads
-    if os.path.exists(levels_dir):
-        try:
-            import shutil
-            shutil.rmtree(levels_dir)
-            print("Cleared old levels directory")
-        except Exception as e:
-            print(f"Warning: Could not clear levels directory: {e}")
-    
-    # Recreate levels directory
     os.makedirs(levels_dir, exist_ok=True)
     
     # Track which levels are valid from current songpacks

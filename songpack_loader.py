@@ -958,20 +958,6 @@ def scan_and_load_songpacks(songpacks_dir='songpacks', extract_to=None, custom_d
     
     log_debug(f"extract_to determined: {extract_to}")
     
-    # CRITICAL: Clear extracted folder before scanning to prevent level accumulation
-    # This ensures old levels from previous loads don't persist
-    if os.path.exists(extract_to):
-        log_debug(f"Clearing extracted folder: {extract_to}")
-        try:
-            shutil.rmtree(extract_to)
-            log_debug(f"  Successfully deleted {extract_to}")
-        except Exception as e:
-            log_debug(f"  Error deleting {extract_to}: {e}")
-    
-    # Recreate the extract folder
-    os.makedirs(extract_to, exist_ok=True)
-    log_debug(f"Created fresh extraction folder: {extract_to}")
-    
     # Scan directories to check
     dirs_to_scan = []
     if os.path.exists(songpacks_dir):
