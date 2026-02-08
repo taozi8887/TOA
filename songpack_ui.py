@@ -192,14 +192,7 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
                 safe_pattern = re.sub(r'[^\w\s-]', '', folder_name).strip().replace(' ', '_')
                 valid_level_patterns.add(safe_pattern.lower())
             
-            # Skip metadata loading if already cached (e.g., from loading screen)
-            if 'metadata_cache' in pack and pack['metadata_cache']:
-                print(f"Pack {pack['pack_name']} already has cached metadata, skipping...")
-                continue
-                
-            print(f"Pre-loading metadata for {pack['pack_name']}...")
-            
-            # First, ensure all levels are converted to JSON
+            # Always ensure all levels are converted to JSON, even if metadata is cached
             print(f"  Checking {len(pack['levels'])} levels...")
             all_level_files = set()
             if os.path.exists(levels_dir):
@@ -208,7 +201,6 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
             for level_info in pack['levels']:
                 folder_name = level_info['name']
                 safe_pattern = re.sub(r'[^\w\s-]', '', folder_name).strip().replace(' ', '_')
-                valid_level_patterns.add(safe_pattern.lower())
                 
                 # Check if JSONs exist for this level
                 existing = False
@@ -231,7 +223,14 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
                         print(f"    ERROR converting {level_info['name']}: {e}")
                         continue
             
-            # Now build metadata cache from all JSONs
+            # Skip metadata cache rebuild if already cached
+            if 'metadata_cache' in pack and pack['metadata_cache']:
+                print(f"Pack {pack['pack_name']} already has cached metadata")
+                continue
+                
+            print(f"Pre-loading metadata for {pack['pack_name']}...")
+            
+            # Build metadata cache from all JSONs
             pack['metadata_cache'] = build_pack_metadata_cache(pack, levels_dir)
         except Exception as e:
             print(f"ERROR processing pack {pack['pack_name']}: {e}")
