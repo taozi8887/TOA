@@ -129,7 +129,7 @@ def fade_transition_in(screen, content_func, game_settings, duration=0.25):
     pygame.display.flip()
 
 
-def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_path=None):
+def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_path=None, cached_packs=None):
     """
     Show song pack selection screen with level selector layout.
     Returns: Selected pack info or None/QUIT or "RELOAD"
@@ -149,24 +149,29 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
     
     log_debug("=== show_songpack_selector called ===")
     
-    # Load song packs
-    if songpacks_path is None:
-        # Default to .toa/assets/songpacks if .toa exists, otherwise assets/songpacks
-        songpacks_path = os.path.join('.toa', 'assets', 'songpacks') if os.path.exists('.toa') else os.path.join('assets', 'songpacks')
-    
-    log_debug(f"songpacks_path: {songpacks_path}")
-    log_debug(f"exists: {os.path.exists(songpacks_path)}")
-    
-    # User's custom folder from settings (set via "Set Folder" button)
-    custom_folder = game_settings.get('custom_songpack_folder')
-    log_debug(f"custom_folder: {custom_folder}")
-    
-    # Extracted songpacks go to .toa/songpacks/extracted or songpacks/extracted
-    extracted_path = os.path.join('.toa', 'songpacks', 'extracted') if os.path.exists('.toa') else os.path.join('songpacks', 'extracted')
-    log_debug(f"extracted_path: {extracted_path}")
-    
-    packs = scan_and_load_songpacks(songpacks_path, extracted_path, custom_folder)
-    log_debug(f"packs loaded: {len(packs)}")
+    # Use cached packs if provided, otherwise scan and load
+    if cached_packs is not None:
+        log_debug(f"Using cached packs: {len(cached_packs)}")
+        packs = cached_packs
+    else:
+        # Load song packs
+        if songpacks_path is None:
+            # Default to .toa/assets/songpacks if .toa exists, otherwise assets/songpacks
+            songpacks_path = os.path.join('.toa', 'assets', 'songpacks') if os.path.exists('.toa') else os.path.join('assets', 'songpacks')
+        
+        log_debug(f"songpacks_path: {songpacks_path}")
+        log_debug(f"exists: {os.path.exists(songpacks_path)}")
+        
+        # User's custom folder from settings (set via "Set Folder" button)
+        custom_folder = game_settings.get('custom_songpack_folder')
+        log_debug(f"custom_folder: {custom_folder}")
+        
+        # Extracted songpacks go to .toa/songpacks/extracted or songpacks/extracted
+        extracted_path = os.path.join('.toa', 'songpacks', 'extracted') if os.path.exists('.toa') else os.path.join('songpacks', 'extracted')
+        log_debug(f"extracted_path: {extracted_path}")
+        
+        packs = scan_and_load_songpacks(songpacks_path, extracted_path, custom_folder)
+        log_debug(f"packs loaded: {len(packs)}")
     
     if not packs:
         print("No song packs found!")
@@ -204,7 +209,8 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
                 for file in all_level_files:
                     if file.lower().endswith('.json'):
                         json_name_base = os.path.splitext(file)[0]
-                        if json_name_base.lower().startswith(safe_pattern.lower() + '_'):
+                        # Match if starts with pattern_ OR exact match
+                        if json_name_base.lower().startswith(safe_pattern.lower() + '_') or json_name_base.lower() == safe_pattern.lower():
                             existing = True
                             break
                 
@@ -284,7 +290,8 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
             # Check if this JSON matches any valid level pattern
             is_valid = False
             for pattern in valid_level_patterns:
-                if json_name_base.lower().startswith(pattern + '_'):
+                # Match if starts with pattern_ OR exact match
+                if json_name_base.lower().startswith(pattern + '_') or json_name_base.lower() == pattern:
                     is_valid = True
                     break
             
@@ -762,7 +769,8 @@ def build_pack_metadata_cache(pack_info, levels_dir=None):
         for file in all_level_files:
             if file.lower().endswith('.json'):
                 json_name_base = os.path.splitext(file)[0]
-                if json_name_base.lower().startswith(safe_pattern.lower() + '_'):
+                # Match if starts with pattern_ OR exact match
+                if json_name_base.lower().startswith(safe_pattern.lower() + '_') or json_name_base.lower() == safe_pattern.lower():
                     full_path = os.path.join(levels_dir, file)
                     if full_path not in seen_jsons:
                         seen_jsons.add(full_path)

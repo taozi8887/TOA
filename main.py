@@ -37,7 +37,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.7.47"
+__version__ = "0.7.50"
 
 # Settings management
 class Settings:
@@ -1733,10 +1733,75 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         
         log_debug(f"Screen size: {screen.get_size()}")
         
+        # Load packs once and cache them to avoid rescanning on every return from level selector
+        from songpack_ui import scan_and_load_songpacks
+        songpacks_path = os.path.join('.toa', 'assets', 'songpacks') if os.path.exists('.toa') else os.path.join('assets', 'songpacks')
+        custom_folder = game_settings.get('custom_songpack_folder')
+        extracted_path = os.path.join('.toa', 'songpacks', 'extracted') if os.path.exists('.toa') else os.path.join('songpacks', 'extracted')
+        
+        log_debug("Initial scan and load of songpacks")
+        cached_packs = scan_and_load_songpacks(songpacks_path, extracted_path, custom_folder)
+        
+        # Preload metadata for all packs
+        levels_dir = os.path.join('.toa', 'levels') if os.path.exists('.toa') else 'levels'
+        for pack in cached_packs:
+            if 'metadata_cache' not in pack or not pack['metadata_cache']:
+                print(f"Pre-loading metadata for {pack['pack_name']}...")
+                pack['metadata_cache'] = build_pack_metadata_cache(pack, levels_dir)
+            
+            # Build level_metadata_full and level_metadata lists for display
+            if 'level_metadata_full' not in pack:
+                pack['level_metadata_full'] = []
+                for json_path, meta in pack['metadata_cache'].items():
+                    # Calculate BPM text
+                    bpm_min = meta['bpm_min']
+                    bpm_max = meta['bpm_max']
+                    if bpm_min is not None and bpm_max is not None:
+                        if bpm_min == bpm_max:
+                            bpm_text = f"{int(bpm_min)}"
+                        else:
+                            bpm_text = f"{int(bpm_min)}-{int(bpm_max)}"
+                    else:
+                        bpm_text = "Unknown"
+                    
+                    # Get NPS range
+                    nps_min = meta.get('nps_min')
+                    nps_max = meta.get('nps_max')
+                    if nps_min is not None and nps_max is not None:
+                        if nps_min == nps_max:
+                            nps_text = f"{nps_min}"
+                        else:
+                            nps_text = f"{nps_min}-{nps_max}"
+                    else:
+                        nps_text = "Unknown"
+                    
+                    pack['level_metadata_full'].append((
+                        json_path,
+                        meta['title'],
+                        meta['version'],
+                        meta['artist'],
+                        meta['creator'],
+                        meta.get('thumbnail_file') or meta['background_file'],
+                        meta['note_count'],
+                        bpm_text,
+                        nps_text,
+                        meta.get('length')
+                    ))
+            
+            if 'level_metadata' not in pack:
+                pack['level_metadata'] = []
+                for json_path, meta in pack['metadata_cache'].items():
+                    pack['level_metadata'].append({
+                        'title': meta['title'],
+                        'artist': meta['artist'],
+                        'version': meta['version'],
+                        'json_path': json_path
+                    })
+        
         while True:
-            log_debug("Calling show_songpack_selector")
-            # Show song pack selector
-            selected_pack = show_songpack_selector(screen, game_settings, resource_path)
+            log_debug("Calling show_songpack_selector with cached packs")
+            # Show song pack selector (with cached packs to avoid rescanning)
+            selected_pack = show_songpack_selector(screen, game_settings, resource_path, cached_packs=cached_packs)
             log_debug(f"show_songpack_selector returned: {selected_pack}")
             
             if selected_pack == "QUIT" or selected_pack is None:
@@ -1744,7 +1809,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                 log_debug("Exiting due to QUIT or None")
                 return
             elif selected_pack == "RELOAD":
-                # Reload songpacks - just break to rescan, don't restart loading screen
+                # Reload songpacks - rescan and update cache
                 print("Reloading songpacks...")
                 # Clear the screen and show a brief message
                 screen.fill((0, 0, 0))
@@ -1753,6 +1818,58 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                 text_rect = text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
                 screen.blit(text, text_rect)
                 pygame.display.flip()
+                # Rescan and reload cached packs
+                cached_packs = scan_and_load_songpacks(songpacks_path, extracted_path, custom_folder)
+                for pack in cached_packs:
+                    if 'metadata_cache' not in pack or not pack['metadata_cache']:
+                        pack['metadata_cache'] = build_pack_metadata_cache(pack, levels_dir)
+                    
+                    # Build level_metadata_full and level_metadata lists for display
+                    if 'level_metadata_full' not in pack:
+                        pack['level_metadata_full'] = []
+                        for json_path, meta in pack['metadata_cache'].items():
+                            bpm_min = meta['bpm_min']
+                            bpm_max = meta['bpm_max']
+                            if bpm_min is not None and bpm_max is not None:
+                                if bpm_min == bpm_max:
+                                    bpm_text = f"{int(bpm_min)}"
+                                else:
+                                    bpm_text = f"{int(bpm_min)}-{int(bpm_max)}"
+                            else:
+                                bpm_text = "Unknown"
+                            
+                            nps_min = meta.get('nps_min')
+                            nps_max = meta.get('nps_max')
+                            if nps_min is not None and nps_max is not None:
+                                if nps_min == nps_max:
+                                    nps_text = f"{nps_min}"
+                                else:
+                                    nps_text = f"{nps_min}-{nps_max}"
+                            else:
+                                nps_text = "Unknown"
+                            
+                            pack['level_metadata_full'].append((
+                                json_path,
+                                meta['title'],
+                                meta['version'],
+                                meta['artist'],
+                                meta['creator'],
+                                meta.get('thumbnail_file') or meta['background_file'],
+                                meta['note_count'],
+                                bpm_text,
+                                nps_text,
+                                meta.get('length')
+                            ))
+                    
+                    if 'level_metadata' not in pack:
+                        pack['level_metadata'] = []
+                        for json_path, meta in pack['metadata_cache'].items():
+                            pack['level_metadata'].append({
+                                'title': meta['title'],
+                                'artist': meta['artist'],
+                                'version': meta['version'],
+                                'json_path': json_path
+                            })
                 # Continue loop to reload selector with new packs
                 continue
             
@@ -1765,7 +1882,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
             if level_json == "QUIT":
                 return
             elif level_json == "RELOAD":
-                # Reload songpacks - break to outer loop to rescan
+                # Reload songpacks - rescan and update cache
                 print("Reloading songpacks from level selector...")
                 screen.fill((0, 0, 0))
                 font = pygame.font.SysFont(['arial'], 36)
@@ -1773,6 +1890,58 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                 text_rect = text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
                 screen.blit(text, text_rect)
                 pygame.display.flip()
+                # Rescan and reload cached packs
+                cached_packs = scan_and_load_songpacks(songpacks_path, extracted_path, custom_folder)
+                for pack in cached_packs:
+                    if 'metadata_cache' not in pack or not pack['metadata_cache']:
+                        pack['metadata_cache'] = build_pack_metadata_cache(pack, levels_dir)
+                    
+                    # Build level_metadata_full and level_metadata lists for display
+                    if 'level_metadata_full' not in pack:
+                        pack['level_metadata_full'] = []
+                        for json_path, meta in pack['metadata_cache'].items():
+                            bpm_min = meta['bpm_min']
+                            bpm_max = meta['bpm_max']
+                            if bpm_min is not None and bpm_max is not None:
+                                if bpm_min == bpm_max:
+                                    bpm_text = f"{int(bpm_min)}"
+                                else:
+                                    bpm_text = f"{int(bpm_min)}-{int(bpm_max)}"
+                            else:
+                                bpm_text = "Unknown"
+                            
+                            nps_min = meta.get('nps_min')
+                            nps_max = meta.get('nps_max')
+                            if nps_min is not None and nps_max is not None:
+                                if nps_min == nps_max:
+                                    nps_text = f"{nps_min}"
+                                else:
+                                    nps_text = f"{nps_min}-{nps_max}"
+                            else:
+                                nps_text = "Unknown"
+                            
+                            pack['level_metadata_full'].append((
+                                json_path,
+                                meta['title'],
+                                meta['version'],
+                                meta['artist'],
+                                meta['creator'],
+                                meta.get('thumbnail_file') or meta['background_file'],
+                                meta['note_count'],
+                                bpm_text,
+                                nps_text,
+                                meta.get('length')
+                            ))
+                    
+                    if 'level_metadata' not in pack:
+                        pack['level_metadata'] = []
+                        for json_path, meta in pack['metadata_cache'].items():
+                            pack['level_metadata'].append({
+                                'title': meta['title'],
+                                'artist': meta['artist'],
+                                'version': meta['version'],
+                                'json_path': json_path
+                            })
                 # Continue outer loop to reload pack selector
                 continue
             elif level_json is not None:
