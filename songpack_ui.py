@@ -186,6 +186,12 @@ def show_songpack_selector(screen, game_settings, resource_path_func, songpacks_
     
     for pack in packs:
         try:
+            # Always track level patterns for cleanup, even if metadata is cached
+            for level_info in pack['levels']:
+                folder_name = level_info['name']
+                safe_pattern = re.sub(r'[^\w\s-]', '', folder_name).strip().replace(' ', '_')
+                valid_level_patterns.add(safe_pattern.lower())
+            
             # Skip metadata loading if already cached (e.g., from loading screen)
             if 'metadata_cache' in pack and pack['metadata_cache']:
                 print(f"Pack {pack['pack_name']} already has cached metadata, skipping...")
