@@ -37,7 +37,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.7.55"
+__version__ = "0.7.56"
 
 # Settings management
 class Settings:
@@ -2255,10 +2255,10 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     count_miss = 0
     
     # Health system
-    max_health = 75.0
-    current_health = 75.0
-    target_health = 75.0  # Animated health bar target
-    displayed_health = 75.0  # Current animated health
+    max_health = 25.0
+    current_health = 25.0
+    target_health = 25.0  # Animated health bar target
+    displayed_health = 25.0  # Current animated health
     lost_health_bars = []  # [(width, alpha, timestamp)] - white bars showing health loss
     judgment_displays = []
 
@@ -2289,25 +2289,33 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     
     # Key mappings for 8-key system - built from settings
     # Since users might map multiple actions to the same key, we store a list of (color, box) per key
-    keybinds = game_settings.get('keybinds')
     KEY_MAPPINGS = {}
     
-    # Add all keybinds, allowing multiple mappings per key
-    key_mapping_list = [
-        (keybinds['red_top'], 'red', 0),
-        (keybinds['red_right'], 'red', 1),
-        (keybinds['red_bottom'], 'red', 2),
-        (keybinds['red_left'], 'red', 3),
-        (keybinds['blue_top'], 'blue', 0),
-        (keybinds['blue_right'], 'blue', 1),
-        (keybinds['blue_bottom'], 'blue', 2),
-        (keybinds['blue_left'], 'blue', 3)
-    ]
+    def rebuild_key_mappings():
+        """Rebuild KEY_MAPPINGS from current settings"""
+        KEY_MAPPINGS.clear()
+        keybinds = game_settings.get('keybinds')
+        
+        # Add all keybinds, allowing multiple mappings per key
+        key_mapping_list = [
+            (keybinds['red_top'], 'red', 0),
+            (keybinds['red_right'], 'red', 1),
+            (keybinds['red_bottom'], 'red', 2),
+            (keybinds['red_left'], 'red', 3),
+            (keybinds['blue_top'], 'blue', 0),
+            (keybinds['blue_right'], 'blue', 1),
+            (keybinds['blue_bottom'], 'blue', 2),
+            (keybinds['blue_left'], 'blue', 3)
+        ]
+        
+        for key, color, box_idx in key_mapping_list:
+            if key is not None:  # Skip None keybinds
+                if key not in KEY_MAPPINGS:
+                    KEY_MAPPINGS[key] = []
+                KEY_MAPPINGS[key].append((color, box_idx))
     
-    for key, color, box_idx in key_mapping_list:
-        if key not in KEY_MAPPINGS:
-            KEY_MAPPINGS[key] = []
-        KEY_MAPPINGS[key].append((color, box_idx))
+    # Build initial key mappings
+    rebuild_key_mappings()
     
     # Track which keys are currently pressed
     keys_pressed = set()
@@ -2323,8 +2331,8 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     
     TIMING_WINDOWS = [
         (0.0225, 'fantastic', 500, 0.5),   # fantastic: ±15ms, score 500, health +0.5
-        (0.045, 'perfect', 400, 1.0),     # perfect: ±30ms, score 400, health +1
-        (0.090, 'great', 300, 0.5),       # great: ±60ms, score 300, health +0.5
+        (0.045, 'perfect', 400, 0.25),     # perfect: ±30ms, score 400, health +0.5
+        (0.090, 'great', 300, 0.1),       # great: ±60ms, score 300, health +0.5
         (0.135, 'cool', 100, 0.0),        # cool: ±100ms, score 100, health 0
         (0.180, 'bad', 50, -1.0),         # bad: ±150ms, score 50, health -1
     ]
@@ -2626,6 +2634,8 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                         pygame.mixer.music.set_volume(game_settings.get('music_volume', 0.7))
                         for sound in hitsounds.values():
                             sound.set_volume(game_settings.get('hitsound_volume', 0.3))
+                        # Rebuild key mappings in case keybinds were changed
+                        rebuild_key_mappings()
                     elif settings_result == 'QUIT_MENU':
                         # Quit to menu
                         pygame.mixer.music.stop()
