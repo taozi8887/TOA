@@ -1,6 +1,6 @@
 {
-  "version": "0.7.56",
-  "release_date": "2026-02-07",
+  "version": "0.8.0",
+  "release_date": "2026-02-08",
   "manifest_version": 1,
   "files": {
     "assets": {
@@ -47,8 +47,8 @@
     },
     "code": {
       "main.py": {
-        "hash": "5588e242e136e15e8532bb6cf3904e9df5e8f0bef627cc089f292a57167e0f93",
-        "size": 163721
+        "hash": "e5ab9b64ba4e95473cb041ae9946411887e34ca89405b9c830919099ecfc1cb8",
+        "size": 162721
       },
       "auto_updater.py": {
         "hash": "3a1ee33ef885cd5a8b80d9a330c6b0778bb5ac1ba53da278f449ab12121a3937",
@@ -69,8 +69,8 @@
     }
   },
   "patches": {
-    "from_0.7.55": {
-      "description": "Patch from 0.7.55 to 0.7.56",
+    "from_0.7.56": {
+      "description": "Patch from 0.7.56 to 0.8.0",
       "changed_files": [
         "main.py"
       ],
@@ -78,7 +78,7 @@
     }
   },
   "rollback": {
-    "previous_version": "0.7.55",
+    "previous_version": "0.7.56",
     "can_rollback": true
   }
 }
