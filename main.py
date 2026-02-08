@@ -37,7 +37,7 @@ except ImportError:
     AUTO_UPDATE_AVAILABLE = False
     print("Auto-update not available: requests library not installed")
 
-__version__ = "0.7.56"
+__version__ = "0.8.0"
 
 # Settings management
 class Settings:
@@ -49,19 +49,20 @@ class Settings:
         'hitsounds_enabled': True,
         'scroll_speed': 75,
         'fade_effects': True,
+        'scroll_direction': 'down',  # 'down' = tiles spawn from top, fall down; 'up' = spawn from bottom, rise up
         'autoplay_enabled': False,  # Debug feature - toggle with Ctrl+P
         'custom_songpack_folder': None,  # User's custom songpack folder
         'keybinds': {
-            # Red keys (WASD by default)
-            'red_top': pygame.K_w,
-            'red_right': pygame.K_d,
-            'red_bottom': pygame.K_s,
-            'red_left': pygame.K_a,
+            # Red keys (WASD by default) - Horizontal layout
+            'red_top': pygame.K_w,        # Box 0 (leftmost)
+            'red_right': pygame.K_d,      # Box 1
+            'red_bottom': pygame.K_s,     # Box 2
+            'red_left': pygame.K_a,       # Box 3 (rightmost)
             # Blue keys (Arrows by default)
-            'blue_top': pygame.K_UP,
-            'blue_right': pygame.K_RIGHT,
-            'blue_bottom': pygame.K_DOWN,
-            'blue_left': pygame.K_LEFT
+            'blue_top': pygame.K_UP,      # Box 0 (leftmost)
+            'blue_right': pygame.K_RIGHT, # Box 1
+            'blue_bottom': pygame.K_DOWN, # Box 2
+            'blue_left': pygame.K_LEFT    # Box 3 (rightmost)
         }
     }
     
@@ -1214,6 +1215,7 @@ def show_settings_menu(from_game=False, from_selector=False):
     hitsounds_enabled = game_settings.get('hitsounds_enabled')
     scroll_speed = game_settings.get('scroll_speed')
     fade_effects = game_settings.get('fade_effects', True)
+    scroll_direction = game_settings.get('scroll_direction', 'down')
     
     # Keybind remapping state
     waiting_for_key = None  # Which keybind we're waiting to remap
@@ -1355,6 +1357,9 @@ def show_settings_menu(from_game=False, from_selector=False):
                 elif fade_toggle_rect.collidepoint(mouse_pos):
                     fade_effects = not fade_effects
                     game_settings.set('fade_effects', fade_effects)
+                elif scroll_direction_toggle_rect.collidepoint(mouse_pos):
+                    scroll_direction = 'up' if scroll_direction == 'down' else 'down'
+                    game_settings.set('scroll_direction', scroll_direction)
                 elif quit_menu_rect and quit_menu_rect.collidepoint(mouse_pos):
                     # Show confirmation for quit to menu
                     if show_quit_confirmation(is_quit_to_menu=True):
@@ -1453,11 +1458,17 @@ def show_settings_menu(from_game=False, from_selector=False):
         scroll_slider_rect = draw_slider(left_col_x, y_offset, slider_width, slider_height,
                                          scroll_speed, 25, 700, "Scroll Speed")
         
+        y_offset += 100
+        # Scroll direction toggle - show as "Down ↓" or "Up ↑"
+        scroll_down = (scroll_direction == 'down')
+        scroll_dir_label = f"Scroll Direction: {'Down ↓' if scroll_down else 'Up ↑'}"
+        scroll_direction_toggle_rect = draw_toggle(left_col_x, y_offset, scroll_down, scroll_dir_label)
+        
         # Keybinds (right column)
         keybinds = game_settings.get('keybinds')
         
         y_offset = 140
-        keybind_label = font_label.render("Red Keys (WASD)", True, RED)
+        keybind_label = font_label.render("Red Keys - Horizontal", True, RED)
         screen.blit(keybind_label, (right_col_x, y_offset - 35))
         
         button_width = 200
@@ -1468,7 +1479,7 @@ def show_settings_menu(from_game=False, from_selector=False):
         if waiting_for_key == 'red_top':
             key_text = "Press a key..."
         else:
-            key_text = f"Top: {get_key_name(keybinds['red_top'])}"
+            key_text = f"Box 0 (Left): {get_key_name(keybinds['red_top'])}"
         color = BLUE if waiting_for_key == 'red_top' else GRAY
         keybind_red_top_rect = draw_button(right_col_x, y_offset, button_width, button_height, 
                                        key_text, color)
@@ -1477,7 +1488,7 @@ def show_settings_menu(from_game=False, from_selector=False):
         if waiting_for_key == 'red_right':
             key_text = "Press a key..."
         else:
-            key_text = f"Right: {get_key_name(keybinds['red_right'])}"
+            key_text = f"Box 1: {get_key_name(keybinds['red_right'])}"
         color = BLUE if waiting_for_key == 'red_right' else GRAY
         keybind_red_right_rect = draw_button(right_col_x, y_offset, button_width, button_height,
                                          key_text, color)
@@ -1486,7 +1497,7 @@ def show_settings_menu(from_game=False, from_selector=False):
         if waiting_for_key == 'red_bottom':
             key_text = "Press a key..."
         else:
-            key_text = f"Bottom: {get_key_name(keybinds['red_bottom'])}"
+            key_text = f"Box 2: {get_key_name(keybinds['red_bottom'])}"
         color = BLUE if waiting_for_key == 'red_bottom' else GRAY
         keybind_red_bottom_rect = draw_button(right_col_x, y_offset, button_width, button_height,
                                           key_text, color)
@@ -1495,21 +1506,21 @@ def show_settings_menu(from_game=False, from_selector=False):
         if waiting_for_key == 'red_left':
             key_text = "Press a key..."
         else:
-            key_text = f"Left: {get_key_name(keybinds['red_left'])}"
+            key_text = f"Box 3 (Right): {get_key_name(keybinds['red_left'])}"
         color = BLUE if waiting_for_key == 'red_left' else GRAY
         keybind_red_left_rect = draw_button(right_col_x, y_offset, button_width, button_height,
                                         key_text, color)
         
         # Blue keys
         y_offset += button_spacing + 20
-        blue_label = font_label.render("Blue Keys (Arrows)", True, BLUE)
+        blue_label = font_label.render("Blue Keys - Horizontal", True, BLUE)
         screen.blit(blue_label, (right_col_x, y_offset - 15))
         
         y_offset += 30
         if waiting_for_key == 'blue_top':
             key_text = "Press a key..."
         else:
-            key_text = f"Top: {get_key_name(keybinds['blue_top'])}"
+            key_text = f"Box 0 (Left): {get_key_name(keybinds['blue_top'])}"
         color = BLUE if waiting_for_key == 'blue_top' else GRAY
         keybind_blue_top_rect = draw_button(right_col_x, y_offset, button_width, button_height,
                                      key_text, color)
@@ -1518,7 +1529,7 @@ def show_settings_menu(from_game=False, from_selector=False):
         if waiting_for_key == 'blue_right':
             key_text = "Press a key..."
         else:
-            key_text = f"Right: {get_key_name(keybinds['blue_right'])}"
+            key_text = f"Box 1: {get_key_name(keybinds['blue_right'])}"
         color = BLUE if waiting_for_key == 'blue_right' else GRAY
         keybind_blue_right_rect = draw_button(right_col_x, y_offset, button_width, button_height,
                                       key_text, color)
@@ -1527,7 +1538,7 @@ def show_settings_menu(from_game=False, from_selector=False):
         if waiting_for_key == 'blue_bottom':
             key_text = "Press a key..."
         else:
-            key_text = f"Bottom: {get_key_name(keybinds['blue_bottom'])}"
+            key_text = f"Box 2: {get_key_name(keybinds['blue_bottom'])}"
         color = BLUE if waiting_for_key == 'blue_bottom' else GRAY
         keybind_blue_bottom_rect = draw_button(right_col_x, y_offset, button_width, button_height,
                                           key_text, color)
@@ -1536,7 +1547,7 @@ def show_settings_menu(from_game=False, from_selector=False):
         if waiting_for_key == 'blue_left':
             key_text = "Press a key..."
         else:
-            key_text = f"Left: {get_key_name(keybinds['blue_left'])}"
+            key_text = f"Box 3 (Right): {get_key_name(keybinds['blue_left'])}"
         color = BLUE if waiting_for_key == 'blue_left' else GRAY
         keybind_blue_left_rect = draw_button(right_col_x, y_offset, button_width, button_height,
                                         key_text, color)
@@ -1840,6 +1851,9 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
 
     # Autoplay is now a debug feature controlled by Ctrl+P
     autoplay_enabled = game_settings.get('autoplay_enabled', False)
+    
+    # Scroll direction setting: 'down' = tiles spawn top, fall down; 'up' = spawn bottom, rise up
+    scroll_direction = game_settings.get('scroll_direction', 'down')
 
     screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
     pygame.display.set_caption(f"TOA")
@@ -1859,7 +1873,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     center_x, center_y = screen_width // 2, screen_height // 2
 
     square_size = 70
-    spacing = 75
+    spacing = 110  # Horizontal spacing between boxes
     border_width = 3
     radius = 10
 
@@ -1927,23 +1941,23 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                 min_time_gap = time_gap
     
     # Calculate approach duration that ensures tiles never overlap
-    # tile_size = 65px, min_spacing = 10px, travel_distance = screen_width // 2
-    tile_size = 65
-    min_spacing = 10
+    # For horizontal layout at bottom with vertical movement
+    tile_size = 65  # Original size restored
+    min_spacing = 5  # Tight spacing
     min_distance_needed = tile_size + min_spacing
-    travel_distance = screen_width // 2
+    # Tiles travel from top (y=0) to bottom boxes (screen_height - 80)
+    bottom_offset = screen_height // 2 - 80
+    travel_distance = center_y + bottom_offset  # Actual vertical distance
     
     # For tiles to not overlap: (travel_distance / approach_duration) * min_time_gap >= min_distance_needed
     # So: approach_duration <= (travel_distance * min_time_gap) / min_distance_needed
     if min_time_gap != float('inf'):
         max_safe_approach_duration = (travel_distance * min_time_gap) / min_distance_needed
-        # Increase by 0.2s to make tiles move slower
-        max_safe_approach_duration += 0.2
-        # Clamp between 0.5s (too fast to read) and 2.0s (too slow)
-        APPROACH_DURATION = max(0.5, min(2.0, max_safe_approach_duration))
+        # Clamp between 0.8s (minimum readable) and 3.0s (maximum for visibility)
+        APPROACH_DURATION = max(0.8, min(3.0, max_safe_approach_duration))
     else:
         # Single note or no notes, use default
-        APPROACH_DURATION = 1.0
+        APPROACH_DURATION = 1.5
     
     # Check if this is a converted SM chart (has source metadata)
     is_sm_chart = 'converted_from_sm' in level_data.get('meta', {}).get('pattern', '')
@@ -2219,30 +2233,11 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     dot_radius = 10
     move_time = 0
 
-    def get_dot_positions(cx, cy, size, sp):
-        """Dot positions on the INNER sides (toward the middle gap)."""
-        inset = 35
-        top_y    = cy - size - sp
-        bottom_y = cy + sp
-        left_x   = cx - size - sp
-        right_x  = cx + sp
-
-        top_inner_edge_y    = top_y + size
-        bottom_inner_edge_y = bottom_y
-        left_inner_edge_x   = left_x + size
-        right_inner_edge_x  = right_x
-
-        return [
-            (cx, top_inner_edge_y + inset),
-            (right_inner_edge_x - inset, cy),
-            (cx, bottom_inner_edge_y - inset),
-            (left_inner_edge_x + inset, cy),
-        ]
-
-    dot_positions = get_dot_positions(center_x, center_y, square_size, spacing)
+    # Dots removed for horizontal layout
+    dot_positions = []  # No dots in horizontal layout
 
     font_countdown = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 100)
-    font_judgment = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 32)
+    font_judgment = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 48)
     font_stats = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 28)
     font_metadata = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 20)
     font_combo = pygame.font.SysFont(['meiryo', 'msgothic', 'yugothic', 'segoeui', 'arial'], 48)
@@ -2260,7 +2255,8 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
     target_health = 25.0  # Animated health bar target
     displayed_health = 25.0  # Current animated health
     lost_health_bars = []  # [(width, alpha, timestamp)] - white bars showing health loss
-    judgment_displays = []
+    # Single judgment display state: {text, x, y, last_update_time, is_visible, just_appeared}
+    current_judgment = {'text': '', 'x': 0, 'y': 0, 'last_update_time': 0, 'is_visible': False, 'just_appeared': False}
 
     combo = 0
     combo_pop_time = 0
@@ -2353,18 +2349,36 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         return None, None, None
 
     def box_centers_display():
+        # Horizontal layout: 4 boxes
+        # Box 0, Box 1, Box 2, Box 3 (left to right)
+        if scroll_direction == 'down':
+            # Tiles spawn from top, boxes at bottom
+            box_offset = screen_height // 2 - 80  # Position near bottom
+        else:  # 'up'
+            # Tiles spawn from bottom, boxes at top
+            box_offset = -(screen_height // 2 - 80)  # Position near top (mirrored)
+        
         return [
-            (center_x, center_y - square_size // 2 - spacing),
-            (center_x + square_size // 2 + spacing, center_y),
-            (center_x, center_y + square_size // 2 + spacing),
-            (center_x - square_size // 2 - spacing, center_y),
+            (center_x - spacing * 1.5, center_y + box_offset),  # 0: leftmost
+            (center_x - spacing * 0.5, center_y + box_offset),  # 1: center-left
+            (center_x + spacing * 0.5, center_y + box_offset),  # 2: center-right
+            (center_x + spacing * 1.5, center_y + box_offset),  # 3: rightmost
         ]
 
     def add_judgment_text(text, box_idx):
-        import random
-        cx, cy = box_centers_display()[box_idx]
-        side = random.choice([-1, 1])
-        judgment_displays.append((text, cx, cy, time.time(), box_idx, side))
+        nonlocal current_judgment
+        # Single judgment display - centered between left edge and leftmost tile
+        cx = screen_width // 4 - 83
+        cy = screen_height // 2
+        was_visible = current_judgment['is_visible']
+        current_judgment = {
+            'text': text,
+            'x': cx,
+            'y': cy,
+            'last_update_time': time.time(),
+            'is_visible': True,
+            'just_appeared': not was_visible
+        }
 
     def trigger_box_shake(box_idx, intensity=9):
         nonlocal shake_time, shake_intensity, shake_box
@@ -2413,8 +2427,12 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         score += judgment_score
         total_hits += 1
         total_notes += 1
-        combo += 1
-        combo_pop_time = time.time()
+        # Reset combo on bad judgment, otherwise increment
+        if judgment_name == 'bad':
+            combo = 0
+        else:
+            combo += 1
+            combo_pop_time = time.time()
 
         # Update judgment counts
         if judgment_name == 'fantastic':
@@ -2444,28 +2462,28 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         if judgment_name == 'fantastic':
             # Fantastic - bright cyan particles
             particle_color = (0, 255, 255)  # Cyan
-            particle_count = 30
-            glow_intensity = 2.0
+            particle_count = 15  # Reduced from 30
+            glow_intensity = 1.0  # Reduced from 2.0
         elif judgment_name == 'perfect':
             # Perfect - gold particles
             particle_color = (255, 215, 0)  # Gold
-            particle_count = 25
-            glow_intensity = 1.5
+            particle_count = 12  # Reduced from 25
+            glow_intensity = 0.8  # Reduced from 1.5
         elif judgment_name == 'great':
             # Great - white particles
             particle_color = (255, 255, 255)  # White
-            particle_count = 20
-            glow_intensity = 1.2
+            particle_count = 10  # Reduced from 20
+            glow_intensity = 0.6  # Reduced from 1.2
         elif judgment_name == 'cool':
             # Cool - light blue particles
             particle_color = (180, 220, 255)
-            particle_count = 15
-            glow_intensity = 0.8
+            particle_count = 7  # Reduced from 15
+            glow_intensity = 0.4  # Reduced from 0.8
         else:  # bad
             # Bad - gray particles
             particle_color = (150, 150, 150)
-            particle_count = 10
-            glow_intensity = 0.5
+            particle_count = 5  # Reduced from 10
+            glow_intensity = 0.3  # Reduced from 0.5
         
         # Create particle burst
         import random
@@ -2636,6 +2654,8 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                             sound.set_volume(game_settings.get('hitsound_volume', 0.3))
                         # Rebuild key mappings in case keybinds were changed
                         rebuild_key_mappings()
+                        # Reload scroll direction in case it changed
+                        scroll_direction = game_settings.get('scroll_direction', 'down')
                     elif settings_result == 'QUIT_MENU':
                         # Quit to menu
                         pygame.mixer.music.stop()
@@ -2697,32 +2717,17 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                 input_flashes.clear()
                 
                 # Fade out all tiles currently on screen
-                box_centers = [
-                    (center_x, center_y - square_size // 2 - spacing),
-                    (center_x + square_size // 2 + spacing, center_y),
-                    (center_x, center_y + square_size // 2 + spacing),
-                    (center_x - square_size // 2 - spacing, center_y),
-                ]
+                box_centers = box_centers_display()
                 for box_idx, color, t_time, duration, evt_idx, side in approach_indicators:
                     # Calculate current position of the tile
                     approach_start_time = t_time - duration
                     progress = (elapsed_time - approach_start_time) / duration
                     progress = max(0.0, min(1.0, progress))
                     
-                    travel_distance = screen_width // 2
                     target_x, target_y = box_centers[box_idx]
-                    if box_idx == 0:
-                        start_x = target_x - travel_distance if side == 'left' else target_x + travel_distance
-                        start_y = target_y
-                    elif box_idx == 1:
-                        start_x = target_x + travel_distance
-                        start_y = target_y
-                    elif box_idx == 2:
-                        start_x = target_x - travel_distance if side == 'left' else target_x + travel_distance
-                        start_y = target_y
-                    else:
-                        start_x = target_x - travel_distance
-                        start_y = target_y
+                    # All tiles from top - spawn at very top of screen
+                    start_x = target_x
+                    start_y = 0  # Start from top of screen
                     
                     current_x = start_x + (target_x - start_x) * progress
                     current_y = start_y + (target_y - start_y) * progress
@@ -2779,12 +2784,8 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                         evt_time, evt_box, evt_color, evt_hitsound = level[i]
                         # Only spawn if within approach window
                         if elapsed_time <= evt_time <= elapsed_time + approach_duration:
-                            if evt_box == 0:
-                                approach_indicators.append((evt_box, evt_color, evt_time, approach_duration, i, 'left'))
-                            elif evt_box == 2:
-                                approach_indicators.append((evt_box, evt_color, evt_time, approach_duration, i, 'right'))
-                            else:
-                                approach_indicators.append((evt_box, evt_color, evt_time, approach_duration, i, None))
+                            # All tiles from top
+                            approach_indicators.append((evt_box, evt_color, evt_time, approach_duration, i, 'top'))
 
             # One-time shake exactly when tile reaches box (TRULY timing-driven; independent of input)
             # Don't shake boxes during game over
@@ -2831,63 +2832,6 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         else:
             screen.fill(WHITE)
 
-        # Draw health bar at top of screen (30% width, centered) with animations
-        health_bar_width = int(screen_width * 0.3)
-        health_bar_x = (screen_width - health_bar_width) // 2
-        health_bar_y = 60
-        health_bar_thickness = 12  # Decreased from 20
-        
-        # Update displayed_health: snap down immediately on loss, animate up on gain
-        if current_health < displayed_health:
-            # Health loss - snap immediately, no animation
-            displayed_health = current_health
-        elif current_health > displayed_health:
-            # Health gain - smooth animation
-            health_diff = current_health - displayed_health
-            if abs(health_diff) > 0.01:
-                displayed_health += health_diff * 0.15
-            else:
-                displayed_health = current_health
-        # If equal, no change needed
-        
-        health_percentage = displayed_health / max_health
-        
-        # Create semi-transparent surface for health bar
-        health_surface = pygame.Surface((health_bar_width, health_bar_thickness), pygame.SRCALPHA)
-        
-        # Background bar (dark gray, semi-transparent)
-        pygame.draw.rect(health_surface, (50, 50, 50, 180), (0, 0, health_bar_width, health_bar_thickness))
-        
-        # Draw fading white bars showing health loss
-        current_time = time.time()
-        expired_bars = []
-        for i, (bar_width, alpha, timestamp) in enumerate(lost_health_bars):
-            time_since = current_time - timestamp
-            if time_since < 0.8:  # Fade over 0.8 seconds
-                fade_alpha = int(255 * (1 - time_since / 0.8))  # Keep white color, just fade alpha
-                pygame.draw.rect(health_surface, (255, 255, 255, fade_alpha), (0, 0, bar_width, health_bar_thickness))
-            else:
-                expired_bars.append(i)
-        # Remove expired bars
-        for i in reversed(expired_bars):
-            lost_health_bars.pop(i)
-        
-        # Foreground bar (colored based on health percentage, semi-transparent)
-        current_bar_width = int(health_bar_width * health_percentage)
-        if health_percentage > 0.7:
-            health_color = (0, 255, 0, 200)  # Green
-        elif health_percentage > 0.4:
-            health_color = (255, 255, 0, 200)  # Yellow
-        elif health_percentage > 0.2:
-            health_color = (255, 165, 0, 200)  # Orange
-        else:
-            health_color = (255, 0, 0, 200)  # Red
-        
-        if current_bar_width > 0:
-            pygame.draw.rect(health_surface, health_color, (0, 0, current_bar_width, health_bar_thickness))
-        
-        screen.blit(health_surface, (health_bar_x, health_bar_y))
-
         # Screen shake offset
         shake_x, shake_y = 0, 0
         if shake_time > 0:
@@ -2902,32 +2846,42 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                 shake_intensity = 0
                 shake_box = None
 
-        # Draw 4 boxes
-        top_shake_x = shake_x if shake_box == 0 else 0
-        top_shake_y = shake_y if shake_box == 0 else 0
-        screen.blit(box_image_rounded, (center_x - square_size // 2 + top_shake_x, center_y - square_size - spacing + top_shake_y))
+        # Draw 4 boxes in horizontal layout - position based on scroll direction
+        box_centers = box_centers_display()
+        
+        # Box 0: leftmost
+        shake_0_x = shake_x if shake_box == 0 else 0
+        shake_0_y = shake_y if shake_box == 0 else 0
+        box_0_x, box_0_y = box_centers[0]
+        screen.blit(box_image_rounded, (box_0_x - square_size // 2 + shake_0_x, box_0_y - square_size // 2 + shake_0_y))
 
-        right_shake_x = shake_x if shake_box == 1 else 0
-        right_shake_y = shake_y if shake_box == 1 else 0
-        screen.blit(box_image_rounded, (center_x + spacing + right_shake_x, center_y - square_size // 2 + right_shake_y))
+        # Box 1: center-left
+        shake_1_x = shake_x if shake_box == 1 else 0
+        shake_1_y = shake_y if shake_box == 1 else 0
+        box_1_x, box_1_y = box_centers[1]
+        screen.blit(box_image_rounded, (box_1_x - square_size // 2 + shake_1_x, box_1_y - square_size // 2 + shake_1_y))
 
-        bottom_shake_x = shake_x if shake_box == 2 else 0
-        bottom_shake_y = shake_y if shake_box == 2 else 0
-        screen.blit(box_image_rounded, (center_x - square_size // 2 + bottom_shake_x, center_y + spacing + bottom_shake_y))
+        # Box 2: center-right
+        shake_2_x = shake_x if shake_box == 2 else 0
+        shake_2_y = shake_y if shake_box == 2 else 0
+        box_2_x, box_2_y = box_centers[2]
+        screen.blit(box_image_rounded, (box_2_x - square_size // 2 + shake_2_x, box_2_y - square_size // 2 + shake_2_y))
 
-        left_shake_x = shake_x if shake_box == 3 else 0
-        left_shake_y = shake_y if shake_box == 3 else 0
-        screen.blit(box_image_rounded, (center_x - square_size - spacing + left_shake_x, center_y - square_size // 2 + left_shake_y))
+        # Box 3: rightmost
+        shake_3_x = shake_x if shake_box == 3 else 0
+        shake_3_y = shake_y if shake_box == 3 else 0
+        box_3_x, box_3_y = box_centers[3]
+        screen.blit(box_image_rounded, (box_3_x - square_size // 2 + shake_3_x, box_3_y - square_size // 2 + shake_3_y))
 
         # Use frozen time for rendering when paused
         render_time = display_time
 
         # Big box positions for overlays (no shake here; shake is already on base image)
         big_box_positions = [
-            (center_x - square_size // 2, center_y - square_size - spacing),  # Top
-            (center_x + spacing, center_y - square_size // 2),                # Right
-            (center_x - square_size // 2, center_y + spacing),                # Bottom
-            (center_x - square_size - spacing, center_y - square_size // 2),  # Left
+            (box_0_x - square_size // 2, box_0_y - square_size // 2),  # 0: leftmost
+            (box_1_x - square_size // 2, box_1_y - square_size // 2),  # 1: center-left
+            (box_2_x - square_size // 2, box_2_y - square_size // 2),  # 2: center-right
+            (box_3_x - square_size // 2, box_3_y - square_size // 2),  # 3: rightmost
         ]
 
         # ===== Arrival flash overlay (timing-driven; works even if you miss) =====
@@ -3034,76 +2988,54 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                     else:
                         alpha = int(255 * (1 - (flash_progress - 0.3) / 0.7))
 
-                    box_centers = [
-                        (center_x, center_y - square_size // 2 - spacing),
-                        (center_x + square_size // 2 + spacing, center_y),
-                        (center_x, center_y + square_size // 2 + spacing),
-                        (center_x - square_size // 2 - spacing, center_y),
-                    ]
+                    box_centers = box_centers_display()
 
                     target_x, target_y = box_centers[box_idx]
 
-                    if box_idx == 0:
-                        gradient_x = edge_offset if side == 'left' else screen_width - edge_offset
-                        edge_y = target_y - edge_flash_height // 2
-                        is_left = (side == 'left')
-                    elif box_idx == 1:
-                        gradient_x = screen_width - edge_offset
-                        edge_y = target_y - edge_flash_height // 2
-                        is_left = False
-                    elif box_idx == 2:
-                        gradient_x = edge_offset if side == 'left' else screen_width - edge_offset
-                        edge_y = target_y - edge_flash_height // 2
-                        is_left = (side == 'left')
-                    else:
-                        gradient_x = edge_offset
-                        edge_y = target_y - edge_flash_height // 2
-                        is_left = True
+                    # All edge flashes from top
+                    gradient_x = target_x - edge_flash_height // 2
+                    edge_y = edge_offset
+                    is_left = False  # Vertical gradient
 
                     flash_color = (255, 0, 0) if color == 'red' else (0, 0, 255)
                     gradient_length = 175
                     max_gradient_alpha = 85
 
-                    gradient_surface = pygame.Surface((gradient_length, edge_flash_height), pygame.SRCALPHA)
+                    # For vertical movement, create vertical gradient
+                    gradient_surface = pygame.Surface((edge_flash_height, gradient_length), pygame.SRCALPHA)
                     for i in range(gradient_length):
-                        if is_left:
-                            gradient_alpha = int(max_gradient_alpha * (1 - i / gradient_length) * (alpha / 255))
-                        else:
-                            gradient_alpha = int(max_gradient_alpha * (i / gradient_length) * (alpha / 255))
+                        gradient_alpha = int(max_gradient_alpha * (i / gradient_length) * (alpha / 255))
                         gradient_color = (*flash_color, gradient_alpha)
-                        pygame.draw.rect(gradient_surface, gradient_color, (i, 0, 1, edge_flash_height))
+                        pygame.draw.rect(gradient_surface, gradient_color, (0, i, edge_flash_height, 1))
 
-                    final_gradient_x = gradient_x if is_left else gradient_x - gradient_length
-                    screen.blit(gradient_surface, (int(final_gradient_x), int(edge_y)))
+                    screen.blit(gradient_surface, (int(gradient_x), int(edge_y)))
 
         # Approach indicators
-        indicator_size = 65
+        indicator_size = 65  # Original size restored
+        
+        # Sort approach indicators by progress (render back-to-front for proper layering)
+        # Calculate progress for each and sort by it
+        sorted_indicators = []
         for box_idx, color, target_time, approach_duration, event_idx, side in approach_indicators:
             approach_start_time = target_time - approach_duration
             progress = (render_time - approach_start_time) / approach_duration
             progress = max(0.0, min(1.0, progress))
+            sorted_indicators.append((progress, box_idx, color, target_time, approach_duration, event_idx, side))
+        
+        # Sort by progress (ascending) so tiles farther away render first
+        sorted_indicators.sort(key=lambda x: x[0])
+        
+        for progress, box_idx, color, target_time, approach_duration, event_idx, side in sorted_indicators:
 
-            box_centers = [
-                (center_x, center_y - square_size // 2 - spacing),
-                (center_x + square_size // 2 + spacing, center_y),
-                (center_x, center_y + square_size // 2 + spacing),
-                (center_x - square_size // 2 - spacing, center_y),
-            ]
+            box_centers = box_centers_display()
 
-            travel_distance = screen_width // 2
             target_x, target_y = box_centers[box_idx]
-            if box_idx == 0:
-                start_x = target_x - travel_distance if side == 'left' else target_x + travel_distance
-                start_y = target_y
-            elif box_idx == 1:
-                start_x = target_x + travel_distance
-                start_y = target_y
-            elif box_idx == 2:
-                start_x = target_x - travel_distance if side == 'left' else target_x + travel_distance
-                start_y = target_y
-            else:
-                start_x = target_x - travel_distance
-                start_y = target_y
+            # Tile spawn position based on scroll direction
+            start_x = target_x
+            if scroll_direction == 'down':
+                start_y = 0  # Spawn from top of screen
+            else:  # 'up'
+                start_y = screen_height  # Spawn from bottom of screen
 
             current_x = start_x + (target_x - start_x) * progress
             current_y = start_y + (target_y - start_y) * progress
@@ -3119,20 +3051,82 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                 else:
                     alpha = 0  # Fully faded
             else:
-                # Tile is still traveling - normal fade-in
-                if progress < 0.15:
-                    alpha = int(245 * (progress / 0.15))
+                # Tile is still traveling - smooth fade-in over first 20% of journey
+                if progress < 0.20:
+                    alpha = int(245 * (progress / 0.20))
                 else:
                     alpha = 245
             
             if alpha > 0:
                 indicator_color = (255, 0, 0) if color == 'red' else (0, 0, 255)
+                border_color = (255, 255, 255) if color == 'red' else (255, 215, 0)  # White border for red, yellow for blue
                 indicator_surface = pygame.Surface((indicator_size, indicator_size), pygame.SRCALPHA)
-                # Draw black border first
-                pygame.draw.rect(indicator_surface, (0, 0, 0, alpha), (0, 0, indicator_size, indicator_size), 0, 8)
+                # Draw border first
+                pygame.draw.rect(indicator_surface, (*border_color, alpha), (0, 0, indicator_size, indicator_size), 0, 8)
                 # Draw colored fill slightly smaller to create border effect
                 pygame.draw.rect(indicator_surface, (*indicator_color, alpha), (3, 3, indicator_size - 6, indicator_size - 6), 0, 6)
                 screen.blit(indicator_surface, (int(current_x - indicator_size // 2), int(current_y - indicator_size // 2)))
+
+        # Draw health bar (30% width, centered) with animations
+        # Rendered AFTER tile indicators so it appears on top
+        health_bar_width = int(screen_width * 0.3)
+        health_bar_x = (screen_width - health_bar_width) // 2
+        if scroll_direction == 'down':
+            health_bar_y = 45  # At top when tiles spawn from top
+        else:  # 'up'
+            health_bar_y = screen_height - 45 - 12  # At bottom when tiles spawn from bottom (minus thickness)
+        health_bar_thickness = 12  # Decreased from 20
+        
+        # Update displayed_health: snap down immediately on loss, animate up on gain
+        if current_health < displayed_health:
+            # Health loss - snap immediately, no animation
+            displayed_health = current_health
+        elif current_health > displayed_health:
+            # Health gain - smooth animation
+            health_diff = current_health - displayed_health
+            if abs(health_diff) > 0.01:
+                displayed_health += health_diff * 0.15
+            else:
+                displayed_health = current_health
+        # If equal, no change needed
+        
+        health_percentage = displayed_health / max_health
+        
+        # Create semi-transparent surface for health bar
+        health_surface = pygame.Surface((health_bar_width, health_bar_thickness), pygame.SRCALPHA)
+        
+        # Background bar (dark gray, semi-transparent)
+        pygame.draw.rect(health_surface, (50, 50, 50, 180), (0, 0, health_bar_width, health_bar_thickness))
+        
+        # Draw fading white bars showing health loss
+        current_time = time.time()
+        expired_bars = []
+        for i, (bar_width, alpha, timestamp) in enumerate(lost_health_bars):
+            time_since = current_time - timestamp
+            if time_since < 0.8:  # Fade over 0.8 seconds
+                fade_alpha = int(255 * (1 - time_since / 0.8))  # Keep white color, just fade alpha
+                pygame.draw.rect(health_surface, (255, 255, 255, fade_alpha), (0, 0, bar_width, health_bar_thickness))
+            else:
+                expired_bars.append(i)
+        # Remove expired bars
+        for i in reversed(expired_bars):
+            lost_health_bars.pop(i)
+        
+        # Foreground bar (colored based on health percentage, semi-transparent)
+        current_bar_width = int(health_bar_width * health_percentage)
+        if health_percentage > 0.7:
+            health_color = (0, 255, 0, 200)  # Green
+        elif health_percentage > 0.4:
+            health_color = (255, 255, 0, 200)  # Yellow
+        elif health_percentage > 0.2:
+            health_color = (255, 165, 0, 200)  # Orange
+        else:
+            health_color = (255, 0, 0, 200)  # Red
+        
+        if current_bar_width > 0:
+            pygame.draw.rect(health_surface, health_color, (0, 0, current_bar_width, health_bar_thickness))
+        
+        screen.blit(health_surface, (health_bar_x, health_bar_y))
 
         # Draw fading tiles (missed notes)
         fade_duration = 0.15  # 0.15 seconds fade
@@ -3145,9 +3139,10 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                 alpha = int(245 * (1 - fade_progress))
                 
                 indicator_color = (255, 0, 0) if color == 'red' else (0, 0, 255)
+                border_color = (255, 255, 255) if color == 'red' else (255, 215, 0)  # White border for red, yellow for blue
                 indicator_surface = pygame.Surface((indicator_size, indicator_size), pygame.SRCALPHA)
-                # Draw black border first
-                pygame.draw.rect(indicator_surface, (0, 0, 0, alpha), (0, 0, indicator_size, indicator_size), 0, 8)
+                # Draw border first
+                pygame.draw.rect(indicator_surface, (*border_color, alpha), (0, 0, indicator_size, indicator_size), 0, 8)
                 # Draw colored fill slightly smaller to create border effect
                 pygame.draw.rect(indicator_surface, (*indicator_color, alpha), (3, 3, indicator_size - 6, indicator_size - 6), 0, 6)
                 screen.blit(indicator_surface, (int(x - indicator_size // 2), int(y - indicator_size // 2)))
@@ -3192,12 +3187,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                 
                 if alpha > 0:
                     # Get box center
-                    box_centers = [
-                        (center_x, center_y - square_size // 2 - spacing),
-                        (center_x + square_size // 2 + spacing, center_y),
-                        (center_x, center_y + square_size // 2 + spacing),
-                        (center_x - square_size // 2 - spacing, center_y),
-                    ]
+                    box_centers = box_centers_display()
                     glow_x, glow_y = box_centers[glow_box_idx]
                     
                     # Apply shake offset if this box is shaking
@@ -3225,7 +3215,8 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
             if wave_age < wave_duration:
                 progress = wave_age / wave_duration
                 wave_radius = int(50 + progress * 70)
-                wave_alpha = int(200 * (1 - progress))
+                # Reduced alpha from 200 to 100 for more subtle waves
+                wave_alpha = int(100 * (1 - progress))
                 wave_thickness = max(1, int(4 * (1 - progress)))
                 
                 if wave_alpha > 0:
@@ -3236,34 +3227,39 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
                     active_waves.append((wave_x, wave_y, wave_start_time, wave_color))
         impact_waves = active_waves
 
-        # Judgments
-        active_judgments = []
-        for judgment_text, jx, jy, start_time, box_idx, side in judgment_displays:
-            time_elapsed = current_time - start_time
-            fade_duration = 0.4
-            if time_elapsed < fade_duration:
-                alpha = int(255 * (1 - time_elapsed / fade_duration))
-                offset_move = time_elapsed * 20
-
-                if box_idx == 0:
-                    display_x = jx
-                    display_y = jy - 80 - offset_move
-                elif box_idx == 1:
-                    display_x = jx
-                    display_y = jy - 80 - offset_move
-                elif box_idx == 2:
-                    display_x = jx
-                    display_y = jy + 100 - offset_move
+        # Judgment display (singleton pattern)
+        if current_judgment['is_visible']:
+            time_since_update = current_time - current_judgment['last_update_time']
+            
+            # Fade after 1s of no hits
+            if time_since_update >= 1.0:
+                fade_duration = 0.3
+                fade_elapsed = time_since_update - 1.0
+                if fade_elapsed < fade_duration:
+                    alpha = int(255 * (1 - fade_elapsed / fade_duration))
                 else:
-                    display_x = jx
-                    display_y = jy + 100 - offset_move
-
-                judgment_surface = font_judgment.render(judgment_text, True, WHITE)
+                    alpha = 0
+                    current_judgment['is_visible'] = False
+            else:
+                alpha = 255
+            
+            if alpha > 0:
+                display_x = current_judgment['x']
+                display_y = current_judgment['y']
+                
+                # Only animate upward when first appearing
+                if current_judgment['just_appeared'] and time_since_update < 0.4:
+                    offset_move = time_since_update * 20
+                    display_y -= offset_move
+                
+                judgment_surface = font_judgment.render(current_judgment['text'], True, WHITE)
                 judgment_surface.set_alpha(alpha)
                 text_rect = judgment_surface.get_rect(center=(int(display_x), int(display_y)))
                 screen.blit(judgment_surface, text_rect)
-                active_judgments.append((judgment_text, jx, jy, start_time, box_idx, side))
-        judgment_displays = active_judgments
+                
+                # Clear just_appeared flag after animation
+                if time_since_update >= 0.4:
+                    current_judgment['just_appeared'] = False
 
         # Combo
         combo_text_str = f"{combo}x"
@@ -3286,11 +3282,17 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
             rotation_angle = 0
 
         rotated_combo = pygame.transform.rotate(combo_surface, rotation_angle)
-        combo_rect = rotated_combo.get_rect(bottomleft=(35, screen_height - 155))
+        if scroll_direction == 'down':
+            combo_rect = rotated_combo.get_rect(bottomleft=(35, screen_height - 155))
+        else:  # 'up'
+            combo_rect = rotated_combo.get_rect(topleft=(35, 155))
         screen.blit(rotated_combo, combo_rect)
 
         # Metadata + image
-        stats_start_y = 20
+        if scroll_direction == 'down':
+            stats_start_y = 20  # Top when tiles spawn from top
+        else:  # 'up'
+            stats_start_y = screen_height - 20  # Bottom when tiles spawn from bottom
         right_margin = 20
 
         if 'meta' in level_data and any(k in level_data['meta'] for k in ['title', 'artist', 'creator', 'version']):
@@ -3324,17 +3326,29 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
 
             for i, (line, color) in enumerate(metadata_lines):
                 meta_text = font_metadata.render(line, True, color)
-                meta_rect = meta_text.get_rect(right=screen_width - right_margin, top=stats_start_y + i * 25)
+                if scroll_direction == 'down':
+                    meta_rect = meta_text.get_rect(right=screen_width - right_margin, top=stats_start_y + i * 25)
+                else:  # 'up'
+                    meta_rect = meta_text.get_rect(right=screen_width - right_margin, bottom=stats_start_y - i * 25)
                 screen.blit(meta_text, meta_rect)
             
-            stats_start_y += len(metadata_lines) * 25 + 5
+            if scroll_direction == 'down':
+                stats_start_y += len(metadata_lines) * 25 + 5
+            else:  # 'up'
+                stats_start_y -= len(metadata_lines) * 25 + 5
         
         # Autoplay indicator below title/charter
         if autoplay_enabled:
             autoplay_text = font_metadata.render("AUTOPLAY", True, (255, 100, 100))
-            autoplay_rect = autoplay_text.get_rect(right=screen_width - right_margin, top=stats_start_y)
+            if scroll_direction == 'down':
+                autoplay_rect = autoplay_text.get_rect(right=screen_width - right_margin, top=stats_start_y)
+            else:  # 'up'
+                autoplay_rect = autoplay_text.get_rect(right=screen_width - right_margin, bottom=stats_start_y)
             screen.blit(autoplay_text, autoplay_rect)
-            stats_start_y += 30
+            if scroll_direction == 'down':
+                stats_start_y += 30
+            else:  # 'up'
+                stats_start_y -= 30
 
             stats_start_y += len(metadata_lines) * 25 + 10
 
@@ -3350,10 +3364,16 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         ]
 
         left_margin = 20
-        stats_bottom_y = screen_height - 20
+        if scroll_direction == 'down':
+            stats_bottom_y = screen_height - 20  # Bottom left when tiles spawn from top
+        else:  # 'up'
+            stats_bottom_y = 20  # Top left when tiles spawn from bottom
 
         for i, (number, label) in enumerate(reversed(stats_data)):
-            y_pos = stats_bottom_y - (i + 1) * 40
+            if scroll_direction == 'down':
+                y_pos = stats_bottom_y - (i + 1) * 40
+            else:  # 'up'
+                y_pos = stats_bottom_y + i * 40
             label_text = font_stats.render(label, True, WHITE)
             label_rect = label_text.get_rect(left=left_margin, top=y_pos)
             screen.blit(label_text, label_rect)
@@ -3383,58 +3403,7 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
         # Update last active dots
         last_active_dots = active_boxes.copy()
         
-        # Draw dots FIRST (underneath everything)
-        for i, (dot_x, dot_y) in enumerate(dot_positions):
-            is_active = i in active_boxes
-            current_dot = dot2_image if is_active else dot_image
-            # Draw black border circle first
-            pygame.draw.circle(screen, (0, 0, 0), (int(dot_x), int(dot_y)), dot_size // 2 + 2)
-            # Then draw the dot image
-            screen.blit(current_dot, (int(dot_x - dot_size // 2), int(dot_y - dot_size // 2)))
-        
-        # Render pulse animation on top of dots
-        for i, (dot_x, dot_y) in enumerate(dot_positions):
-            is_active = i in active_boxes
-            
-            # Check if this dot has an active pulse animation
-            if i in dot_pulse_times:
-                switch_age = current_time - dot_pulse_times[i]
-                pulse_duration = 0.2
-                if switch_age < pulse_duration:
-                    pulse_progress = switch_age / pulse_duration
-                    # Ease-out cubic for smooth deceleration
-                    ease = 1 - pow(1 - pulse_progress, 3)
-                    scale = 1.0 + (0.3 * (1 - ease))
-                    # Draw a transparent glow circle for pulse effect
-                    pulse_radius = int(dot_size // 2 * scale)
-                    pulse_alpha = int(150 * (1 - ease))
-                    if pulse_alpha > 0:
-                        pulse_surface = pygame.Surface((pulse_radius * 2, pulse_radius * 2), pygame.SRCALPHA)
-                        pygame.draw.circle(pulse_surface, (255, 100, 100, pulse_alpha), 
-                                         (pulse_radius, pulse_radius), pulse_radius)
-                        screen.blit(pulse_surface, (int(dot_x - pulse_radius), int(dot_y - pulse_radius)))
-                else:
-                    # Clean up finished pulse
-                    del dot_pulse_times[i]
-        
-        # Render dot switch ripples (ON TOP of everything)
-        ripple_duration = 0.3
-        active_ripples = []
-        for ripple_idx, ripple_start_time in dot_switch_ripples:
-            ripple_age = current_time - ripple_start_time
-            if ripple_age < ripple_duration:
-                progress = ripple_age / ripple_duration
-                ripple_radius = int(15 + progress * 20)
-                ripple_alpha = int(180 * (1 - progress))
-                
-                if ripple_alpha > 0:
-                    ripple_x, ripple_y = dot_positions[ripple_idx]
-                    ripple_surface = pygame.Surface((ripple_radius * 2 + 10, ripple_radius * 2 + 10), pygame.SRCALPHA)
-                    pygame.draw.circle(ripple_surface, (255, 50, 50, ripple_alpha),
-                                     (ripple_radius + 5, ripple_radius + 5), ripple_radius, 3)
-                    screen.blit(ripple_surface, (int(ripple_x - ripple_radius - 5), int(ripple_y - ripple_radius - 5)))
-                    active_ripples.append((ripple_idx, ripple_start_time))
-        dot_switch_ripples = active_ripples
+        # Dots removed for horizontal layout - no dot rendering needed
 
         # Countdown - positioned above play area, below HP bar
         if display_time < 3.0:
@@ -3470,7 +3439,8 @@ def main(level_json=None, audio_dir=None, returning_from_game=False, preloaded_m
             flash_age = current_time - screen_flash_time
             flash_duration = 0.15
             if flash_age < flash_duration:
-                current_flash_alpha = int(screen_flash_alpha * (1 - flash_age / flash_duration))
+                # Reduced intensity - multiply by 0.3 to make it much more subtle
+                current_flash_alpha = int(screen_flash_alpha * (1 - flash_age / flash_duration) * 0.3)
                 if current_flash_alpha > 0:
                     flash_surface = pygame.Surface((screen_width, screen_height), pygame.SRCALPHA)
                     flash_surface.fill((255, 255, 255, current_flash_alpha))
